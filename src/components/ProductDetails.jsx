@@ -10,12 +10,12 @@ const ProductDetails = () => {
     const { addToCart } = useCart();
 
     useEffect(() => {
-        fetch(`https://fakestoreapi.com/products/${id}`)
+        fetch(`https://linkiin.in/api/products/${id}`)
             .then(res => res.json())
             .then(data => {
                 setProduct(data);
                 // Fetch related products from same category
-                fetch(`https://fakestoreapi.com/products/category/${data.category}?limit=4`)
+                fetch(`https://linkiin.in/api/categories/${data.category}?limit=4`)
                     .then(res => res.json())
                     .then(related => setRelatedProducts(related.filter(p => p.id !== data.id)));
             })

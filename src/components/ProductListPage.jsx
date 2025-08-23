@@ -40,7 +40,7 @@ const ProductListPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      let url = 'https://fakestoreapi.com/products';
+      let url = 'https://linkiin.in/api/products';
       if (category && categoryMapping[category]) {
         url += `/category/${categoryMapping[category]}`;
       }
