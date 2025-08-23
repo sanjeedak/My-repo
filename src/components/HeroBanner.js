@@ -1,124 +1,147 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const HERO_API = 'https://dummyjson.com/products/1';
-
-/**
- * ProductDetailModal Component
- * A simple modal to display product details when "Learn More" is clicked.
- */
-const ProductDetailModal = ({ product, onClose }) => {
-  if (!product) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white text-gray-800 p-8 rounded-xl shadow-2xl max-w-lg w-full relative">
-        <button 
-          onClick={onClose} 
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
-        >
-          &times;
-        </button>
-        <h2 className="text-3xl font-bold mb-4">{product.title}</h2>
-        <p className="text-gray-600">{product.description}</p>
-      </div>
-    </div>
-  );
-};
-
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const HeroBanner = () => {
-  const [banner, setBanner] = useState(null);
+  const [banners, setBanners] = useState([]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [slideIn, setSlideIn] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBanner = async () => {
+    const fetchBanners = async () => {
       try {
-        const res = await fetch(HERO_API);
+        const res = await fetch('https://linkiin.in/api/banners');
+        if (!res.ok) {
+          throw new Error(`Failed to fetch banners: ${res.statusText}`);
+        }
         const data = await res.json();
-        setBanner({
-          id: data.id,
-          title: data.title,
-          description: data.description,
-          image: data.images[0],
-          primaryCTA: 'Buy Now',
-          secondaryCTA: 'Learn More'
-        });
+        
+        // Correctly parse the API response structure {data: {banners: [...]}}
+        if (data && data.data && Array.isArray(data.data.banners)) {
+          setBanners(data.data.banners);
+        } else {
+          throw new Error('API response is not in the expected format.');
+        }
+
       } catch (err) {
-        setError('Failed to load banner');
+        setError(`Failed to load banners: ${err.message}`);
         console.error(err);
       } finally {
         setLoading(false);
-        setSlideIn(true);
       }
     };
-    fetchBanner();
+    fetchBanners();
   }, []);
 
-  const handleBuyNow = () => {
-    if (banner && banner.id) {
-      navigate(`/product/${banner.id}`);
+  // Automatic slider functionality
+  useEffect(() => {
+    if (banners.length > 1) {
+      const interval = setInterval(() => {
+        handleNext();
+      }, 5000); // Change slide every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [banners]);
+
+  const currentBanner = banners[currentBannerIndex];
+
+  // Use the button_url from the API for the primary action
+  const handlePrimaryAction = () => {
+    if (currentBanner?.button_url) {
+      navigate(currentBanner.button_url);
     }
   };
-
+  
+  // Navigate to the product details page using the banner's ID
   const handleLearnMore = () => {
-    setIsModalOpen(true);
+    if (currentBanner?.id) {
+      navigate(`/product/${currentBanner.id}`);
+    }
+  };
+  
+  // Manual navigation handlers
+  const handlePrev = () => {
+    setCurrentBannerIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length);
   };
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Loading banner...</div>;
-  if (error) return <div className="text-center py-12 text-red-500">{error}</div>;
+  const handleNext = () => {
+    setCurrentBannerIndex(prevIndex => (prevIndex + 1) % banners.length);
+  };
+
+  if (loading) return <div className="text-center py-20 text-gray-500">Loading banner...</div>;
+  if (error) return <div className="text-center py-20 text-red-500 font-semibold">{error}</div>;
+  if (banners.length === 0) return <div className="text-center py-20 text-gray-500">No banners available.</div>;
 
   return (
-    <>
-      <div className="bg-gradient-to-r from-slate-800 to-gray-900 text-white overflow-hidden">
-        <div className="container mx-auto px-4 py-20 md:py-32 grid md:grid-cols-2 gap-12 items-center">
-          {/* Text */}
-          <div
-            className={`text-center md:text-left transform transition-all duration-1000 ease-out ${
-              slideIn ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
-            }`}
-          >
-            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-4">{banner.title}</h1>
-            <p className="text-lg text-slate-300 mb-8">{banner.description}</p>
-            <div className="flex justify-center md:justify-start space-x-4">
-              <button 
-                onClick={handleBuyNow}
-                className="bg-teal-500 text-white px-6 py-3 rounded-full hover:bg-teal-600 transition duration-300"
+    <div className="relative bg-gray-900 h-[60vh] md:h-[70vh] flex items-center text-white overflow-hidden">
+      {/* Banners */}
+      {banners.map((banner, index) => (
+        <div
+          key={banner.id}
+          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
+            index === currentBannerIndex ? 'opacity-100 z-10' : 'opacity-0'
+          }`}
+          style={{ 
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${banner.image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+          }}
+        >
+          <div className="container mx-auto px-6 h-full flex flex-col justify-center items-center text-center md:items-start md:text-left">
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4">{banner.title}</h1>
+            <p className="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl">{banner.description}</p>
+            <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+              <button
+                onClick={handlePrimaryAction}
+                className="bg-teal-500 text-white font-bold px-8 py-3 rounded-full hover:bg-teal-600 transition-transform transform hover:scale-105 duration-300"
               >
-                {banner.primaryCTA} →
+                {banner.button_text || 'Shop Now'}
               </button>
-              <button 
+              <button
                 onClick={handleLearnMore}
-                className="bg-transparent border-2 border-teal-500 text-teal-500 px-6 py-3 rounded-full hover:bg-teal-500 hover:text-white transition duration-300"
+                className="bg-transparent border-2 border-white text-white font-bold px-8 py-3 rounded-full hover:bg-white hover:text-gray-900 transition duration-300"
               >
-                {banner.secondaryCTA} →
+                Learn More
               </button>
-            </div>
-          </div>
-
-          {/* Image */}
-          <div
-            className={`relative hidden md:block transform transition-all duration-1000 ease-out ${
-              slideIn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-            } hover:scale-105`}
-          >
-            <div className="bg-white p-4 rounded-xl shadow-2xl">
-              <img
-                src={banner.image}
-                alt="Banner"
-                className="rounded-lg"
-                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400'; }}
-              />
             </div>
           </div>
         </div>
+      ))}
+
+      {/* Navigation Buttons */}
+      {banners.length > 1 && (
+        <>
+          <button
+            onClick={handlePrev}
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black bg-opacity-40 hover:bg-opacity-60 transition-colors z-20"
+          >
+            <ChevronLeft size={32} />
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black bg-opacity-40 hover:bg-opacity-60 transition-colors z-20"
+          >
+            <ChevronRight size={32} />
+          </button>
+        </>
+      )}
+
+      {/* Dots Indicator */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
+        {banners.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentBannerIndex(index)}
+            className={`h-3 w-3 rounded-full transition-all duration-300 ${
+              index === currentBannerIndex ? 'bg-white scale-125' : 'bg-white bg-opacity-50'
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
       </div>
-      {isModalOpen && <ProductDetailModal product={banner} onClose={() => setIsModalOpen(false)} />}
-    </>
+    </div>
   );
 };
 

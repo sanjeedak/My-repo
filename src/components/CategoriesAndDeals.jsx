@@ -3,8 +3,8 @@ import { StarIcon } from '../assets/icons';
 import { useNavigate } from 'react-router-dom';
 
 // Simulated API endpoints
-const CATEGORY_API = 'https://fakestoreapi.com/products/categories';
-const PRODUCTS_API = 'https://fakestoreapi.com/products?limit=4'; // limit to 4 for featured
+const CATEGORY_API = 'https://linkiin.in/api/categories';
+const PRODUCTS_API = 'https://linkiin.in/api/products?limit=4'; // limit to 4 for featured
 
 // --- Categories Section with async API fetch ---
 export const CategoriesSection = () => {

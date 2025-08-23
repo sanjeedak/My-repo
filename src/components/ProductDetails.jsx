@@ -15,7 +15,7 @@ const ProductDetails = () => {
             .then(data => {
                 setProduct(data);
                 // Fetch related products from same category
-                fetch(`https://linkiin.in/api/categories/${data.category}?limit=4`)
+                fetch(`https://linkiin.in/api/products/${data.category}?limit=4`)
                     .then(res => res.json())
                     .then(related => setRelatedProducts(related.filter(p => p.id !== data.id)));
             })
