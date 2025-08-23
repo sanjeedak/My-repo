@@ -56,7 +56,7 @@ const Navbar = () => {
 
     const categoryLinks = loading
         ? [{ to: '#', text: 'Loading...' }]
-        : categories.map(cat => ({ to: `/category/${cat.slug}`, text: cat.name }))
+        : categories.map(cat => ({ to: `/categories/${cat.slug}`, text: cat.name }))
             .concat([{ to: '/categories', text: 'View All', isBold: true }]);
 
     const vendorZoneLinks = [
