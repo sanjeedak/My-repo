@@ -4,10 +4,29 @@ import { useCart } from '../context/CartContext';
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
+  // --- Helper to normalize product data for the cart context ---
   const handleAddToCart = () => {
-    addToCart(product);
-    alert(`Added ${product.title} to cart!`); 
+    // Pass a clean, consistent object to the cart
+    const itemToAdd = {
+      id: product.id,
+      name: product.name, // Use name instead of title
+      price: parseFloat(product.selling_price), // Use selling_price
+      image: product.image_1, // Use image_1
+    };
+    addToCart(itemToAdd);
+    alert(`Added ${itemToAdd.name} to cart!`); 
   };
+  
+  // --- Calculate discount from MRP and Selling Price ---
+  const mrp = parseFloat(product.mrp);
+  const sellingPrice = parseFloat(product.selling_price);
+  let discountPercent = 0;
+  if (mrp > sellingPrice) {
+    discountPercent = Math.round(((mrp - sellingPrice) / mrp) * 100);
+  }
+
+  const rating = parseFloat(product.rating);
+  const totalReviews = product.total_reviews || 0;
 
   const StarIcon = ({ filled }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${filled ? 'text-yellow-400' : 'text-gray-300'}`} viewBox="0 0 20 20" fill="currentColor">
@@ -16,23 +35,25 @@ const ProductCard = ({ product }) => {
   );
 
   return (
-    <div className="border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-      <img src={product.image} alt={product.title} className="w-full h-48 object-cover rounded-md" />
-      <h3 className="text-lg font-semibold mt-2">{product.title}</h3>
-      <div className="flex items-center mt-1">
-        {[...Array(5)].map((_, i) => (
-          <StarIcon key={i} filled={i < Math.floor(product.rating?.rate || 0)} />
-        ))}
-        <span className="text-xs text-gray-500 ml-1">({product.rating?.count || 0})</span>
+    <div className="border rounded-lg p-4 shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+      <img src={product.image_1} alt={product.name} className="w-full h-48 object-contain rounded-md" />
+      <div className="mt-2 flex-grow">
+        <h3 className="text-md font-semibold text-gray-800">{product.name}</h3>
+        <div className="flex items-center mt-1">
+          {[...Array(5)].map((_, i) => (
+            <StarIcon key={i} filled={i < rating} />
+          ))}
+          <span className="text-xs text-gray-500 ml-1">({totalReviews})</span>
+        </div>
+        <div className="mt-2">
+          {mrp > sellingPrice && <span className="text-sm text-gray-500 line-through mr-2">${mrp.toFixed(2)}</span>}
+          <span className="text-lg font-bold text-gray-900">${sellingPrice.toFixed(2)}</span>
+        </div>
+        {discountPercent > 0 && <p className="text-green-600 text-sm font-semibold">{discountPercent}% OFF</p>}
       </div>
-      <p className="text-gray-600 mt-1">
-        {product.originalPrice && <span className="line-through mr-2">${product.originalPrice.toFixed(2)}</span>}
-        ${product.price.toFixed(2)}
-      </p>
-      {product.discount && <p className="text-red-500 text-sm">-{product.discount}%</p>}
       <button
         onClick={handleAddToCart}
-        className="mt-2 bg-teal-500 text-white px-4 py-2 rounded-full hover:bg-teal-600 transition duration-300"
+        className="mt-4 w-full bg-teal-500 text-white px-4 py-2 rounded-full hover:bg-teal-600 transition duration-300"
       >
         Add to Cart
       </button>

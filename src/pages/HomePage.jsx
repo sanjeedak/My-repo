@@ -2,29 +2,28 @@ import React from 'react';
 import CategoriesBar from '../components/CategoriesBar';
 import HeroBanner from '../components/HeroBanner';
 import { FlashDeal, FeaturedProducts } from '../components/ProductSections';
-import CategoriesAndDeals from '../components/CategoriesAndDeals';
-// import BusinessSection from '../components/BusinessSection';
+// FIXED: Changed to a named import for the two components
+import { CategoriesSection, FeaturedDealSection } from '../components/CategoriesAndDeals';
 
 const HomePage = () => {
   return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
+    <div className="container mx-auto px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+        <div className="hidden lg:block lg:col-span-1">
           <CategoriesBar />
         </div>
         <div className="lg:col-span-3">
           <HeroBanner />
         </div>
       </div>
-
-      <div className="space-y-6 mt-6">
+      <div className="space-y-8 mt-8">
         <FlashDeal />
         <FeaturedProducts />
-        <CategoriesAndDeals />
+        {/* FIXED: Use the correctly imported components */}
+        <CategoriesSection />
+        <FeaturedDealSection />
       </div>
-
-      {/* <BusinessSection /> */}
-    </>
+    </div>
   );
 };
 

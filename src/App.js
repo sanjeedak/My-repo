@@ -38,8 +38,9 @@ const App = () => {
     <CartProvider>
       <Router>
         <Routes>
+          {/* MODIFIED: Added /home route */}
           <Route
-            path="/"
+            path="/home"
             element={
               <Layout>
                 <HomePage />
