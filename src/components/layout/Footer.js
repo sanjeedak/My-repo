@@ -84,8 +84,8 @@ const Footer = () => {
                        <div>
                            <h3 className="text-white font-semibold mb-2">Start A Conversation</h3>
                            <div className="flex flex-col space-y-2">
-                               <a href="tel:+00123456789" className="flex items-center gap-2"><PhoneIcon/> <span>+00xxxxxxxxxxxx</span></a>
-                               <a href="mailto:copy@6amtech.com" className="flex items-center gap-2"><MailIcon/> <span>copy@6amtech.com</span></a>
+                               <a href="tel:+91 73488 32668" className="flex items-center gap-2"><PhoneIcon/> <span>+91 73488 32668</span></a>
+                               <a href="linkiin.in" className="flex items-center gap-2"><MailIcon/> <span>linkiin.in</span></a>
                                <a href="/support" className="flex items-center gap-2"><SupportIcon/> <span>Support ticket</span></a>
                            </div>
                        </div>
@@ -110,7 +110,7 @@ const Footer = () => {
             {/* Copyright Bar */}
             <div className="bg-[#162E48] relative">
                 <div className="container mx-auto px-6 py-4 text-center text-sm">
-                    Copyright 6amTech®2021
+                    Copyright Shopzeo
                 </div>
                 <button 
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

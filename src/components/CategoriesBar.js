@@ -1,7 +1,7 @@
 // src/components/CategoriesBar.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { apiService } from '../api/apiService';
+import { apiService } from './layout/apiService';
 import SubcategoryList from './SubcategoryList';
 import { categoryIcons } from '../assets/categories_icons';
 import { ChevronRightIcon } from '../assets/icons';

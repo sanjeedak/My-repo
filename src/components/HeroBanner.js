@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { apiService } from '../api/apiService'; // Import the service
+import { apiService } from './layout/apiService'; // Import the service
 import { API_BASE_URL } from '../api/config';   // Import the base URL for images
 
 const HeroBanner = () => {

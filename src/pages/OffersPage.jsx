@@ -1,7 +1,7 @@
 // src/pages/OfferPage.jsx
 import React, { useEffect, useState } from 'react';
 import { StarIcon } from '../assets/icons';
-import { apiService } from '../api/apiService'; // Import the service
+import { apiService } from '../components/layout/apiService'; // Import the service
 
 const OfferPage = () => {
   const [offers, setOffers] = useState([]);

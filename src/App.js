@@ -1,112 +1,66 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-// --- Context Provider ---
 import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
 
-// --- Component Imports ---
-import Header from './components/Header';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import FloatingButtons from './components/FloatingButtons';
+// Layout Components
+import Header from './components/layout/Header';
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 
-// --- Page Imports ---
+// Page Components
 import HomePage from './pages/HomePage';
 import BrandPage from './pages/BrandPage';
 import OffersPage from './pages/OffersPage';
-import VendorsPage from './pages/VendorsPage';
-import ProductListPage from './components/ProductListPage';
-import Rating from './components/Rating';
-import Signin from './pages/SignIn';
-import Signup from './pages/SignUp';
+import ProductListPage from './pages/ProductListPage';
+import ProductDetailsPage from './pages/ProductDetailsPage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
+import CartPage from './pages/CartPage';
+import VendorSignUpPage from './pages/VendorSignUpPage';
+import VendorSignInPage from './pages/VendorSignInPage';
 
-// --- Layout Wrapper for consistency ---
+// Layout Wrapper
 const Layout = ({ children }) => (
-  <div className="bg-gray-50 min-h-screen font-sans relative">
+  <div className="bg-slate-50 min-h-screen font-sans">
     <Header />
     <Navbar />
-    <main className="container mx-auto px-4 mt-4 pb-8">
-      {children}
-    </main>
+    <main>{children}</main>
     <Footer />
-    <FloatingButtons />
   </div>
 );
 
-const App = () => {
+// Auth Layout (bina header/footer ke)
+const AuthLayout = ({ children }) => (
+    <div className="min-h-screen font-sans">
+        {children}
+    </div>
+);
+
+function App() {
   return (
-    <CartProvider>
-      <Router>
-        <Routes>
-          {/* MODIFIED: Added /home route */}
-          <Route
-            path="/home"
-            element={
-              <Layout>
-                <HomePage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/brand"
-            element={
-              <Layout>
-                <BrandPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/offers"
-            element={
-              <Layout>
-                <OffersPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/vendors"
-            element={
-              <Layout>
-                <VendorsPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/products/:category"
-            element={
-              <Layout>
-                <ProductListPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/rating"
-            element={
-              <Layout>
-                <Rating />
-              </Layout>
-            }
-          />
-          <Route
-            path="/signin"
-            element={
-              <Layout>
-                <Signin />
-              </Layout>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <Layout>
-                <Signup />
-              </Layout>
-            }
-          />
-        </Routes>
-      </Router>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout><HomePage /></Layout>} />
+            <Route path="/brands" element={<Layout><BrandPage /></Layout>} />
+            <Route path="/deals" element={<Layout><OffersPage /></Layout>} />
+            <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+            <Route path="/category/:slug" element={<Layout><ProductListPage /></Layout>} />
+            <Route path="/product/:slug" element={<Layout><ProductDetailsPage /></Layout>} />
+            <Route path="/search" element={<Layout><ProductListPage /></Layout>} />
+            
+            <Route path="/signin" element={<AuthLayout><SignInPage /></AuthLayout>} />
+            <Route path="/signup" element={<AuthLayout><SignUpPage /></AuthLayout>} />
+
+             <Route path="/vendor/signin" element={<AuthLayout><VendorSignInPage /></AuthLayout>} />
+            <Route path="/vendor/signup" element={<AuthLayout><VendorSignUpPage /></AuthLayout>} />
+          </Routes>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
-};
+}
 
 export default App;

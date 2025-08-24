@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { apiService } from '../api/apiService';
+import { apiService } from './apiService';
 
 // --- SVG Icon Components ---
 const MenuIcon = () => ( <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg> );
@@ -61,7 +61,7 @@ const Navbar = () => {
 
     const vendorZoneLinks = [
         { to: '/vendor/signup', text: 'Become a Vendor' },
-        { to: '/vendor/login', text: 'Vendor Login' }
+        { to: '/vendor/signin', text: 'Vendor Login' }
     ];
     
     const categoriesButtonClass = "flex items-center bg-blue-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-800 transition-colors";

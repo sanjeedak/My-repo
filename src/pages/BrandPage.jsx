@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiService } from '../api/apiService';
+import { apiService } from '../components/layout/apiService';
 import { API_BASE_URL } from '../api/config';
 
 // Skeleton component for a better loading experience

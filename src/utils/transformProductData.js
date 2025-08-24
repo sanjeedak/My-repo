@@ -1,20 +1,30 @@
+// src/utils/transformProductData.js
+
+/**
+ * API se mile product data ko UI ke liye a se format karta hai.
+ * @param {object} apiProduct - API se mila product object.
+ * @returns {object} - UI ke liye formatted product object.
+ */
 export const transformProductData = (apiProduct) => {
   const mrp = parseFloat(apiProduct.mrp);
   const sellingPrice = parseFloat(apiProduct.selling_price);
-  let discount = 0;
+  let discountPercent = 0;
+
   if (mrp > sellingPrice) {
-    discount = Math.round(((mrp - sellingPrice) / mrp) * 100);
+    discountPercent = Math.round(((mrp - sellingPrice) / mrp) * 100);
   }
+
   return {
     id: apiProduct.id,
-    title: apiProduct.name, // Changed from name to title for consistency if needed elsewhere
-    name: apiProduct.name, // Kept name for direct use
+    name: apiProduct.name,
+    slug: apiProduct.slug,
     price: sellingPrice,
     originalPrice: mrp,
-    discountAmount: (mrp - sellingPrice).toFixed(2),
-    discount: discount,
+    discount: discountPercent,
     image: apiProduct.image_1,
     rating: parseFloat(apiProduct.rating),
-    total_reviews: apiProduct.total_reviews || 0,
+    totalReviews: apiProduct.total_reviews || 0,
+    quantity: apiProduct.quantity,
+    description: apiProduct.description,
   };
 };

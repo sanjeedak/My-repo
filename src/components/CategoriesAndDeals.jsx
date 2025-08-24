@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'; // FIXED: Removed quotes around useEffect
 import { useNavigate, Link } from 'react-router-dom';
 import { StarIcon } from '../assets/icons';
-import { apiService } from '../api/apiService';
+import { apiService } from './layout/apiService';
 import { API_BASE_URL } from '../api/config';
 import { transformProductData } from '../utils/transformProductData';
-import ProductCard from '../components/ProductCard';
+import ProductCard from './products/ProductCard';
 
 // --- Categories Section ---
 export const CategoriesSection = () => {
