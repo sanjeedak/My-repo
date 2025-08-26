@@ -110,7 +110,7 @@ const Navbar = () => {
                     </div>
 
                     {/* Center: Navigation Links (always visible) */}
-                    <div className="flex items-center flex-wrap gap-x-4 gap-y-2 md:gap-x-6">
+                    <div className="flex items-center flex-wrap gap-x-4 gap-y-2 md:gap-x-4 flex-grow">
                         {mainNavLinks.map(link => (
                             <Link key={link.text} to={link.to} className="font-medium hover:opacity-80 transition-opacity whitespace-nowrap">
                                 {link.text}
