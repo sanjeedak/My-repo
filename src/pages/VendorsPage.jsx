@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../../../api/apiService';
-import SellerCard from '../components/SellerCard'; // Use the new component
+import SellerCard from '../components/SellerCard'; // Using the existing SellerCard component
 
-// A skeleton that matches the new SellerCard design
+// A skeleton that matches the SellerCard design
 const SellerCardSkeleton = () => (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
         <div className="flex animate-pulse items-center gap-4">
@@ -18,27 +18,29 @@ const SellerCardSkeleton = () => (
 
 
 const VendorsPage = () => {
-  const [vendors, setVendors] = useState([]);
+  const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchVendors = async () => {
+    const fetchStores = async () => {
         try {
-            const data = await apiService('/sellers');
-            if (data.success && Array.isArray(data.data.sellers)) {
-                setVendors(data.data.sellers);
+            // Updated endpoint to /stores
+            const data = await apiService('/stores');
+            // Updated data mapping to data.data.stores
+            if (data.success && Array.isArray(data.data.stores)) {
+                setStores(data.data.stores);
             } else {
-                throw new Error('Could not retrieve vendor data.');
+                throw new Error('Could not retrieve store data.');
             }
         } catch (err) {
-            setError('Failed to fetch vendors. Please try again later.');
+            setError('Failed to fetch stores. Please try again later.');
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
-    fetchVendors();
+    fetchStores();
   }, []);
 
   return (
@@ -46,10 +48,10 @@ const VendorsPage = () => {
         <div className="container mx-auto px-4">
             <div className="text-center mb-10">
                 <h1 className="text-4xl font-extrabold text-slate-800">
-                  Our Trusted Sellers
+                  Our Trusted Stores
                 </h1>
                 <p className="mt-2 text-gray-500">
-                  Explore products from our curated list of top-rated vendors.
+                  Explore products from our curated list of top-rated stores.
                 </p>
             </div>
             
@@ -63,7 +65,8 @@ const VendorsPage = () => {
                 {loading ? (
                     Array.from({ length: 6 }).map((_, i) => <SellerCardSkeleton key={i} />)
                 ) : (
-                    vendors.map(seller => <SellerCard key={seller.id} seller={seller} />)
+                    // Passing store data to the SellerCard component
+                    stores.map(store => <SellerCard key={store.id} seller={store} />)
                 )}
             </div>
         </div>
