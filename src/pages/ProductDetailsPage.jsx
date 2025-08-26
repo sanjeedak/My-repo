@@ -18,7 +18,7 @@ const ProductDetailsPage = () => {
             if (!slug) return;
             setLoading(true);
             try {
-                const productData = await apiService(`/api/products/slug/${slug}`);
+                const productData = await apiService(`/products/slug/${slug}`);
                 const mainProduct = transformProductData(productData.product);
                 setProduct(mainProduct);
 

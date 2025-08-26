@@ -10,7 +10,7 @@ const TopSellers = () => {
   useEffect(() => {
     const fetchTopSellers = async () => {
       try {
-        const data = await apiService('/api/products/top-sellers');
+        const data = await apiService('/products/top-sellers');
         setProducts(data.products); // assuming response format: { success: true, products: [...] }
       } catch (err) {
         setError(err.message);

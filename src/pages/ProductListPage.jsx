@@ -31,7 +31,7 @@ const ProductListPage = () => {
             const searchQuery = params.get('q');
             const brandQuery = params.get('brand');
 
-            let endpoint = '/api/products';
+            let endpoint = '/products';
             let pageTitle = 'All Products';
 
             if (slug) {

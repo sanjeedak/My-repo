@@ -15,7 +15,7 @@ const CategoriesBar = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await apiService('/api/categories');
+        const data = await apiService('/categories');
         const topLevel = data.data.categories.filter(cat => cat.parent_id === null);
         setCategories(topLevel);
       } catch (err) {
@@ -32,7 +32,7 @@ const CategoriesBar = () => {
     if (subcategories[category.id]) return; // Don't re-fetch if already loaded
 
     try {
-      const data = await apiService(`/api/categories?parent_id=${category.id}`);
+      const data = await apiService(`/categories?parent_id=${category.id}`);
       setSubcategories(prev => ({ ...prev, [category.id]: data.data.categories || [] }));
     } catch (err) {
       console.error(err);

@@ -25,7 +25,7 @@ const VendorsPage = () => {
   useEffect(() => {
     const fetchVendors = async () => {
         try {
-            const data = await apiService('/api/sellers');
+            const data = await apiService('/sellers');
             if (data.success && Array.isArray(data.data.sellers)) {
                 setVendors(data.data.sellers);
             } else {

@@ -15,7 +15,7 @@ export const CategoriesSection = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const data = await apiService('/api/categories');
+                const data = await apiService('/categories');
                 const formatted = data.data.categories.map((cat) => ({
                     id: cat.id,
                     name: cat.name,
@@ -59,7 +59,7 @@ export const CategoriesSection = () => {
                             <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center overflow-hidden border group-hover:border-blue-500 transition-all">
                                 <img src={cat.image} alt={cat.name} className="max-w-full max-h-full object-contain" />
                             </div>
-                            <p className="mt-2 text-sm text-gray-700 group-hover:text-blue-600">{cat.name}</p>
+                            <p className="mt-1 text-sm text-gray-700 group-hover:text-blue-600">{cat.name}</p>
                         </button>
                     ))}
                 </div>
@@ -77,7 +77,7 @@ export const FeaturedDealSection = () => {
     useEffect(() => {
         const fetchDeals = async () => {
             try {
-                const data = await apiService('/api/products?is_featured=true&limit=4');
+                const data = await apiService('/products?is_featured=true&limit=4');
                 const enhanced = data.products.map(transformProductData);
                 setDeals(enhanced);
             } catch (error) {

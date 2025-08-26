@@ -11,7 +11,7 @@ const OfferPage = () => {
     const fetchOffers = async () => {
       try {
         // REFACTORED: Replaced fake API with a call to the apiService
-        const data = await apiService('/api/products?on_sale=true&limit=8'); // Logical endpoint for offers
+        const data = await apiService('/products?on_sale=true&limit=8'); // Logical endpoint for offers
         
         // Your existing data transformation logic
         const formatted = data.products.map((item) => ({

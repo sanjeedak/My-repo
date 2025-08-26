@@ -20,6 +20,7 @@ import CartPage from './pages/CartPage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
 
+
 // Layout Wrapper
 const Layout = ({ children }) => (
   <div className="bg-slate-50 min-h-screen font-sans">
@@ -58,6 +59,7 @@ function App() {
             <Route path="/vendor/signup" element={<AuthLayout><VendorSignUpPage /></AuthLayout>} />
           </Routes>
         </Router>
+       
       </CartProvider>
     </AuthProvider>
   );

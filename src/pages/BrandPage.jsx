@@ -19,7 +19,7 @@ const BrandPage = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const data = await apiService('/api/brands');
+        const data = await apiService('/brands');
         
         if (data.success && Array.isArray(data.data.brands)) {
             setBrands(data.data.brands);

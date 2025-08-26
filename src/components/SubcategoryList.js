@@ -9,7 +9,9 @@ const SubcategoryList = ({ categorySlug, subcategories }) => {
         subcategories.map((subcategory) => (
           <li key={subcategory.id} className="hover:bg-blue-50 transition-colors duration-200">
             <Link
-              to={`/category/${categorySlug}/${subcategory.slug}`}
+              // --- MODIFIED LINE ---
+              // This now creates a URL like: /products?category_id=350&data_from=category
+              to={`/products?category_id=${subcategory.id}&data_from=category`}
               className="block w-full px-4 py-2 text-sm text-gray-700 text-left font-medium hover:text-blue-600"
             >
               {subcategory.name}

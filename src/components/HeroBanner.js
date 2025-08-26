@@ -15,7 +15,7 @@ const HeroBanner = () => {
     const fetchBanners = async () => {
       try {
         // REFACTORED: Using apiService for clean data fetching
-        const data = await apiService('/api/banners');
+        const data = await apiService('/banners');
         setBanners(data.data.banners);
       } catch (err) {
         setError(`Failed to load banners: ${err.message}`);

@@ -109,7 +109,7 @@ const SignUpPage = () => {
 
     setIsLoading(true);
     try {
-      await apiService('/api/auth/send-otp', {
+      await apiService('/auth/send-otp', {
         method: 'POST',
         body: { phone: formData.emailPhone },
       });
@@ -145,12 +145,12 @@ const SignUpPage = () => {
             phone: formData.emailPhone,
             otp,
           };
-      const response = await apiService('/api/auth/register', {
+      const response = await apiService('/auth/signup', {
         method: 'POST',
         body: payload,
       });
       console.log('Signup successful:', response.data);
-      navigate('/login');
+      navigate('/signin');
     } catch (error) {
       setErrors({ submit: error.message || 'Signup failed. Please try again.' });
     } finally {

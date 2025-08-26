@@ -111,7 +111,7 @@ const FlashDeal = () => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    apiService('/api/products?on_sale=true&limit=10')
+    apiService('/products?on_sale=true&limit=10')
       .then(data => setFlashProducts(data.products.map(transformProductData)))
       .catch(error => console.error("Failed to load flash deals:", error))
       .finally(() => setLoading(false));
@@ -164,7 +164,7 @@ const FeaturedProducts = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiService('/api/products?is_featured=true&limit=12')
+    apiService('/products?is_featured=true&limit=12')
       .then(data => setFeaturedProducts(data.products.map(transformProductData)))
       .catch(error => console.error("Failed to load featured products:", error))
       .finally(() => setLoading(false));
@@ -188,7 +188,7 @@ const TopSellers = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        apiService('/api/sellers?top=true&limit=4')
+        apiService('/sellers?top=true&limit=4')
             .then(data => {
                 if (data.success) setSellers(data.data.sellers);
             })

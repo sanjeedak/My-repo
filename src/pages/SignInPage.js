@@ -90,7 +90,7 @@ const SignInPage = () => {
     }
     setIsLoading(true);
     try {
-      await apiService('/api/auth/send-otp', {
+      await apiService('/auth/send-otp', {
         method: 'POST',
         body: { phone: formData.emailPhone },
       });
@@ -115,7 +115,7 @@ const SignInPage = () => {
       const payload = useEmail
         ? { email: formData.emailPhone, password: formData.password }
         : { phone: formData.emailPhone, otp };
-      const response = await apiService('/api/auth/login', {
+      const response = await apiService('/auth/login', {
         method: 'POST',
         body: payload,
       });
