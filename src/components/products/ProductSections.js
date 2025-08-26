@@ -77,26 +77,25 @@ const CountdownTimer = ({ hours = 48 }) => {
 };
 
 /**
- * A redesigned, professional Seller Card.
+ * A redesigned, professional Seller Card, now adapted for the 'stores' API model.
  */
-const SellerCard = ({ seller }) => (
-    <Link to={`/vendors/${seller.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+const SellerCard = ({ seller: store }) => ( // Prop is aliased to 'store' for clarity
+    <Link to={`/store/${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
         <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
             <img 
-                src={`${API_BASE_URL}/${seller.logo}`} 
-                alt={seller.name}
+                src={store.logo ? `${API_BASE_URL}/${store.logo}` : 'https://placehold.co/80x80?text=Store'} 
+                alt={store.name}
                 className="h-20 w-20 rounded-full object-cover border-4 border-white shadow-md"
-                onError={(e) => { e.target.src = 'https://placehold.co/80x80?text=Store'; }}
             />
         </div>
         <div className="p-4 text-center">
-            <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">{seller.name}</h3>
+            <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">{store.name}</h3>
             <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
                 <StarIcon />
-                <span className="ml-1">{parseFloat(seller.rating || 0).toFixed(1)} Rating</span>
+                <span className="ml-1">{parseFloat(store.rating || 0).toFixed(1)} Rating</span>
             </div>
             <div className="mt-4 text-xs text-gray-400">
-                <span>{seller.total_products || 0} Products</span>
+                <span>{store.total_products || 0} Products</span>
             </div>
         </div>
     </Link>
@@ -184,26 +183,28 @@ const FeaturedProducts = () => {
 };
 
 const TopSellers = () => {
-    const [sellers, setSellers] = useState([]);
+    const [stores, setStores] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        apiService('/sellers?top=true&limit=4')
+        apiService('/stores?top=true&limit=4')
             .then(data => {
-                if (data.success) setSellers(data.data.sellers);
+                if (data.success && data.data.stores) {
+                    setStores(data.data.stores);
+                }
             })
-            .catch(error => console.error("Failed to fetch top sellers:", error))
+            .catch(error => console.error("Failed to fetch top stores:", error))
             .finally(() => setLoading(false));
     }, []);
 
     return (
         <div className="my-12">
-            <SectionHeader title="Top Sellers" linkTo="/sellers" />
+            <SectionHeader title="Top Stores" linkTo="/stores" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {loading ? (
                     Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>)
                 ) : (
-                    sellers.map(seller => <SellerCard key={seller.id} seller={seller} />)
+                    stores.map(store => <SellerCard key={store.id} seller={store} />)
                 )}
             </div>
         </div>
