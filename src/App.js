@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -20,22 +20,18 @@ import CartPage from './pages/CartPage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
 
-
-// Layout Wrapper
-const Layout = ({ children }) => (
-  <div className="bg-slate-50 min-h-screen font-sans">
+// --- Main Layout Component ---
+// This component now acts as a wrapper for all pages that need the standard layout.
+// The <Outlet /> component from react-router-dom renders the specific page content.
+const MainLayout = () => (
+  <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
     <Header />
     <Navbar />
-    <main>{children}</main>
+    <main className="flex-grow">
+      <Outlet /> 
+    </main>
     <Footer />
   </div>
-);
-
-// Auth Layout (bina header/footer ke)
-const AuthLayout = ({ children }) => (
-    <div className="min-h-screen font-sans">
-        {children}
-    </div>
 );
 
 function App() {
@@ -44,22 +40,24 @@ function App() {
       <CartProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Layout><HomePage /></Layout>} />
-            <Route path="/brands" element={<Layout><BrandPage /></Layout>} />
-            <Route path="/deals" element={<Layout><OffersPage /></Layout>} />
-            <Route path="/cart" element={<Layout><CartPage /></Layout>} />
-            <Route path="/category/:slug" element={<Layout><ProductListPage /></Layout>} />
-            <Route path="/product/:slug" element={<Layout><ProductDetailsPage /></Layout>} />
-            <Route path="/search" element={<Layout><ProductListPage /></Layout>} />
-            
-            <Route path="/signin" element={<AuthLayout><SignInPage /></AuthLayout>} />
-            <Route path="/signup" element={<AuthLayout><SignUpPage /></AuthLayout>} />
-
-             <Route path="/vendor/signin" element={<AuthLayout><VendorSignInPage /></AuthLayout>} />
-            <Route path="/vendor/signup" element={<AuthLayout><VendorSignUpPage /></AuthLayout>} />
+            {/* All pages now render inside the MainLayout */}
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="brands" element={<BrandPage />} />
+              <Route path="deals" element={<OffersPage />} />
+              <Route path="cart" element={<CartPage />} />
+              <Route path="category/:slug" element={<ProductListPage />} />
+              <Route path="product/:slug" element={<ProductDetailsPage />} />
+              <Route path="search" element={<ProductListPage />} />
+              
+              {/* Auth and Vendor pages are now included in the main layout */}
+              <Route path="signin" element={<SignInPage />} />
+              <Route path="signup" element={<SignUpPage />} />
+              <Route path="vendor/signin" element={<VendorSignInPage />} />
+              <Route path="vendor/signup" element={<VendorSignUpPage />} />
+            </Route>
           </Routes>
         </Router>
-       
       </CartProvider>
     </AuthProvider>
   );
