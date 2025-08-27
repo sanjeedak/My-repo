@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import CheckoutPage from './pages/CheckoutPage';
 
 // Layout Components
 import Header from './components/layout/Header';
@@ -21,14 +22,13 @@ import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
 
 // --- Main Layout Component ---
-// This component now acts as a wrapper for all pages that need the standard layout.
-// The <Outlet /> component from react-router-dom renders the specific page content.
+
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
     <Header />
     <Navbar />
     <main className="flex-grow">
-      <Outlet /> 
+      <Outlet />
     </main>
     <Footer />
   </div>
@@ -46,16 +46,19 @@ function App() {
               <Route path="brands" element={<BrandPage />} />
               <Route path="deals" element={<OffersPage />} />
               <Route path="cart" element={<CartPage />} />
+              <Route path="checkout" element={<CheckoutPage />} />   {/* ✅ fixed */}
               <Route path="category/:slug" element={<ProductListPage />} />
               <Route path="product/:slug" element={<ProductDetailsPage />} />
+
               <Route path="search" element={<ProductListPage />} />
-              
-              {/* Auth and Vendor pages are now included in the main layout */}
+
+              {/* Auth and Vendor pages */}
               <Route path="signin" element={<SignInPage />} />
               <Route path="signup" element={<SignUpPage />} />
               <Route path="vendor/signin" element={<VendorSignInPage />} />
               <Route path="vendor/signup" element={<VendorSignUpPage />} />
             </Route>
+
           </Routes>
         </Router>
       </CartProvider>

@@ -1,41 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import ProductFilters from './ProductFilters';
+import ProductGrid from './ProductGrid';
 import { apiService } from '../components/layout/apiService';
-import ProductFilters from '../components/ProductFilters';
-import ProductGrid from '../components/ProductGrid';
-import Pagination from '../components/Pagination';
 
 const ProductsPage = () => {
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({});
-  const [loading, setLoading] = useState(true);
-  
   const [queryParams, setQueryParams] = useState({
     category: '',
-    brand: '',
+    subcategory: '',
     minPrice: '',
     maxPrice: '',
     sortBy: 'createdAt',
-    order: 'desc',
-    page: 1,
-    limit: 12
+    order: 'asc',
   });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  // Handle filter changes
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setQueryParams((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Fetch products whenever filters change
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams();
-        Object.entries(queryParams).forEach(([key, value]) => {
-          if (value) {
-            params.append(key, value);
-          }
-        });
+        // Build query string
+        const qs = new URLSearchParams();
+        if (queryParams.category) qs.append('category_id', queryParams.category);
+        if (queryParams.subcategory) qs.append('subcategory_id', queryParams.subcategory);
+        if (queryParams.minPrice) qs.append('minPrice', queryParams.minPrice);
+        if (queryParams.maxPrice) qs.append('maxPrice', queryParams.maxPrice);
+        if (queryParams.sortBy) qs.append('sortBy', queryParams.sortBy);
+        if (queryParams.order) qs.append('order', queryParams.order);
 
-        const response = await apiService(`/api/products?${params.toString()}`);
-        setProducts(response.data);
-        setPagination(response.pagination);
+        const data = await apiService(`/products?${qs.toString()}`);
+        setProducts(data.products || []);
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+        console.error('Failed to fetch products:', err);
       } finally {
         setLoading(false);
       }
@@ -44,25 +47,13 @@ const ProductsPage = () => {
     fetchProducts();
   }, [queryParams]);
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setQueryParams(prev => ({
-      ...prev,
-      [name]: value,
-      page: 1
-    }));
-  };
-
-  const handlePageChange = (newPage) => {
-    setQueryParams(prev => ({ ...prev, page: newPage }));
-  };
-
   return (
-    <div className="container">
-      <h1>Our Products</h1>
+    <div className="container mx-auto px-4 py-6">
+      {/* Filters */}
       <ProductFilters queryParams={queryParams} handleFilterChange={handleFilterChange} />
+
+      {/* Products */}
       <ProductGrid products={products} loading={loading} />
-      <Pagination pagination={pagination} queryParams={queryParams} handlePageChange={handlePageChange} />
     </div>
   );
 };
