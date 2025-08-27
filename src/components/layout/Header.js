@@ -9,13 +9,17 @@ import {
   PhoneIcon,
   IndiaFlagIcon,
 } from "../../assets/icons";
-import { useCart } from "../../context/CartContext";  // ✅ use custom hook
+import { LogIn, UserPlus } from "lucide-react"; // 👈 SignIn + SignUp icons
+import { useCart } from "../../context/CartContext";
 
 const Header = () => {
-  const { cartItems } = useCart();  // ✅ access cartItems from context
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef(null);
+  const userDropdownRef = useRef(null);
+
+  const { cartItems } = useCart();
 
   // Handle scroll effect
   useEffect(() => {
@@ -31,6 +35,9 @@ const Header = () => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsDropdownOpen(false);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) {
+        setIsUserDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -72,25 +79,55 @@ const Header = () => {
 
         {/* --- Right: Icons --- */}
         <div className="flex items-center gap-4">
+          {/* Wishlist */}
           <Link
             to="/wishlist"
             className="p-2 rounded-full hover:bg-gray-100 transition"
           >
             <WishlistIcon className="h-6 w-6" />
           </Link>
-          <button className="p-2 rounded-full hover:bg-gray-100 transition">
-            <UserIcon className="h-6 w-6" />
-          </button>
-          <button className="relative p-2 rounded-full hover:bg-gray-100 transition">
+
+          {/* User Dropdown (Sign In / Sign Up) */}
+          <div className="relative" ref={userDropdownRef}>
+            <button
+              onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+              className="p-2 rounded-full hover:bg-gray-100 transition"
+            >
+              <UserIcon className="h-6 w-6" />
+            </button>
+
+            {isUserDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg z-50">
+                <Link
+                  to="/signin"
+                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  <LogIn className="h-4 w-4 text-gray-600" /> Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  <UserPlus className="h-4 w-4 text-gray-600" /> Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Cart */}
+          <Link
+            to="/cart"
+            className="relative p-2 rounded-full hover:bg-gray-100 transition"
+          >
             <CartIcon className="h-6 w-6" />
-            {cartItems.length > 0 && (
+            {cartItems && cartItems.length > 0 && (
               <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
                 {cartItems.length}
               </span>
             )}
-          </button>
+          </Link>
 
-          {/* --- Dropdown --- */}
+          {/* --- Language & Contact Dropdown --- */}
           <div className="relative" ref={dropdownRef}>
             <button
               className="flex items-center gap-1 px-3 py-2 border rounded-md hover:bg-gray-50"
