@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// import { apiService } from './apiService';
+import { apiService } from './apiService'; // Make sure this path is correct
 
 // --- SVG Icon Components ---
 const GridIcon = ({ className = "h-5 w-5 mr-2" }) => (
@@ -9,23 +9,23 @@ const GridIcon = ({ className = "h-5 w-5 mr-2" }) => (
     </svg>
 );
 
-const ChevronDownIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+const ChevronDownIcon = ({ className = "h-4 w-4 ml-auto" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
     </svg>
 );
 
 // --- Reusable DropdownMenu Component ---
-const DropdownMenu = ({ buttonContent, links, dropdownWidth = 'w-60', buttonClassName }) => {
-    // Using a blue theme for hover effects
-    const linkClass = "block px-4 py-2 text-blue-700 hover:bg-blue-50 hover:text-[#1455ac] transition-colors rounded-md";
+const DropdownMenu = ({ buttonContent, links, dropdownWidth = 'w-60', buttonClassName, isScrollable = false }) => {
+    const linkClass = "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-[#1455ac] transition-colors rounded-md text-sm";
+    const scrollableClass = isScrollable ? 'max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100' : '';
 
     return (
         <div className="group relative">
             <button className={buttonClassName}>
                 {buttonContent}
             </button>
-            <div className={`absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 ${dropdownWidth} py-2 z-50 border border-blue-100`}>
+            <div className={`absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 ${dropdownWidth} py-2 z-50 border border-gray-100 ${scrollableClass}`}>
                 {links.map((link, index) => (
                     <Link key={index} to={link.to} className={`${linkClass} ${link.isBold ? 'font-bold border-t mt-1 pt-2' : ''}`}>
                         {link.text}
@@ -44,25 +44,11 @@ const Navbar = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const data = await new Promise(resolve => setTimeout(() => resolve({
-                     success: true,
-                     data: {
-                         categories: [
-                             { parent_id: null, slug: 'electronics', name: 'Electronics' },
-                             { parent_id: null, slug: 'fashion', name: 'Fashion' },
-                             { parent_id: null, slug: 'home-garden', name: 'Home & Garden' },
-                             { parent_id: null, slug: 'books', name: 'Books' },
-                             { parent_id: null, slug: 'sports', name: 'Sports & Outdoors' },
-                         ],
-                     },
-                }), 1000));
-
-                if (data.success) {
-                    const topLevel = data.data.categories.filter(cat => cat.parent_id === null);
-                    setCategories(topLevel.slice(0, 8));
+                const response = await apiService('/categories?parent_id=null');
+                if (response.success && Array.isArray(response.data.categories)) {
+                    setCategories(response.data.categories);
                 }
-            } catch (err)
- {
+            } catch (err) {
                 console.error("Failed to fetch categories:", err);
             } finally {
                 setLoading(false);
@@ -74,30 +60,28 @@ const Navbar = () => {
     const mainNavLinks = [
         { to: '/', text: 'Home' },
         { to: '/brands', text: 'Brands' },
-        { to: '/deals', 'text': 'Offers' }
+        { to: '/deals', text: 'Offers' }
     ];
-
-    const categoryLinks = loading
-        ? [{ to: '#', text: 'Loading...' }]
-        : categories.map(cat => ({ to: `/categories/${cat.slug}`, text: cat.name }))
-            .concat([{ to: '/categories', text: 'View All', isBold: true }]);
 
     const vendorZoneLinks = [
         { to: '/vendor/signup', text: 'Become a Vendor' },
         { to: '/vendor/signin', text: 'Vendor Login' }
     ];
 
-    // --- Styling to match the provided image ---
-    const categoriesButtonClass = "flex items-center bg-white text-[#1455ac] font-semibold py-2 px-3 rounded-lg border-2 border-[#1455ac] hover:bg-blue-50 transition-colors shadow-sm text-sm w-48 justify-between";
-    const defaultButtonClass = "flex items-center font-medium text-gray-800 hover:text-[#1455ac] transition-colors text-sm";
+    const categoryLinks = loading
+        ? [{ to: '#', text: 'Loading...' }]
+        : categories.map(cat => ({ to: `/category/${cat.slug}`, text: cat.name }))
+            .concat([{ to: '/categories', text: 'View All', isBold: true }]);
+
+    const categoriesButtonClass = "flex items-center bg-white text-[#1455ac] font-semibold py-2 px-4 rounded-lg border-2 border-transparent hover:bg-blue-50 transition-colors shadow-sm text-sm w-48 justify-between";
+    const defaultButtonClass = "flex items-center font-medium text-blue-100 hover:text-white transition-colors text-sm";
 
     return (
-        // Using a light background and "Open Sans" font family
-        <nav className="bg-blue-600 text-white shadow-md">
+        <nav className="bg-blue-800 text-white shadow-md font-poppins">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-3 items-center py-2">
-                    {/* Left & Center Links */}
-                    <div className="flex items-center flex-wrap gap-x-3 gap-y-2 md:gap-x-3">
+                <div className="flex items-center flex-wrap gap-y-2 py-1">
+                    {/* All links are now in a single container */}
+                    <div className="flex items-center flex-wrap gap-x-4 gap-y-2 md:gap-x-5">
                         {/* Categories Dropdown */}
                         <div className="flex-shrink-0">
                             <DropdownMenu
@@ -107,30 +91,27 @@ const Navbar = () => {
                                         <GridIcon />
                                         <span>Categories</span>
                                     </div>
-                                    <ChevronDownIcon />
+                                    <ChevronDownIcon className="h-4 w-4 text-gray-500" />
                                 </>}
                                 links={categoryLinks}
-                                dropdownWidth="w-48"
+                                dropdownWidth="w-64"
+                                isScrollable={true}
                             />
                         </div>
                         {/* Main Navigation Links */}
                         {mainNavLinks.map(link => (
-                            <Link key={link.text} to={link.to} className="font-medium text-gray-800 hover:text-[#1455ac] transition-colors whitespace-nowrap text-sm">
+                            <Link key={link.text} to={link.to} className="font-medium text-blue-100 hover:text-white transition-colors whitespace-nowrap text-sm px-2">
                                 {link.text}
                             </Link>
                         ))}
-                    </div>
-
-                    {/* Right Side Links */}
-                    <div className="flex items-center">
+                        {/* Vendor Zone Links */}
                         <DropdownMenu
                             buttonClassName={defaultButtonClass}
-                            buttonContent={<><span>Vendor Zone</span><ChevronDownIcon /></>}
+                            buttonContent={<><span>Vendor Zone</span><ChevronDownIcon className="h-4 w-4 ml-1 text-blue-100" /></>}
                             links={vendorZoneLinks}
                             dropdownWidth="w-48"
                         />
                     </div>
-                     <div className="justify-self-end"></div>
                 </div>
             </div>
         </nav>
