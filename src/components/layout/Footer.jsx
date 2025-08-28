@@ -74,30 +74,33 @@ const Footer = () => {
                     </div>
 
                     {/* Contact Bar */}
-                    <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 pb-5 text-sm">
-                        <div className="w-130">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-5 text-sm">
+                        {/* Start A Conversation */}
+                        <div>
                             <h3 className="text-white font-semibold mb-2">Start A Conversation</h3>
-                            <div className="flex items-center gap-2">
-                                <a href="tel:+91 73488 32668" className="flex text-md items-center gap-2"><PhoneIcon /> <span>+91 73488 32668</span></a>
-                                <a href="mailto:shopzeo@shopzeo.in" className="flex font-md items-center gap-2"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
-                                <a href="/support" className="flex font-md items-center gap-2"><SupportIcon /> <span>Support ticket</span></a>
+                            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-x-4 gap-y-2">
+                                <a href="tel:+917348832668" className="flex items-center gap-2 text-md"><PhoneIcon /> <span>+91 73488 32668</span></a>
+                                <a href="mailto:shopzeo@shopzeo.in" className="flex items-center gap-2 text-md"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
+                                <Link to="/support" className="flex items-center gap-2 text-md"><SupportIcon /> <span>Support ticket</span></Link>
                             </div>
                         </div>
-                        <div className="pl-5">
+                        {/* Address */}
+                        <div>
                             <h3 className="text-white font-semibold mb-2">Address</h3>
                             <div className="flex items-start gap-2">
-                                <LocationIcon className="mt-1" />
+                                <LocationIcon className="mt-1 flex-shrink-0" />
                                 <span>2447,16th B Main, Kodihalli,HAL 2nd Stage,Bangalore-560008</span>
                             </div>
                         </div>
+                        {/* Social */}
                         <div>
                             <h3 className="text-white font-semibold mb-2">Social</h3>
                             <div className="flex items-center gap-5">
-                                <a href="#" target="_blank" rel="noopener noreferrer"><FaLinkedin className="w-6 h-6 text-white" /></a>
-                                <a href="#" target="_blank" rel="noopener noreferrer"><FaInstagram className="w-6 h-6 text-white" /></a>
-                                <a href="#" target="_blank" rel="noopener noreferrer"><FaPinterest className="w-6 h-6 text-white" /></a>
-                                <a href="#" target="_blank" rel="noopener noreferrer"><FaTwitter className="w-6 h-6 text-white" /></a>
-                                <a href="#" target="_blank" rel="noopener noreferrer"><FaFacebook className="w-6 h-6 text-white" /></a>
+                                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><FaLinkedin className="w-6 h-6 text-white" /></a>
+                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram className="w-6 h-6 text-white" /></a>
+                                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" aria-label="Pinterest"><FaPinterest className="w-6 h-6 text-white" /></a>
+                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><FaTwitter className="w-6 h-6 text-white" /></a>
+                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebook className="w-6 h-6 text-white" /></a>
                             </div>
                         </div>
                     </div>

@@ -1,16 +1,10 @@
-// src/components/ProductCard.js
-import React, { useState } from "react"; // <-- useState import karein
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../api/config";
-import { EyeIcon } from "lucide-react";
-import { useCart } from "../../context/CartContext";
+import { Eye as EyeIcon } from "lucide-react"; // Renamed for clarity
 
-const ProductCard = ({ product, hideButtons = false }) => {
+const ProductCard = ({ product, onQuickView }) => {
   const navigate = useNavigate();
-  const { cartItems, addToCart } = useCart();
-  const isProductInCart = cartItems.find(item => item.id === product.id);
-
-  // ✅ STEP 1: Hover ke liye state banayein
   const [isHovered, setIsHovered] = useState(false);
 
   const handleNavigateDetails = () => {
@@ -21,18 +15,10 @@ const ProductCard = ({ product, hideButtons = false }) => {
     }
   };
 
-  const handleBuyNow = (e) => {
-    e.stopPropagation();
-    if (product) {
-      addToCart(product);
-      navigate("/checkout");
-    }
-  };
-
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
-    if (product) {
-      addToCart(product);
+  const handleQuickView = (e) => {
+    e.stopPropagation(); // Prevent navigating to the details page
+    if (onQuickView) {
+      onQuickView(product);
     }
   };
 
@@ -42,72 +28,39 @@ const ProductCard = ({ product, hideButtons = false }) => {
   };
 
   return (
-    // ✅ STEP 2: Mouse events add karein aur "group" class hata dein
     <div
       onClick={handleNavigateDetails}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative bg-white border rounded-lg shadow hover:shadow-lg transition flex flex-col cursor-pointer"
+      className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col cursor-pointer text-center relative overflow-hidden"
     >
-      {/* Image */}
-      <div className="relative">
+      <div className="p-4 relative">
         <img
           src={getImageUrl(product.image)}
           alt={product.name}
-          className="h-48 w-full object-contain p-4"
+          className="h-40 w-full object-contain"
         />
-        {/* Eye Icon (center overlay) */}
-        {/* ✅ STEP 3: State ke hisab se icon show/hide karein */}
+        {/* Eye effect overlay - RESTORED */}
         <div
-          className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
         >
-          <EyeIcon className="w-8 h-8 text-white" />
+          <button 
+            onClick={handleQuickView} 
+            className="p-2 rounded-full bg-white text-gray-800 hover:bg-gray-200"
+            aria-label="Quick view"
+          >
+            <EyeIcon className="w-6 h-6" />
+          </button>
         </div>
       </div>
-
-      {/* Details */}
-      <div className="p-4 flex flex-col flex-grow justify-between">
+      <div className="p-4 border-t flex flex-col flex-grow justify-between">
         <h3
-          className="font-semibold text-gray-800 mb-2 truncate"
+          className="font-medium text-gray-700 text-sm mb-2 truncate"
           title={product.name}
         >
           {product.name}
         </h3>
-        <p className="text-blue-600 font-bold mb-4">₹{product.price}</p>
-
-        {/* Action Buttons */}
-        {!hideButtons && (
-          <div className="flex gap-2">
-            {isProductInCart ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/cart");
-                }}
-                className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
-              >
-                Go to Cart
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-blue-600 text-white text-sm py-2 rounded hover:bg-blue-700"
-                >
-                  Add to Cart
-                </button>
-
-                <button
-                  onClick={handleBuyNow}
-                  className="flex-1 bg-green-600 text-white text-sm py-2 rounded hover:bg-green-700"
-                >
-                  Buy Now
-                </button>
-
-              </>
-            )}
-          </div>
-        )}
+        <p className="text-brand-blue font-bold">₹{product.price}</p>
       </div>
     </div>
   );

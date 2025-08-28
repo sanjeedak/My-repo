@@ -13,15 +13,13 @@ import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import BrandPage from './pages/BrandPage';
 import OffersPage from './pages/OffersPage';
-import ProductListPage from './pages/ProductListPage';
+import ProductsPage from './pages/ProductsPage'; // <-- This is the main page
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import CartPage from './pages/CartPage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
-
-// --- Main Layout Component ---
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
@@ -40,17 +38,16 @@ function App() {
       <CartProvider>
         <Router>
           <Routes>
-            {/* All pages now render inside the MainLayout */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
               <Route path="brands" element={<BrandPage />} />
               <Route path="deals" element={<OffersPage />} />
               <Route path="cart" element={<CartPage />} />
-              <Route path="checkout" element={<CheckoutPage />} />   {/* ✅ fixed */}
-              <Route path="category/:slug" element={<ProductListPage />} />
+              <Route path="checkout" element={<CheckoutPage />} />
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="category/:slug" element={<ProductsPage />} /> {/* Both routes point to the new page */}
               <Route path="product/:slug" element={<ProductDetailsPage />} />
-
-              <Route path="search" element={<ProductListPage />} />
+              <Route path="search" element={<ProductsPage />} />
 
               {/* Auth and Vendor pages */}
               <Route path="signin" element={<SignInPage />} />
@@ -58,7 +55,6 @@ function App() {
               <Route path="vendor/signin" element={<VendorSignInPage />} />
               <Route path="vendor/signup" element={<VendorSignUpPage />} />
             </Route>
-
           </Routes>
         </Router>
       </CartProvider>

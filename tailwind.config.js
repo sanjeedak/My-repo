@@ -1,4 +1,3 @@
-// tailwind.config.js
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
@@ -7,11 +6,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        'brand-blue': '#0071DC', // The primary blue color from the 6valley example
+      },
       fontFamily: {
-        // Set Poppins as the default sans-serif font
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'), // This line enables the forms plugin
+  ],
 }
