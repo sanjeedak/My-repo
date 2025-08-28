@@ -15,8 +15,8 @@ const Footer = () => {
     return (
         <footer className="mt-6 text-slate-300">
             {/* Main Footer Section */}
-            <div className="bg-[#203956] pt-8 px-6">
-                <div className="container mx-auto">
+            <div className="bg-[#203956] pt-6 px-2">
+                <div className="px-20 mx-auto">
                     {/* Top Links Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-8">
                         {/* Brand & Downloads */}
@@ -74,25 +74,25 @@ const Footer = () => {
                     </div>
 
                     {/* Contact Bar */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-slate-700 py-6 text-sm">
-                        <div>
+                    <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 pb-5 text-sm">
+                        <div className="w-130">
                             <h3 className="text-white font-semibold mb-2">Start A Conversation</h3>
-                            <div className="flex items-center gap-3">
-                                <a href="tel:+91 73488 32668" className="flex items-center gap-2"><PhoneIcon /> <span>+91 73488 32668</span></a>
-                                <a href="mailto:shopzeo@shopzeo.in" className="flex items-center gap-2"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
-                                <a href="/support" className="flex items-center gap-2"><SupportIcon /> <span>Support ticket</span></a>
+                            <div className="flex items-center gap-2">
+                                <a href="tel:+91 73488 32668" className="flex text-md items-center gap-2"><PhoneIcon /> <span>+91 73488 32668</span></a>
+                                <a href="mailto:shopzeo@shopzeo.in" className="flex font-md items-center gap-2"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
+                                <a href="/support" className="flex font-md items-center gap-2"><SupportIcon /> <span>Support ticket</span></a>
                             </div>
                         </div>
-                        <div>
+                        <div className="pl-5">
                             <h3 className="text-white font-semibold mb-2">Address</h3>
                             <div className="flex items-start gap-2">
                                 <LocationIcon className="mt-1" />
-                                <span>2447, 16th B Main, Kodihalli, HAL 2nd Stage, Bangalore - 560008</span>
+                                <span>2447,16th B Main, Kodihalli,HAL 2nd Stage,Bangalore-560008</span>
                             </div>
                         </div>
                         <div>
                             <h3 className="text-white font-semibold mb-2">Social</h3>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-5">
                                 <a href="#" target="_blank" rel="noopener noreferrer"><FaLinkedin className="w-6 h-6 text-white" /></a>
                                 <a href="#" target="_blank" rel="noopener noreferrer"><FaInstagram className="w-6 h-6 text-white" /></a>
                                 <a href="#" target="_blank" rel="noopener noreferrer"><FaPinterest className="w-6 h-6 text-white" /></a>

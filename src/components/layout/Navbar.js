@@ -100,16 +100,18 @@ const Navbar = () => {
         .map((cat) => ({ to: `/category/${cat.slug}`, text: cat.name }))
         .concat([{ to: "/categories", text: "View All", isBold: true }]);
 
+  // ✅ CHANGE KIYA GAYA HAI: Button ki padding (py aur px) kam kar di hai
   const categoriesButtonClass =
-    "flex items-center bg-white text-[#1455ac] font-semibold py-3 px-6 rounded-lg border-2 border-transparent hover:bg-blue-50 transition-colors shadow-sm text-base w-56 justify-between";
+    "flex items-center bg-white text-[#1455ac] font-semibold py-2 px-4 rounded-md border-2 border-transparent hover:bg-blue-80 transition-colors shadow-sm text-base w-56 justify-between";
+  
   const defaultButtonClass =
-    "flex items-center font-medium text-blue-100 hover:text-white transition-colors text-base px-3 py-2";
+    "flex items-center font-medium text-blue-100 hover:text-white transition-colors text-base px-3 py-0";
 
   return (
-    <nav className="bg-blue-800 text-white shadow-md font-poppins">
-      <div className="container mx-auto px-6">
-        <div className="flex items-center flex-wrap gap-y-2 py-3">
-          <div className="flex items-center flex-wrap gap-x-6 gap-y-2 md:gap-x-7">
+      <div className="bg-blue-800 text-white shadow-md font-poppins sticky top-0 z-50">
+      {/* <div className="container mx-auto px-6 py-0">  */}
+        <div className="items-center px-20 py-2  flex-wrap gap-y-0">
+          <div className="flex items-center flex-wrap gap-x-6 gap-y-0 md:gap-x-7">
             {/* Categories Dropdown */}
             <div className="flex-shrink-0">
               <DropdownMenu
@@ -120,7 +122,8 @@ const Navbar = () => {
                       <GridIcon className="h-6 w-6 text-[#1455ac]" />
                       <span>Categories</span>
                     </div>
-                    <ChevronDownIcon className="h-5 w-5 text-gray-200" />
+                    {/* ✅ FIX KIYA GAYA HAI: Icon ki height h-0 se h-5 kar di hai */}
+                    <ChevronDownIcon className="h-5 w-5 text-gray-400" />
                   </>
                 }
                 links={categoryLinks}
@@ -134,7 +137,7 @@ const Navbar = () => {
               <Link
                 key={link.text}
                 to={link.to}
-                className="font-medium text-blue-100 hover:text-white transition-colors whitespace-nowrap text-base px-3 py-2"
+                className="font-medium text-blue-100 hover:text-white transition-colors whitespace-nowrap text-base px-3 py-0"
               >
                 {link.text}
               </Link>
@@ -146,7 +149,6 @@ const Navbar = () => {
               buttonContent={
                 <>
                   <div className="flex items-center gap-2">
-                    <GridIcon className="h-6 w-6 text-blue-100" />
                     <span>Vendor Zone</span>
                   </div>
                   <ChevronDownIcon className="h-5 w-5 ml-1 text-blue-100" />
@@ -157,8 +159,8 @@ const Navbar = () => {
             />
           </div>
         </div>
-      </div>
-    </nav>
+      {/* </div> */}
+    </div>
   );
 };
 

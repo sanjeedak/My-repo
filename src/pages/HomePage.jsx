@@ -6,9 +6,9 @@ import { CategoriesSection } from '../components/CategoriesAndDeals';
 
 const HomePage = () => {
   return (
-    <div className="container mx-auto px-4">
+    <div className="mx-auto px-20">
       {/* Top section with categories and hero banner */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
         <div className="hidden lg:block lg:col-span-1">
           <CategoriesBar />
         </div>

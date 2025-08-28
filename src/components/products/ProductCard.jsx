@@ -1,4 +1,5 @@
-import React from "react";
+// src/components/ProductCard.js
+import React, { useState } from "react"; // <-- useState import karein
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../api/config";
 import { EyeIcon } from "lucide-react";
@@ -8,8 +9,10 @@ const ProductCard = ({ product, hideButtons = false }) => {
   const navigate = useNavigate();
   const { cartItems, addToCart } = useCart();
   const isProductInCart = cartItems.find(item => item.id === product.id);
+  
+  // ✅ STEP 1: Hover ke liye state banayein
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Navigate to ProductDetailsPage with slug
   const handleNavigateDetails = () => {
     if (product?.slug) {
       navigate(`/product/${product.slug}`);
@@ -18,34 +21,33 @@ const ProductCard = ({ product, hideButtons = false }) => {
     }
   };
 
-  // Buy Now -> add to cart then go to checkout
   const handleBuyNow = (e) => {
-    e.stopPropagation(); // prevent card click
+    e.stopPropagation();
     if (product) {
       addToCart(product);
       navigate("/checkout");
     }
   };
 
-  // Add to Cart -> add product to cart and stay on the current page
   const handleAddToCart = (e) => {
-    e.stopPropagation(); // prevent card click
+    e.stopPropagation();
     if (product) {
       addToCart(product);
-      // alert("Product added to cart!"); // Removed to avoid interrupting the user flow
     }
   };
 
-  // Image URL builder
   const getImageUrl = (img) => {
     if (!img) return "https://placehold.co/300x300?text=No+Image";
     return img.startsWith("http") ? img : `${API_BASE_URL}/${img}`;
   };
 
   return (
+    // ✅ STEP 2: Mouse events add karein aur "group" class hata dein
     <div
       onClick={handleNavigateDetails}
-      className="relative group bg-white border rounded-lg shadow hover:shadow-lg transition flex flex-col cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative bg-white border rounded-lg shadow hover:shadow-lg transition flex flex-col cursor-pointer"
     >
       {/* Image */}
       <div className="relative">
@@ -55,7 +57,10 @@ const ProductCard = ({ product, hideButtons = false }) => {
           className="h-48 w-full object-contain p-4"
         />
         {/* Eye Icon (center overlay) */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+        {/* ✅ STEP 3: State ke hisab se icon show/hide karein */}
+        <div 
+          className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+        >
           <EyeIcon className="w-8 h-8 text-white" />
         </div>
       </div>
