@@ -7,6 +7,7 @@ import ProductModal from '../components/products/ProductModal';
 import { apiService } from '../components/layout/apiService';
 import { transformProductData } from '../utils/transformProductData';
 import { Search } from 'lucide-react';
+import InfoCards from '../components/layout/InfoCards'; // <-- IMPORT THE NEW COMPONENT
 
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
@@ -64,6 +65,7 @@ const ProductsPage = () => {
                 setLoading(false);
             }
         };
+
         fetchProducts();
     }, [filters, pagination.currentPage, location.search]);
 
@@ -77,7 +79,7 @@ const ProductsPage = () => {
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <input type="text" placeholder="Search for items..." className="border rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48"/>
+                            <input type="text" placeholder="Search for items..." className="border-gray-300 rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48 focus:ring-brand-blue focus:border-brand-blue"/>
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         </div>
                         <select
@@ -86,7 +88,7 @@ const ProductsPage = () => {
                                 const [sortBy, order] = e.target.value.split('-');
                                 setFilters(prev => ({ ...prev, sortBy, order, currentPage: 1 }));
                             }}
-                            className="border-gray-300 rounded-md shadow-sm text-sm"
+                            className="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-blue focus:border-brand-blue"
                         >
                             <option value="created_at-desc">Sort by Default</option>
                             <option value="name-asc">Name (A-Z)</option>
@@ -134,6 +136,7 @@ const ProductsPage = () => {
                     </main>
                 </div>
             </div>
+            <InfoCards /> {/* <-- ADD THE NEW COMPONENT HERE */}
             {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
         </>
     );
