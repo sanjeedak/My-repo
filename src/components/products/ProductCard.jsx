@@ -9,7 +9,7 @@ const ProductCard = ({ product, hideButtons = false }) => {
   const navigate = useNavigate();
   const { cartItems, addToCart } = useCart();
   const isProductInCart = cartItems.find(item => item.id === product.id);
-  
+
   // ✅ STEP 1: Hover ke liye state banayein
   const [isHovered, setIsHovered] = useState(false);
 
@@ -58,7 +58,7 @@ const ProductCard = ({ product, hideButtons = false }) => {
         />
         {/* Eye Icon (center overlay) */}
         {/* ✅ STEP 3: State ke hisab se icon show/hide karein */}
-        <div 
+        <div
           className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
         >
           <EyeIcon className="w-8 h-8 text-white" />
@@ -92,16 +92,18 @@ const ProductCard = ({ product, hideButtons = false }) => {
               <>
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                  className="flex-1 bg-blue-600 text-white text-sm py-2 rounded hover:bg-blue-700"
                 >
                   Add to Cart
                 </button>
+
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                  className="flex-1 bg-green-600 text-white text-sm py-2 rounded hover:bg-green-700"
                 >
                   Buy Now
                 </button>
+
               </>
             )}
           </div>
