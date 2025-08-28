@@ -32,26 +32,37 @@ const ProductListPage = () => {
             const brandQuery = params.get('brand');
 
             let endpoint = '/products';
+            const queryParams = [];
             let pageTitle = 'All Products';
 
             if (slug) {
-                endpoint += `?category_slug=${slug}`;
+                queryParams.push(`category_slug=${slug}`);
                 pageTitle = `Category: ${slug.replace(/-/g, ' ')}`;
-            } else if (searchQuery) {
-                endpoint += `?search=${searchQuery}`;
+            }
+            if (searchQuery) {
+                queryParams.push(`search=${searchQuery}`);
                 pageTitle = `Search results for: "${searchQuery}"`;
-            } else if (brandQuery) {
-                endpoint += `?brand_slug=${brandQuery}`;
+            }
+            if (brandQuery) {
+                queryParams.push(`brand_slug=${brandQuery}`);
                 pageTitle = `Brand: ${brandQuery.replace(/-/g, ' ')}`;
             }
+
+            if (queryParams.length > 0) {
+                endpoint += `?${queryParams.join('&')}`;
+            }
+            
             setTitle(pageTitle);
 
             try {
+                // Using the provided model for '/products' to fetch all products
                 const data = await apiService(endpoint);
-                setProducts(data.products.map(transformProductData));
+                const transformedProducts = (data.products || []).map(transformProductData);
+                setProducts(transformedProducts);
             } catch (err) {
                 setError('Could not fetch products. Please try again later.');
                 console.error("Failed to fetch products:", err);
+                setProducts([]);
             } finally {
                 setLoading(false);
             }

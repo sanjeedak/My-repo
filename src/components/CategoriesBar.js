@@ -40,24 +40,21 @@ const CategoriesBar = () => {
     fetchCategories();
   }, []);
 
-  // When hovering a category → fetch subcategories
+  // When hovering a category -> fetch its subcategories
   const handleMouseEnter = async (category) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
 
     hoverTimeoutRef.current = setTimeout(async () => {
       setActiveCategory(category);
-      setSubcategories([]); // reset
+      setSubcategories([]); // Reset subcategories
       try {
         setSubLoading(true);
+        // FIX: The endpoint should be `/subcategories` with a query parameter.
         const res = await apiService(`/subcategories?category_id=${category.id}`);
         console.log("Subcategories API response:", res);
 
-        const subs =
-          res?.data?.subcategories ||
-          res?.data?.data?.subcategories ||
-          res?.subcategories ||
-          res?.data ||
-          [];
+        // FIX: Consistently parse the API response.
+        const subs =  res?.data?.subCategories || [];
 
         console.log("Parsed subcategories:", subs);
         setSubcategories(subs);

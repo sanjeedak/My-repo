@@ -14,10 +14,13 @@ export const transformProductData = (apiProduct) => {
     discountPercent = Math.round(((mrp - sellingPrice) / mrp) * 100);
   }
 
+  // FIX: Generate a slug from the product name if one doesn't exist, using product ID as a final fallback.
+  const slug = apiProduct.slug || (apiProduct.name ? apiProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : apiProduct.id);
+
   return {
     id: apiProduct.id,
     name: apiProduct.name,
-    slug: apiProduct.slug,
+    slug: slug, // Use the new slug
     price: sellingPrice,
     originalPrice: mrp,
     discount: discountPercent,

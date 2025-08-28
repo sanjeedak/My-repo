@@ -4,31 +4,36 @@ import { API_BASE_URL } from "../../api/config";
 import { EyeIcon } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, hideButtons = false }) => {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { cartItems, addToCart } = useCart();
+  const isProductInCart = cartItems.find(item => item.id === product.id);
 
   // Navigate to ProductDetailsPage with slug
   const handleNavigateDetails = () => {
-    if (product.slug) {
-      navigate(`/product/${product.slug}`); // ✅ matches your route
-    } else {
+    if (product?.slug) {
+      navigate(`/product/${product.slug}`);
+    } else if (product?.id) {
       navigate(`/product/${product.id}`);
     }
   };
 
-  // Buy Now → add to cart then go to checkout
+  // Buy Now -> add to cart then go to checkout
   const handleBuyNow = (e) => {
     e.stopPropagation(); // prevent card click
-    addToCart(product);
-    navigate("/checkout"); // ✅ direct to checkout page
+    if (product) {
+      addToCart(product);
+      navigate("/checkout");
+    }
   };
 
-  // Add to Cart → go to Cart page
+  // Add to Cart -> add product to cart and stay on the current page
   const handleAddToCart = (e) => {
     e.stopPropagation(); // prevent card click
-    addToCart(product);
-    navigate("/cart"); // ✅ redirect to Cart page
+    if (product) {
+      addToCart(product);
+      // alert("Product added to cart!"); // Removed to avoid interrupting the user flow
+    }
   };
 
   // Image URL builder
@@ -66,20 +71,36 @@ const ProductCard = ({ product }) => {
         <p className="text-blue-600 font-bold mb-4">₹{product.price}</p>
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          >
-            Add to Cart
-          </button>
-          <button
-            onClick={handleBuyNow}
-            className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
-          >
-            Buy Now
-          </button>
-        </div>
+        {!hideButtons && (
+          <div className="flex gap-2">
+            {isProductInCart ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/cart");
+                }}
+                className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+              >
+                Go to Cart
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                >
+                  Add to Cart
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                >
+                  Buy Now
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

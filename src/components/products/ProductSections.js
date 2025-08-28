@@ -38,6 +38,52 @@ const SectionHeader = ({ title, linkTo }) => (
   </div>
 );
 
+// --- COUNTDOWN TIMER ---
+const CountdownTimer = ({ hours = 48 }) => {
+  const [targetDate] = useState(() => {
+    const date = new Date();
+    date.setHours(date.getHours() + hours);
+    return date;
+  });
+  const [timeLeft, setTimeLeft] = useState({});
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const difference = +targetDate - +new Date();
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        clearInterval(timer);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  const timerItems = [
+    { label: 'Days', value: timeLeft.days },
+    { label: 'Hours', value: timeLeft.hours },
+    { label: 'Mins', value: timeLeft.minutes },
+    { label: 'Secs', value: timeLeft.seconds },
+  ];
+
+  return (
+    <div className="mt-4 flex justify-center gap-3">
+      {timerItems.map((item, i) => (
+        <div key={i} className="bg-white/20 px-3 py-2 rounded-lg text-center">
+          <div className="text-lg font-bold">{item.value ?? 0}</div>
+          <div className="text-xs uppercase text-blue-100">{item.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // --- FEATURED PRODUCTS ---
 const FeaturedProducts = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -46,10 +92,9 @@ const FeaturedProducts = () => {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const data = await apiService('/product?is_featured=true&limit=12'); // 👈 singular endpoint
+        const data = await apiService('/products?is_featured=true&limit=12');
 
         let items = [];
-        // ✅ Handle multiple possible API response shapes
         if (Array.isArray(data)) {
           items = data;
         } else if (Array.isArray(data.products)) {
@@ -84,7 +129,7 @@ const FeaturedProducts = () => {
         ) : featuredProducts.length > 0 ? (
           featuredProducts.map((p) => (
             <Link key={p.id} to={`/product/${p.slug || p.id}`}>
-              <ProductCard product={p} />
+              <ProductCard product={p} hideButtons={true} />
             </Link>
           ))
         ) : (
@@ -124,6 +169,7 @@ const FlashDeal = () => {
         <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-lg p-6 flex flex-col justify-center text-center shadow-lg">
           <h3 className="text-3xl font-extrabold tracking-tight">Flash Deals</h3>
           <p className="my-3 text-blue-100">Hurry up! The offer is limited.</p>
+          <CountdownTimer hours={48} />
         </div>
         
         {/* Right Product Carousel Section */}
@@ -134,7 +180,7 @@ const FlashDeal = () => {
               : flashProducts.map(p => (
                   <div key={p.id} className="flex-none w-64 snap-start">
                     <Link to={`/product/${p.slug || p.id}`}>
-                      <ProductCard product={p} />
+                      <ProductCard product={p} hideButtons={true} />
                     </Link>
                   </div>
               ))
@@ -155,7 +201,7 @@ const FlashDeal = () => {
 
 // --- TOP SELLERS ---
 const SellerCard = ({ seller: store }) => (
-  <Link to={`/store/${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+  <Link to={`/vendors/${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
     <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <img 
         src={store.logo ? `${API_BASE_URL}/${store.logo}` : 'https://placehold.co/80x80?text=Store'} 
@@ -193,7 +239,7 @@ const TopSellers = () => {
 
   return (
     <div className="my-12">
-      <SectionHeader title="Top Sellers" linkTo="/stores" />
+      <SectionHeader title="Top Sellers" linkTo="/vendors" />
       <div className="flex space-x-6 overflow-x-auto scrollbar-hide py-2">
         {loading 
           ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="w-64 h-48 bg-gray-200 rounded-lg animate-pulse"></div>)

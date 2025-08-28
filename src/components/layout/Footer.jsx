@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaLinkedin, FaInstagram, FaPinterest, FaTwitter, FaFacebook } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 
 // --- SVG Icon Components ---
 const PhoneIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>);
@@ -8,54 +9,41 @@ const SupportIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-
 const LocationIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>);
 const ChevronUpIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>);
 
-// Social Icons
-const SocialIcon = ({ href, children }) => (
-    <a href={href} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2A4462] text-white hover:bg-white hover:text-[#203956] transition-colors">
-        {children}
-    </a>
-);
-const LinkedinIcon = () => <svg>...</svg>; // Placeholder for your icon SVG
-const InstagramIcon = () => <svg>...</svg>;
-const PinterestIcon = () => <svg>...</svg>;
-const TwitterIcon = () => <svg>...</svg>;
-const FacebookIcon = () => <svg>...</svg>;
-
 const Footer = () => {
     const linkHoverClass = "hover:text-white transition-colors";
 
     return (
         <footer className="mt-6 text-slate-300">
             {/* Main Footer Section */}
-            <div className="bg-[#203956] pt-8 pL-12">
-                <div className="container mx-auto px-6">
+            <div className="bg-[#203956] pt-8 px-6">
+                <div className="container mx-auto">
                     {/* Top Links Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 pb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-8">
                         {/* Brand & Downloads */}
                         <div className="space-y-4">
-                            <img src="../img/logo_shopzeo.png" alt="Shopzeo Logo" className="h-8" />
+                            <img src="/img/logo_shopzeo.png" alt="Shopzeo Logo" className="h-8" />
                             <h3 className="text-white uppercase text-sm font-semibold tracking-wider pt-4">Download Our App</h3>
                             <div className="flex gap-2">
-                                <a href="/appstore.com">
+                                <a href="https://www.apple.com/app-store/" target="_blank" rel="noopener noreferrer">
                                     <img src="/img/appstore.jpeg" alt="App Store" className="h-10 object-contain" />
                                 </a>
-                                <a href="/play.google.com">
+                                <a href="https://play.google.com/store/apps" target="_blank" rel="noopener noreferrer">
                                     <img src="/img/googleplay.jpeg" alt="Google Play" className="h-10 object-contain" />
                                 </a>
                             </div>
-
                         </div>
 
                         {/* Quick Links */}
                         <div>
                             <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4">Quick Links</h3>
                             <ul className="space-y-2 text-sm">
-                                <li><a href="/profile" className={linkHoverClass}>Profile Info</a></li>
-                                <li><a href="/deals" className={linkHoverClass}>Flash Deal</a></li>
-                                <li><a href="/featured" className={linkHoverClass}>Featured Products</a></li>
-                                <li><a href="/best-selling" className={linkHoverClass}>Best Selling Product</a></li>
-                                <li><a href="/latest" className={linkHoverClass}>Latest Products</a></li>
-                                <li><a href="/top-rated" className={linkHoverClass}>Top Rated Product</a></li>
-                                <li><a href="/track-order" className={linkHoverClass}>Track Order</a></li>
+                                <li><Link to="/profile" className={linkHoverClass}>Profile Info</Link></li>
+                                <li><Link to="/deals" className={linkHoverClass}>Flash Deal</Link></li>
+                                <li><Link to="/products" className={linkHoverClass}>Featured Products</Link></li>
+                                <li><Link to="/best-selling" className={linkHoverClass}>Best Selling Product</Link></li>
+                                <li><Link to="/latest" className={linkHoverClass}>Latest Products</Link></li>
+                                <li><Link to="/top-rated" className={linkHoverClass}>Top Rated Product</Link></li>
+                                <li><Link to="/track-order" className={linkHoverClass}>Track Order</Link></li>
                             </ul>
                         </div>
 
@@ -63,12 +51,12 @@ const Footer = () => {
                         <div>
                             <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4">Other</h3>
                             <ul className="space-y-2 text-sm">
-                                <li><a href="/about" className={linkHoverClass}>About Us</a></li>
-                                <li><a href="/terms" className={linkHoverClass}>Terms And Conditions</a></li>
-                                <li><a href="/privacy" className={linkHoverClass}>Privacy Policy</a></li>
-                                <li><a href="/refund" className={linkHoverClass}>Refund Policy</a></li>
-                                <li><a href="/return" className={linkHoverClass}>Return Policy</a></li>
-                                <li><a href="/cancellation" className={linkHoverClass}>Cancellation Policy</a></li>
+                                <li><Link to="/about" className={linkHoverClass}>About Us</Link></li>
+                                <li><Link to="/terms" className={linkHoverClass}>Terms And Conditions</Link></li>
+                                <li><Link to="/privacy" className={linkHoverClass}>Privacy Policy</Link></li>
+                                <li><Link to="/refund" className={linkHoverClass}>Refund Policy</Link></li>
+                                <li><Link to="/return" className={linkHoverClass}>Return Policy</Link></li>
+                                <li><Link to="/cancellation" className={linkHoverClass}>Cancellation Policy</Link></li>
                             </ul>
                         </div>
 
@@ -91,7 +79,7 @@ const Footer = () => {
                             <h3 className="text-white font-semibold mb-2">Start A Conversation</h3>
                             <div className="flex items-center gap-3">
                                 <a href="tel:+91 73488 32668" className="flex items-center gap-2"><PhoneIcon /> <span>+91 73488 32668</span></a>
-                                <a href="linkiin.in" className="flex items-center gap-2"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
+                                <a href="mailto:shopzeo@shopzeo.in" className="flex items-center gap-2"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
                                 <a href="/support" className="flex items-center gap-2"><SupportIcon /> <span>Support ticket</span></a>
                             </div>
                         </div>
@@ -99,17 +87,17 @@ const Footer = () => {
                             <h3 className="text-white font-semibold mb-2">Address</h3>
                             <div className="flex items-start gap-2">
                                 <LocationIcon className="mt-1" />
-                                <span>2447, 16th B Main, Kodihalli, HAL 2nd Stage, Bangalore - 560008</span>
+                                <span>2447, 16th B Main, Kodihalli, HAL 2nd Stage, Bangalore - 560008</span>
                             </div>
                         </div>
                         <div>
                             <h3 className="text-white font-semibold mb-2">Social</h3>
                             <div className="flex items-center gap-3">
-                                <a href=""><FaLinkedin className="w-6 h-6 text-white" /></a>
-                                <a href="#"><FaInstagram className="w-6 h-6 text-white" /></a>
-                                <a href="#"><FaPinterest className="w-6 h-6 text-white" /></a>
-                                <a href="#"><FaTwitter className="w-6 h-6 text-white" /></a>
-                                <a href="#"><FaFacebook className="w-6 h-6 text-white" /></a>
+                                <a href="#" target="_blank" rel="noopener noreferrer"><FaLinkedin className="w-6 h-6 text-white" /></a>
+                                <a href="#" target="_blank" rel="noopener noreferrer"><FaInstagram className="w-6 h-6 text-white" /></a>
+                                <a href="#" target="_blank" rel="noopener noreferrer"><FaPinterest className="w-6 h-6 text-white" /></a>
+                                <a href="#" target="_blank" rel="noopener noreferrer"><FaTwitter className="w-6 h-6 text-white" /></a>
+                                <a href="#" target="_blank" rel="noopener noreferrer"><FaFacebook className="w-6 h-6 text-white" /></a>
                             </div>
                         </div>
                     </div>

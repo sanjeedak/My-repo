@@ -64,7 +64,7 @@ const CartPage = () => {
               </button>
               <span className="px-3 py-1 border rounded">{item.quantity}</span>
               <button
-                onClick={() => addToCart({ ...item, quantity: 1 })} // ✅ fix: always add one more
+                onClick={() => addToCart(item)} // ✅ FIX: Pass the item directly to increment quantity
                 className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
               >
                 +
