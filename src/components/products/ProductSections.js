@@ -38,53 +38,122 @@ const SectionHeader = ({ title, linkTo }) => (
   </div>
 );
 
-// --- COUNTDOWN ---
-const CountdownTimer = ({ hours = 48 }) => {
-  const [targetDate] = useState(() => {
-    const date = new Date();
-    date.setHours(date.getHours() + hours);
-    return date;
-  });
-  const [timeLeft, setTimeLeft] = useState({});
+// --- FEATURED PRODUCTS ---
+const FeaturedProducts = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const difference = +targetDate - +new Date();
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-        });
-      } else {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        clearInterval(timer);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [targetDate]);
+    const fetchFeatured = async () => {
+      try {
+        const data = await apiService('/product?is_featured=true&limit=12'); // 👈 singular endpoint
 
-  const timerItems = [
-    { label: 'Days', value: timeLeft.days },
-    { label: 'Hours', value: timeLeft.hours },
-    { label: 'Mins', value: timeLeft.minutes },
-    { label: 'Secs', value: timeLeft.seconds },
-  ];
+        let items = [];
+        // ✅ Handle multiple possible API response shapes
+        if (Array.isArray(data)) {
+          items = data;
+        } else if (Array.isArray(data.products)) {
+          items = data.products;
+        } else if (Array.isArray(data.data)) {
+          items = data.data;
+        } else if (data.product) {
+          items = [data.product];
+        } else if (data) {
+          items = [data];
+        }
+
+        setFeaturedProducts(items.map(transformProductData));
+      } catch (error) {
+        console.error("Failed to load featured products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
 
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {timerItems.map(({label, value}) => (
-        <div key={label} className="text-center bg-white/20 p-3 rounded-lg">
-          <div className="text-3xl font-bold">{String(value || 0).padStart(2, '0')}</div>
-          <div className="text-xs uppercase tracking-wider">{label}</div>
-        </div>
-      ))}
+    <div className="my-12">
+      <SectionHeader title="Featured Products" linkTo="/products?featured=true" />
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="w-full h-80 bg-gray-200 rounded-lg animate-pulse"></div>
+          ))
+        ) : featuredProducts.length > 0 ? (
+          featuredProducts.map((p) => (
+            <Link key={p.id} to={`/product/${p.slug || p.id}`}>
+              <ProductCard product={p} />
+            </Link>
+          ))
+        ) : (
+          <div className="col-span-full text-center text-gray-500">
+            🚀 No featured products available
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-// --- SELLER CARD ---
+// --- FLASH DEAL ---
+const FlashDeal = () => {
+  const [flashProducts, setFlashProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    apiService('/products?on_sale=true&limit=10')
+      .then(data => setFlashProducts((data.products || []).map(transformProductData)))
+      .catch(error => console.error("Failed to load flash deals:", error))
+      .finally(() => setLoading(false));
+  }, []);
+  
+  const handleScroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="my-12">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
+        {/* Left Countdown Section */}
+        <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-lg p-6 flex flex-col justify-center text-center shadow-lg">
+          <h3 className="text-3xl font-extrabold tracking-tight">Flash Deals</h3>
+          <p className="my-3 text-blue-100">Hurry up! The offer is limited.</p>
+        </div>
+        
+        {/* Right Product Carousel Section */}
+        <div className="relative lg:col-span-3 group">
+          <div ref={scrollRef} className="flex space-x-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide h-full py-2">
+            {loading 
+              ? Array.from({length: 4}).map((_, i) => <div key={i} className="flex-none w-64 h-full bg-gray-200 rounded-lg animate-pulse snap-start"></div>)
+              : flashProducts.map(p => (
+                  <div key={p.id} className="flex-none w-64 snap-start">
+                    <Link to={`/product/${p.slug || p.id}`}>
+                      <ProductCard product={p} />
+                    </Link>
+                  </div>
+              ))
+            }
+          </div>
+          {/* Navigation Buttons */}
+          <button onClick={() => handleScroll('left')} className="absolute top-1/2 left-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 -translate-x-4">
+            <ChevronLeftIcon />
+          </button>
+          <button onClick={() => handleScroll('right')} className="absolute top-1/2 right-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 translate-x-4">
+            <ChevronRightIcon />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- TOP SELLERS ---
 const SellerCard = ({ seller: store }) => (
   <Link to={`/store/${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
     <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -106,86 +175,6 @@ const SellerCard = ({ seller: store }) => (
     </div>
   </Link>
 );
-
-// --- MAIN SECTIONS ---
-
-const FlashDeal = () => {
-  const [flashProducts, setFlashProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const scrollRef = useRef(null);
-
-  useEffect(() => {
-    apiService('/products?on_sale=true&limit=10')
-      .then(data => setFlashProducts(data.products.map(transformProductData)))
-      .catch(error => console.error("Failed to load flash deals:", error))
-      .finally(() => setLoading(false));
-  }, []);
-  
-  const handleScroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -300 : 300;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
-  return (
-    <div className="my-12">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
-        {/* Left Countdown Section */}
-        <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-lg p-6 flex flex-col justify-center text-center shadow-lg">
-          <h3 className="text-3xl font-extrabold tracking-tight">Flash Deals</h3>
-          <p className="my-3 text-blue-100">Hurry up! The offer is limited.</p>
-          <CountdownTimer hours={24} />
-        </div>
-        
-        {/* Right Product Carousel Section */}
-        <div className="relative lg:col-span-3 group">
-          <div ref={scrollRef} className="flex space-x-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide h-full py-2">
-            {loading 
-              ? Array.from({length: 4}).map((_, i) => <div key={i} className="flex-none w-64 h-full bg-gray-200 rounded-lg animate-pulse snap-start"></div>)
-              : flashProducts.map(p => (
-                  <div key={p.id} className="flex-none w-64 snap-start">
-                    <ProductCard product={p} />
-                  </div>
-              ))
-            }
-          </div>
-          {/* Navigation Buttons */}
-          <button onClick={() => handleScroll('left')} className="absolute top-1/2 left-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 -translate-x-4">
-            <ChevronLeftIcon />
-          </button>
-          <button onClick={() => handleScroll('right')} className="absolute top-1/2 right-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 translate-x-4">
-            <ChevronRightIcon />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const FeaturedProducts = () => {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    apiService('/products?is_featured=true&limit=12')
-      .then(data => setFeaturedProducts(data.products.map(transformProductData)))
-      .catch(error => console.error("Failed to load featured products:", error))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <div className="my-12">
-      <SectionHeader title="Featured Products" linkTo="/products?featured=true" />
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-        {loading
-          ? Array.from({length: 6}).map((_, i) => <div key={i} className="w-full h-80 bg-gray-200 rounded-lg animate-pulse"></div>)
-          : featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
-        }
-      </div>
-    </div>
-  );
-};
 
 const TopSellers = () => {
   const [stores, setStores] = useState([]);

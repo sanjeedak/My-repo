@@ -1,53 +1,34 @@
 // src/components/CategoriesBar.js
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { apiService } from './layout/apiService';
-import SubcategoryList from './SubcategoryList';
-import { categoryIcons } from '../assets/categories_icons';
-import { ChevronRightIcon } from '../assets/icons';
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { apiService } from "./layout/apiService";
+import SubcategoryList from "./SubcategoryList";
+import { categoryIcons } from "../assets/categories_icons";
+import { ChevronRightIcon } from "../assets/icons";
 
-
-const buildCategoryTree = (categories) => {
-  const categoryMap = new Map();
-  const topLevelCategories = [];
-
-
-  categories.forEach(cat => {
-    categoryMap.set(cat.id, { ...cat, subcategories: [] });
-  });
-
-  categoryMap.forEach(cat => {
-    if (cat.parent_id) {
-      const parent = categoryMap.get(cat.parent_id);
-      if (parent) {
-        parent.subcategories.push(cat);
-      }
-    } else {
-      topLevelCategories.push(cat);
-    }
-  });
-
-  return topLevelCategories;
-};
-
-
-// --- The Component ---
 const CategoriesBar = () => {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [subLoading, setSubLoading] = useState(false);
   const [error, setError] = useState(null);
   const hoverTimeoutRef = useRef(null);
 
-
+  // Fetch top-level categories
   useEffect(() => {
-    const fetchAndProcessCategories = async () => {
+    const fetchCategories = async () => {
       try {
         setLoading(true);
-     
-        const response = await apiService('/categories'); 
-        const categoryTree = buildCategoryTree(response.data.categories);
-        setCategories(categoryTree);
+        const response = await apiService("/categories");
+        console.log("Categories API response:", response);
+
+        const cats =
+          response?.data?.categories ||
+          response?.categories ||
+          response?.data ||
+          [];
+        setCategories(cats);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch categories:", err);
@@ -56,46 +37,65 @@ const CategoriesBar = () => {
         setLoading(false);
       }
     };
-    fetchAndProcessCategories();
-  }, []); 
+    fetchCategories();
+  }, []);
 
-  const handleMouseEnter = (category) => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
- 
-    hoverTimeoutRef.current = setTimeout(() => {
+  // When hovering a category → fetch subcategories
+  const handleMouseEnter = async (category) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+
+    hoverTimeoutRef.current = setTimeout(async () => {
       setActiveCategory(category);
+      setSubcategories([]); // reset
+      try {
+        setSubLoading(true);
+        const res = await apiService(`/subcategories?category_id=${category.id}`);
+        console.log("Subcategories API response:", res);
+
+        const subs =
+          res?.data?.subcategories ||
+          res?.data?.data?.subcategories ||
+          res?.subcategories ||
+          res?.data ||
+          [];
+
+        console.log("Parsed subcategories:", subs);
+        setSubcategories(subs);
+      } catch (err) {
+        console.error("Failed to fetch subcategories:", err);
+        setSubcategories([]);
+      } finally {
+        setSubLoading(false);
+      }
     }, 200);
   };
 
   const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
+      setSubcategories([]);
     }, 300);
   };
-  
 
   const handlePanelMouseEnter = () => {
-      if(hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-      }
-  }
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+  };
 
   if (error) {
-    return <div className="p-4 text-center text-red-500 bg-white border border-gray-200 rounded-lg shadow-sm h-[380px]">{error}</div>;
+    return (
+      <div className="p-4 text-center text-red-500 bg-white border border-gray-200 rounded-lg shadow-sm h-[380px]">
+        {error}
+      </div>
+    );
   }
 
   return (
     <div className="flex bg-white border border-gray-200 rounded-lg shadow-sm h-[380px] w-full relative">
-      {/* Main Categories List */}
+      {/* Main Categories */}
       <ul className="divide-y divide-gray-200 w-full overflow-y-auto">
         {loading ? (
-                Array.from({ length: 8 }).map((_, index) => (
+          Array.from({ length: 8 }).map((_, index) => (
             <li key={index} className="p-4">
               <div className="flex items-center gap-3 animate-pulse">
                 <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
@@ -113,15 +113,16 @@ const CategoriesBar = () => {
               <Link
                 to={`/category/${category.slug}`}
                 className="flex justify-between items-center w-full text-sm text-gray-700 text-left px-4 py-2.5 hover:bg-gray-50"
-              
-                onFocus={() => handleMouseEnter(category)} 
+                onFocus={() => handleMouseEnter(category)}
                 onBlur={handleMouseLeave}
               >
                 <span className="flex items-center gap-3">
-                  {categoryIcons[category.name] || <div className="w-5 h-5 bg-gray-200 rounded-full"></div>}
+                  {categoryIcons[category.name] || (
+                    <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                  )}
                   <span className="font-medium">{category.name}</span>
                 </span>
-                {category.subcategories?.length > 0 && <ChevronRightIcon />}
+                <ChevronRightIcon />
               </Link>
             </li>
           ))
@@ -135,16 +136,22 @@ const CategoriesBar = () => {
         className={`
           absolute left-full top-0 w-[550px] h-full bg-white border-l border-gray-200 shadow-lg z-10 p-5
           transition-opacity duration-300 ease-in-out
-          ${activeCategory && activeCategory.subcategories?.length > 0 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+          ${activeCategory ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
       >
         {activeCategory && (
-          <SubcategoryList 
-            key={activeCategory.id} 
-            categorySlug={activeCategory.slug}
-            categoryName={activeCategory.name}
-            subcategories={activeCategory.subcategories} 
-          />
+          subLoading ? (
+            <div className="p-4 text-gray-500">Loading...</div>
+          ) : subcategories.length > 0 ? (
+            <SubcategoryList
+              key={activeCategory.id}
+              categorySlug={activeCategory.slug}
+              categoryName={activeCategory.name}
+              subcategories={subcategories}
+            />
+          ) : (
+            <div className="p-4 text-gray-500">No subcategories</div>
+          )
         )}
       </div>
     </div>
