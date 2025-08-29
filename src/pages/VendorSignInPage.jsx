@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthFormLayout from '../components/layout/AuthFormLayout';
+import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
 
 // A styled input field with a label.
 const InputField = ({ id, label, type, value, onChange, error, autoComplete }) => (
@@ -47,66 +48,69 @@ const VendorSignInPage = () => {
     };
 
     return (
-        <AuthFormLayout>
-            <div className="text-center mb-6">
-                <h2 className="text-3xl font-extrabold text-gray-900">
-                    Vendor Login
-                </h2>
-                <p className="mt-2 text-sm text-gray-600">
-                    Welcome back! Please sign in to your dashboard.
-                </p>
-            </div>
+        <>
+            <AuthFormLayout>
+                <div className="text-center mb-6">
+                    <h2 className="text-3xl font-extrabold text-gray-900">
+                        Vendor Login
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        Welcome back! Please sign in to your dashboard.
+                    </p>
+                </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <InputField
-                    id="email"
-                    label="Your Email"
-                    type="email"
-                    autoComplete="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    error={errors.email}
-                />
-                <InputField
-                    id="password"
-                    label="Password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    error={errors.password}
-                />
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Remember me</label>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <InputField
+                        id="email"
+                        label="Your Email"
+                        type="email"
+                        autoComplete="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        error={errors.email}
+                    />
+                    <InputField
+                        id="password"
+                        label="Password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        error={errors.password}
+                    />
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Remember me</label>
+                        </div>
+                        <div className="text-sm">
+                            <Link to="/vendor/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                                Forgot password?
+                            </Link>
+                        </div>
                     </div>
-                    <div className="text-sm">
-                        <Link to="/vendor/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                            Forgot password?
+                    <div>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
+                        >
+                            {isLoading ? 'Signing In...' : 'Sign In'}
+                        </button>
+                    </div>
+                </form>
+
+                <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-600">
+                        Don't have a vendor account?{' '}
+                        <Link to="/vendor/signup" className="font-semibold text-blue-600 hover:underline">
+                            Sign Up Now
                         </Link>
-                    </div>
+                    </p>
                 </div>
-                <div>
-                    <button 
-                        type="submit" 
-                        disabled={isLoading}
-                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
-                    >
-                        {isLoading ? 'Signing In...' : 'Sign In'}
-                    </button>
-                </div>
-            </form>
-
-            <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
-                    Don't have a vendor account?{' '}
-                    <Link to="/vendor/signin" className="font-semibold text-blue-600 hover:underline">
-                        Sign Up Now
-                    </Link>
-                </p>
-            </div>
-        </AuthFormLayout>
+            </AuthFormLayout>
+            <InfoCards />
+        </>
     );
 };
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
 import { useAuth } from '../context/AuthContext'; // Import useAuth hook
+import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
 
 const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => (
   <div>
@@ -142,111 +143,114 @@ const SignInPage = () => {
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen p-4 font-sans relative"
-      style={{ background: 'linear-gradient(135deg, #1f1f3a, #000000)' }}
-    >
-      <button
-        onClick={handleClose}
-        className="absolute top-4 right-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 px-4 py-2"
-        aria-label="Close sign-in form"
-      >
-        Close
-      </button>
+    <>
       <div
-        className="w-full max-w-lg p-10 rounded-3xl shadow-2xl backdrop-blur-lg bg-gray-800 bg-opacity-30"
-        style={{ border: '1px solid rgba(255, 255, 255, 0.2)' }}
+        className="flex items-center justify-center min-h-screen p-4 font-sans relative"
+        style={{ background: 'linear-gradient(135deg, #1f1f3a, #000000)' }}
       >
-        <h2 className="text-4xl font-extrabold text-center text-white mb-8 tracking-wide">
-          SIGN IN
-        </h2>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="flex justify-center space-x-6 mb-4">
-            <RadioButton
-              id="email"
-              label="Use Email"
-              checked={useEmail}
-              onChange={() => handleRadioChange(true)}
-              value="Email"
-            />
-            <RadioButton
-              id="phone"
-              label="Use Phone"
-              checked={!useEmail}
-              onChange={() => handleRadioChange(false)}
-              value="Phone"
-            />
-          </div>
-          <InputField
-            id="emailPhone"
-            label={useEmail ? 'Email' : 'Phone Number'}
-            type={useEmail ? 'email' : 'tel'}
-            name="emailPhone"
-            placeholder={useEmail ? 'Email' : 'Phone Number'}
-            value={formData.emailPhone}
-            onChange={handleChange}
-            error={errors.emailPhone}
-          />
-          {!useEmail && !showOTP && (
-            <button
-              type="button"
-              onClick={handleSendOTP}
-              disabled={isLoading}
-              className="w-full py-2 text-white font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
-              aria-label="Send OTP"
-            >
-              {isLoading ? 'Sending...' : 'Send OTP'}
-            </button>
-          )}
-          {showOTP && (
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 px-4 py-2"
+          aria-label="Close sign-in form"
+        >
+          Close
+        </button>
+        <div
+          className="w-full max-w-lg p-10 rounded-3xl shadow-2xl backdrop-blur-lg bg-gray-800 bg-opacity-30"
+          style={{ border: '1px solid rgba(255, 255, 255, 0.2)' }}
+        >
+          <h2 className="text-4xl font-extrabold text-center text-white mb-8 tracking-wide">
+            SIGN IN
+          </h2>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="flex justify-center space-x-6 mb-4">
+              <RadioButton
+                id="email"
+                label="Use Email"
+                checked={useEmail}
+                onChange={() => handleRadioChange(true)}
+                value="Email"
+              />
+              <RadioButton
+                id="phone"
+                label="Use Phone"
+                checked={!useEmail}
+                onChange={() => handleRadioChange(false)}
+                value="Phone"
+              />
+            </div>
             <InputField
-              id="otp"
-              label="Enter OTP"
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '');
-                if (value.length <= 6) setOtp(value);
-              }}
-              error={errors.otp}
-            />
-          )}
-          {useEmail && (
-            <InputField
-              id="password"
-              label="Password"
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
+              id="emailPhone"
+              label={useEmail ? 'Email' : 'Phone Number'}
+              type={useEmail ? 'email' : 'tel'}
+              name="emailPhone"
+              placeholder={useEmail ? 'Email' : 'Phone Number'}
+              value={formData.emailPhone}
               onChange={handleChange}
-              error={errors.password}
+              error={errors.emailPhone}
             />
-          )}
-          <div className="flex justify-end text-sm">
-            <a
-              href="/forgot-password"
-              className="font-semibold text-purple-300 hover:text-purple-100 transition-colors duration-300"
-              aria-label="Forgot Password"
-            >
-              Forgot Password?
-            </a>
-          </div>
-          {errors.submit && <p className="text-red-400 text-xs text-center">{errors.submit}</p>}
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
-              aria-label="Sign In"
-            >
-              {isLoading ? 'Signing In...' : 'SIGN IN'}
-            </button>
-          </div>
-        </form>
+            {!useEmail && !showOTP && (
+              <button
+                type="button"
+                onClick={handleSendOTP}
+                disabled={isLoading}
+                className="w-full py-2 text-white font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
+                aria-label="Send OTP"
+              >
+                {isLoading ? 'Sending...' : 'Send OTP'}
+              </button>
+            )}
+            {showOTP && (
+              <InputField
+                id="otp"
+                label="Enter OTP"
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  if (value.length <= 6) setOtp(value);
+                }}
+                error={errors.otp}
+              />
+            )}
+            {useEmail && (
+              <InputField
+                id="password"
+                label="Password"
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                error={errors.password}
+              />
+            )}
+            <div className="flex justify-end text-sm">
+              <a
+                href="/forgot-password"
+                className="font-semibold text-purple-300 hover:text-purple-100 transition-colors duration-300"
+                aria-label="Forgot Password"
+              >
+                Forgot Password?
+              </a>
+            </div>
+            {errors.submit && <p className="text-red-400 text-xs text-center">{errors.submit}</p>}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
+                aria-label="Sign In"
+              >
+                {isLoading ? 'Signing In...' : 'SIGN IN'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+      <InfoCards />
+    </>
   );
 };
 

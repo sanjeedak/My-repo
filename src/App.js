@@ -17,9 +17,11 @@ import ProductsPage from './pages/ProductsPage'; // <-- This is the main page
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CartPage from './pages/CartPage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
+import VendorForgotPasswordPage from './pages/VendorForgotPasswordPage'; // Import the new page
 import AboutUsPage from './pages/AboutUsPage'; // <-- About Us Page
 import ContactUsPage from './pages/ContactUsPage';
 import FAQPage from './pages/FAQPage';
@@ -62,8 +64,10 @@ function App() {
               {/* Auth and Vendor pages */}
               <Route path="signin" element={<SignInPage />} />
               <Route path="signup" element={<SignUpPage />} />
+              <Route path="forgot-password" element={<ForgotPasswordPage />} />
               <Route path="vendor/signin" element={<VendorSignInPage />} />
               <Route path="vendor/signup" element={<VendorSignUpPage />} />
+              <Route path="vendor/forgot-password" element={<VendorForgotPasswordPage />} /> {/* Add this route */}
             </Route>
           </Routes>
         </Router>

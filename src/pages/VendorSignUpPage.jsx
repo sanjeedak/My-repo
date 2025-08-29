@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthFormLayout from '../components/layout/AuthFormLayout';
 import Stepper from '../components/layout/Stepper';
 import VendorInfoStep from '../components/VendorInfoStep';
 import ShopInfoStep from '../components/ShopInfoStep';
-import BusinessInfoStep from '../components/BusinessInfoStep'; // New import
+import BusinessInfoStep from '../components/BusinessInfoStep';
+import InfoCards from '../components/layout/InfoCards';
 
 // --- Reusable Form Components ---
 export const InputField = ({ id, label, type, value, onChange, error, required = true }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
-        <input id={id} type={type} value={value} onChange={onChange} required={required} className={`mt-1 block w-full px-3 py-2 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`} />
+        <input id={id} name={id} type={type} value={value} onChange={onChange} required={required} className={`mt-1 block w-full px-3 py-2 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`} />
         {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
 );
@@ -33,72 +34,134 @@ export const FileUpload = ({ id, label, onChange, fileName, helpText, required =
 
 // --- Main Page Component ---
 const VendorSignUpPage = () => {
+    const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         // Step 1
-        firstName: '', lastName: '', email: '', phone: '', password: '', confirmPassword: '', vendorImage: null,
+        first_name: '', last_name: '', email: '', phone: '', password: '', confirmPassword: '', vendorImage: null,
         // Step 2
-        shopName: '', shopAddress: '', shopLogo: null, shopBanner: null,
+        name: '', address: '', city: '', state: '', country: '', postal_code: '', logo: null, banner: null,
         // Step 3
-        tin: '', tinExpireDate: '', tinCertificate: null,
+        gst_number: '', pan_number: '',
         // Final
         agreedToTerms: false,
     });
     const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
-        const { id, value, type, checked } = e.target;
-        setFormData(prev => ({ ...prev, [id]: type === 'checkbox' ? checked : value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
+        }
     };
 
     const handleFileChange = (e) => {
-        setFormData(prev => ({ ...prev, [e.target.id]: e.target.files[0] }));
+        const { name, files } = e.target;
+        setFormData(prev => ({ ...prev, [name]: files[0] }));
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
+        }
+    };
+    
+    const validateStep = (currentStep) => {
+        const newErrors = {};
+        if (currentStep === 1) {
+            if (!formData.first_name) newErrors.first_name = "First name is required.";
+            if (!formData.last_name) newErrors.last_name = "Last name is required.";
+            if (!/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = "Invalid email format.";
+            if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = "Phone must be 10 digits.";
+            if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters.";
+            if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match.";
+        }
+        if (currentStep === 2) {
+            if (!formData.name) newErrors.name = "Store name is required.";
+            if (!formData.address) newErrors.address = "Address is required.";
+            if (!formData.city) newErrors.city = "City is required.";
+            if (!formData.state) newErrors.state = "State is required.";
+            if (!formData.country) newErrors.country = "Country is required.";
+            if (!/^\d{6}$/.test(formData.postal_code)) newErrors.postal_code = "Pincode must be 6 digits.";
+            if (!formData.logo) newErrors.logo = "Store logo is required.";
+            if (!formData.banner) newErrors.banner = "Store banner is required.";
+        }
+        if (currentStep === 3) {
+            if (!formData.gst_number) newErrors.gst_number = "GST number is required.";
+        }
+        return newErrors;
     };
 
-    const handleNext = () => setStep(prev => prev + 1);
+    const handleNext = () => {
+        const validationErrors = validateStep(step);
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+        } else {
+            setErrors({});
+            setStep(prev => prev + 1);
+        }
+    };
+    
     const handleBack = () => setStep(prev => prev - 1);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const validationErrors = validateStep(step);
+         if (!formData.agreedToTerms) {
+            validationErrors.agreedToTerms = "You must agree to the terms.";
+        }
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        setErrors({});
         console.log('Final Vendor Submission:', formData);
+        // Simulate API call and redirect
+        navigate('/vendor/dashboard');
     };
 
     return (
-        <AuthFormLayout>
-            <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Create an Account</h2>
-            
-            <Stepper currentStep={step} />
-
-            <form onSubmit={handleSubmit} className="space-y-8">
-                {step === 1 && <VendorInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
-                {step === 2 && <ShopInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
-                {step === 3 && <BusinessInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
+        <div className="bg-slate-50">
+            <AuthFormLayout
+                footerText="Already have an account?"
+                footerLink="/vendor/signin"
+                footerActionText="Sign In"
+            >
+                <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Create a Vendor Account</h2>
                 
-                <div className="pt-4">
-                    {step === 1 && (
-                        <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Next</button>
-                    )}
-                    {step === 2 && (
-                        <div className="flex gap-4">
-                            <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">Back</button>
+                <Stepper currentStep={step} />
+
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    {step === 1 && <VendorInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
+                    {step === 2 && <ShopInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
+                    {step === 3 && <BusinessInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
+                    
+                    <div className="pt-4">
+                        {step === 1 && (
                             <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Next</button>
-                        </div>
-                    )}
-                    {step === 3 && (
-                        <div className="space-y-4">
-                            <div className="flex items-center">
-                                <input id="agreedToTerms" name="agreedToTerms" type="checkbox" checked={formData.agreedToTerms} onChange={handleChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                                <label htmlFor="agreedToTerms" className="ml-2 block text-sm text-gray-900">I agree to the <Link to="/terms" className="text-blue-600 hover:underline">terms and conditions</Link></label>
-                            </div>
+                        )}
+                        {step === 2 && (
                             <div className="flex gap-4">
                                 <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">Back</button>
-                                <button type="submit" className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Submit Application</button>
+                                <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Next</button>
                             </div>
-                        </div>
-                    )}
-                </div>
-            </form>
-        </AuthFormLayout>
+                        )}
+                        {step === 3 && (
+                            <div className="space-y-4">
+                                <div className="flex items-center">
+                                    <input id="agreedToTerms" name="agreedToTerms" type="checkbox" checked={formData.agreedToTerms} onChange={handleChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                                    <label htmlFor="agreedToTerms" className="ml-2 block text-sm text-gray-900">I agree to the <Link to="/terms" className="text-blue-600 hover:underline">terms and conditions</Link></label>
+                                </div>
+                                {errors.agreedToTerms && <p className="text-xs text-red-600">{errors.agreedToTerms}</p>}
+                                <div className="flex gap-4">
+                                    <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">Back</button>
+                                    <button type="submit" className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Submit Application</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </form>
+            </AuthFormLayout>
+            <InfoCards />
+        </div>
     );
 };
 
