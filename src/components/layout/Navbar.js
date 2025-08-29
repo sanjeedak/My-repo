@@ -1,8 +1,9 @@
 // src/components/layout/Navbar.js
-import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { apiService } from "./apiService"; // adjust path if yours differs
-import { GridIcon, ChevronDownIcon } from "../../assets/icons"; // ✅ icons from assets
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { apiService } from './apiService';
+import { GridIcon, ChevronDownIcon } from '../../assets/icons';
+import { Menu, X } from 'lucide-react';
 
 // --- Reusable DropdownMenu ---
 const DropdownMenu = ({
@@ -11,6 +12,7 @@ const DropdownMenu = ({
   dropdownWidth = "w-64",
   buttonClassName,
   isScrollable = false,
+  isLoading = false,
 }) => {
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef(null);
@@ -21,37 +23,21 @@ const DropdownMenu = ({
   };
 
   const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setOpen(false), 200); // gentle close delay
+    timeoutRef.current = setTimeout(() => setOpen(false), 200);
   };
 
-  const linkClass =
-    "block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#1455ac] transition-colors rounded-md text-base";
-  const scrollableClass = isScrollable
-    ? "max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-    : "";
+  const linkClass = "block px-5 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-md text-sm";
+  const scrollableClass = isScrollable ? "max-h-[70vh] overflow-y-auto" : "";
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Button */}
-      <button type="button" className={buttonClassName} aria-expanded={open}>
+    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <div className={buttonClassName} aria-expanded={open}>
         {buttonContent}
-      </button>
-
-      {/* Dropdown */}
+      </div>
       {open && (
-        <div
-          className={`absolute left-0 bg-white shadow-lg rounded-md mt-2 ${dropdownWidth} py-3 z-50 border border-gray-100 ${scrollableClass} transition-all duration-200`}
-        >
-          {links.map((link, index) => (
-            <Link
-              key={index}
-              to={link.to}
-              className={`${linkClass} ${link.isBold ? "font-bold border-t mt-2 pt-3" : ""}`}
-            >
+        <div className={`absolute left-0 bg-white shadow-lg rounded-md mt-2 ${dropdownWidth} py-2 z-50 border border-gray-100 ${scrollableClass} transition-all duration-200`}>
+          {isLoading ? <div className="p-4 text-center text-gray-500">Loading...</div> : links.map((link, index) => (
+            <Link key={index} to={link.to} className={`${linkClass} ${link.isBold ? "font-bold border-t mt-2 pt-3" : ""}`}>
               {link.text}
             </Link>
           ))}
@@ -61,107 +47,129 @@ const DropdownMenu = ({
   );
 };
 
+
 // --- Main Navbar ---
 const Navbar = () => {
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
+    const fetchData = async () => {
       try {
-        const response = await apiService("/categories?parent_id=null");
-        if (mounted && response?.success && Array.isArray(response?.data?.categories)) {
-          setCategories(response.data.categories);
+        const [catResponse, brandResponse] = await Promise.all([
+          apiService("/categories?parent_id=null"),
+          apiService("/brands?limit=8") // Fetch a few brands for the dropdown
+        ]);
+
+        if (catResponse?.success && Array.isArray(catResponse?.data?.categories)) {
+          setCategories(catResponse.data.categories);
+        }
+        if (brandResponse?.success && Array.isArray(brandResponse?.data?.brands)) {
+          setBrands(brandResponse.data.brands);
         }
       } catch (err) {
-        console.error("Failed to fetch categories:", err);
+        console.error("Failed to fetch navbar data:", err);
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
-    })();
-    return () => { mounted = false; };
+    };
+    fetchData();
   }, []);
 
-  const mainNavLinks = [
-    { to: "/", text: "Home" },
-    { to: "/brands", text: "Brands" },
-    { to: "/deals", text: "Offers" },
+  const mainNavLinks = [{ to: '/', text: 'Home' }];
+
+  const offerLinks = [
+      { to: "/deals?type=flash", text: "Flash Deals" },
+      { to: "/products?featured=true", text: "Featured Products" },
+      { to: "/products?top_rated=true", text: "Top Rated" },
+  ];
+
+  const brandLinks = [
+    ...brands.map(brand => ({ to: `/products?brand=${brand.slug}`, text: brand.name })),
+    { to: "/brands", text: "View All Brands", isBold: true }
   ];
 
   const vendorZoneLinks = [
-    { to: "/vendor/signup", text: "Become a Vendor" },
-    { to: "/vendor/signin", text: "Vendor Login" },
+    { to: '/vendor/signup', text: 'Become a Vendor' },
+    { to: '/vendor/signin', text: 'Vendor Login' },
   ];
 
   const categoryLinks = loading
-    ? [{ to: "#", text: "Loading..." }]
+    ? []
     : categories
         .map((cat) => ({ to: `/category/${cat.slug}`, text: cat.name }))
         .concat([{ to: "/categories", text: "View All", isBold: true }]);
 
-  // ✅ CHANGE KIYA GAYA HAI: Button ki padding (py aur px) kam kar di hai
-  const categoriesButtonClass =
-    "flex items-center bg-white text-[#1455ac] font-semibold py-2 px-4 rounded-md border-2 border-transparent hover:bg-blue-80 transition-colors shadow-sm text-base w-56 justify-between";
-  
-  const defaultButtonClass =
-    "flex items-center font-medium text-blue-100 hover:text-white transition-colors text-base px-3 py-0";
+  const categoriesButtonClass = "flex items-center bg-white text-blue-800 font-semibold py-2.5 px-4 rounded-md border-2 border-transparent hover:bg-gray-100 transition-colors shadow-sm text-base justify-between";
+  const defaultButtonClass = "flex items-center font-medium text-blue-100 hover:text-white transition-colors text-base px-3 py-2 cursor-pointer";
 
   return (
-      <div className="bg-blue-800 text-white shadow-md font-poppins sticky top-0 z-50">
-      {/* <div className="container mx-auto px-6 py-0">  */}
-        <div className="items-center px-20 py-2  flex-wrap gap-y-0">
-          <div className="flex items-center flex-wrap gap-x-6 gap-y-0 md:gap-x-7">
-            {/* Categories Dropdown */}
-            <div className="flex-shrink-0">
-              <DropdownMenu
-                buttonClassName={categoriesButtonClass}
-                buttonContent={
-                  <>
-                    <div className="flex items-center gap-2">
-                      <GridIcon className="h-6 w-6 text-[#1455ac]" />
-                      <span>Categories</span>
-                    </div>
-                    {/* ✅ FIX KIYA GAYA HAI: Icon ki height h-0 se h-5 kar di hai */}
-                    <ChevronDownIcon className="h-5 w-5 text-gray-400" />
-                  </>
-                }
-                links={categoryLinks}
-                dropdownWidth="w-72"
-                isScrollable
-              />
-            </div>
-
-            {/* Main Navigation Links */}
-            {mainNavLinks.map((link) => (
-              <Link
-                key={link.text}
-                to={link.to}
-                className="font-medium text-blue-100 hover:text-white transition-colors whitespace-nowrap text-base px-3 py-0"
-              >
-                {link.text}
-              </Link>
-            ))}
-
-            {/* Vendor Zone Dropdown */}
+    <nav className="bg-blue-800 text-white shadow-md font-poppins sticky top-[64px] md:top-auto z-30">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-x-1 w-full">
             <DropdownMenu
+              buttonClassName={categoriesButtonClass}
+              buttonContent={<><GridIcon className="h-5 w-5 mr-2" /><span>Categories</span><ChevronDownIcon className="h-5 w-5 ml-2 text-gray-400" /></>}
+              links={categoryLinks}
+              dropdownWidth="w-72"
+              isScrollable
+              isLoading={loading}
+            />
+            {mainNavLinks.map(link => (
+              <NavLink key={link.text} to={link.to} className={({ isActive }) => `px-4 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-blue-900 text-white' : 'text-blue-100 hover:bg-blue-700'}`}>{link.text}</NavLink>
+            ))}
+            <DropdownMenu
+              buttonContent={<><span>Brands</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
               buttonClassName={defaultButtonClass}
-              buttonContent={
-                <>
-                  <div className="flex items-center gap-2">
-                    <span>Vendor Zone</span>
-                  </div>
-                  <ChevronDownIcon className="h-5 w-5 ml-1 text-blue-100" />
-                </>
-              }
+              links={brandLinks}
+              isLoading={loading}
+            />
+            <DropdownMenu
+              buttonContent={<><span>Offers</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
+              buttonClassName={defaultButtonClass}
+              links={offerLinks}
+            />
+            <DropdownMenu
+              buttonContent={<><span>Vendor Zone</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
+              buttonClassName={defaultButtonClass}
               links={vendorZoneLinks}
               dropdownWidth="w-56"
             />
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <div className="md:hidden flex items-center">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white focus:outline-none p-2" aria-label="Open menu">
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
-      {/* </div> */}
-    </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden pb-4">
+            <nav className="flex flex-col space-y-1">
+              {mainNavLinks.map(link => <Link key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{link.text}</Link>)}
+              <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">Brands</Link>
+              <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">Offers</Link>
+              <div className="border-t border-blue-700 mt-2 pt-2">
+                <h4 className="px-3 text-sm font-semibold text-gray-400 uppercase">Vendor</h4>
+                {vendorZoneLinks.map(link => (
+                    <Link key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{link.text}</Link>
+                ))}
+              </div>
+            </nav>
+          </div>
+        )}
+      </div>
+    </nav>
   );
 };
 
 export default Navbar;
+

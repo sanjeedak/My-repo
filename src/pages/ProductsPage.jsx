@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import ProductCard from '../components/products/ProductCard';
 import FilterSidebar from '../components/products/FilterSidebar';
 import Pagination from '../components/Pagination';
@@ -7,14 +7,14 @@ import ProductModal from '../components/products/ProductModal';
 import { apiService } from '../components/layout/apiService';
 import { transformProductData } from '../utils/transformProductData';
 import { Search } from 'lucide-react';
-import InfoCards from '../components/layout/InfoCards'; // <-- IMPORT THE NEW COMPONENT
+import InfoCards from '../components/layout/InfoCards';
 
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [availableBrands, setAvailableBrands] = useState([]);
-    const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
+    const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [filters, setFilters] = useState({
         maxPrice: 4000,
@@ -25,10 +25,27 @@ const ProductsPage = () => {
     });
 
     const location = useLocation();
+    const { slug: categorySlugFromPath } = useParams();
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+
+    const pageTitle = useMemo(() => {
+        const section = searchParams.get('section');
+        const brandSlug = searchParams.get('brand');
+        const categorySlug = categorySlugFromPath || searchParams.get('category');
+        
+        if (section === 'featured') return 'Featured Products';
+        if (section === 'flash_deal') return 'Flash Deals';
+        if (section === 'top_sellers') return 'Top Selling Products';
+        if (categorySlug) return `Products in ${categorySlug.replace(/-/g, ' ')}`;
+        if (brandSlug) return `Products from ${brandSlug.replace(/-/g, ' ')}`;
+        return 'All Products';
+    }, [searchParams, categorySlugFromPath]);
 
     useEffect(() => {
         apiService('/brands').then(brandData => {
-            if (brandData.success) setAvailableBrands(brandData.data.brands);
+            if (brandData.success && Array.isArray(brandData.data?.brands)) {
+                setAvailableBrands(brandData.data.brands);
+            }
         }).catch(err => console.error("Failed to fetch brands:", err));
     }, []);
     
@@ -43,39 +60,85 @@ const ProductsPage = () => {
             setLoading(true);
             setError('');
             
-            const params = new URLSearchParams(location.search);
-            params.set('page', pagination.currentPage);
-            params.set('sort_by', filters.sortBy);
-            params.set('order', filters.order);
-            if (filters.maxPrice < 100000) params.set('max_price', filters.maxPrice);
-            if (filters.brands.length > 0) params.set('brand_slug', filters.brands.join(','));
-            if (filters.minRating > 0) params.set('rating', filters.minRating);
+            const currentParams = new URLSearchParams(location.search);
+            const section = currentParams.get('section');
+            let endpoint = '/products';
+            const queryParams = new URLSearchParams();
+
+            queryParams.set('page', pagination.currentPage);
+
+            // Special case for top-sellers endpoint which might not support other filters
+            if (section === 'top_sellers') {
+                endpoint = '/products/top-sellers';
+            } else {
+                // Apply general filters for all other cases
+                queryParams.set('sort_by', filters.sortBy);
+                queryParams.set('order', filters.order);
+                if (filters.maxPrice < 4000) queryParams.set('max_price', filters.maxPrice);
+                if (filters.brands.length > 0) queryParams.set('brand_slug', filters.brands.join(','));
+                if (filters.minRating > 0) queryParams.set('rating', filters.minRating);
+
+                // Handle category from either URL path or query param
+                const categorySlug = categorySlugFromPath || currentParams.get('category');
+                if (categorySlug) {
+                    queryParams.set('category_slug', categorySlug);
+                }
+                
+                // Handle brand from query param
+                const brandSlug = currentParams.get('brand');
+                if(brandSlug){
+                    queryParams.set('brand_slug', brandSlug);
+                }
+
+                // Section-specific flags
+                if (section === 'featured') {
+                    queryParams.set('is_featured', 'true');
+                } else if (section === 'flash_deal') {
+                    queryParams.set('on_sale', 'true');
+                }
+            }
 
             try {
-                const data = await apiService(`/products?${params.toString()}`);
-                const transformed = (data.products || []).map(transformProductData);
+                const finalUrl = `${endpoint}?${queryParams.toString()}`;
+                const data = await apiService(finalUrl);
+                
+                const productList = data.products || (data.data && data.data.products) || [];
+                const transformed = productList.map(transformProductData);
                 setProducts(transformed);
-                setPagination(prev => ({
-                    ...prev,
-                    totalPages: data.last_page || Math.ceil((data.total || transformed.length) / 10) || 1
-                }));
+
+                const paginationData = data.pagination || (data.data && data.data.pagination);
+                if (paginationData) {
+                    setPagination(prev => ({
+                        ...prev,
+                        totalPages: paginationData.totalPages || 1,
+                        totalItems: paginationData.totalItems || 0,
+                    }));
+                } else {
+                     setPagination({ 
+                        currentPage: data.current_page || 1, 
+                        totalPages: data.last_page || 1,
+                        totalItems: data.total || productList.length,
+                     });
+                }
+
             } catch (err) {
                 setError('Could not fetch products. Please try again later.');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProducts();
-    }, [filters, pagination.currentPage, location.search]);
+    }, [filters, pagination.currentPage, location.search, categorySlugFromPath]);
 
     return (
         <>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-800">Category Products</h2>
-                        <p className="text-sm text-gray-500">{products.length} items found</p>
+                        <h2 className="text-xl font-bold text-gray-800 capitalize">{pageTitle}</h2>
+                        <p className="text-sm text-gray-500">{pagination?.totalItems || products.length} items found</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative">
@@ -136,10 +199,11 @@ const ProductsPage = () => {
                     </main>
                 </div>
             </div>
-            <InfoCards /> {/* <-- ADD THE NEW COMPONENT HERE */}
+            <InfoCards />
             {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
         </>
     );
 };
 
 export default ProductsPage;
+

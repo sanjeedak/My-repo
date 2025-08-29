@@ -93,20 +93,7 @@ const FeaturedProducts = () => {
     const fetchFeatured = async () => {
       try {
         const data = await apiService('/products?is_featured=true&limit=12');
-
-        let items = [];
-        if (Array.isArray(data)) {
-          items = data;
-        } else if (Array.isArray(data.products)) {
-          items = data.products;
-        } else if (Array.isArray(data.data)) {
-          items = data.data;
-        } else if (data.product) {
-          items = [data.product];
-        } else if (data) {
-          items = [data];
-        }
-
+        const items = data.products || data.data?.products || [];
         setFeaturedProducts(items.map(transformProductData));
       } catch (error) {
         console.error("Failed to load featured products:", error);
@@ -114,13 +101,12 @@ const FeaturedProducts = () => {
         setLoading(false);
       }
     };
-
     fetchFeatured();
   }, []);
 
   return (
     <div className="my-12">
-      <SectionHeader title="Featured Products" linkTo="/products?featured=true" />
+      <SectionHeader title="Featured Products" linkTo="/products?section=featured" />
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
         {loading ? (
           Array.from({ length: 6 }).map((_, i) => (
@@ -164,15 +150,13 @@ const FlashDeal = () => {
 
   return (
     <div className="my-12">
+      <SectionHeader title="Flash Deals" linkTo="/products?section=flash_deal" />
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
-        {/* Left Countdown Section */}
         <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-lg p-6 flex flex-col justify-center text-center shadow-lg">
           <h3 className="text-3xl font-extrabold tracking-tight">Flash Deals</h3>
           <p className="my-3 text-blue-100">Hurry up! The offer is limited.</p>
           <CountdownTimer hours={48} />
         </div>
-        
-        {/* Right Product Carousel Section */}
         <div className="relative lg:col-span-3 group">
           <div ref={scrollRef} className="flex space-x-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide h-full py-2">
             {loading 
@@ -186,7 +170,6 @@ const FlashDeal = () => {
               ))
             }
           </div>
-          {/* Navigation Buttons */}
           <button onClick={() => handleScroll('left')} className="absolute top-1/2 left-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 -translate-x-4">
             <ChevronLeftIcon />
           </button>
@@ -204,9 +187,10 @@ const SellerCard = ({ seller: store }) => (
   <Link to={`/vendors/${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
     <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <img 
-        src={store.logo ? `${API_BASE_URL}/${store.logo}` : 'https://placehold.co/80x80?text=Store'} 
+        src={store.logo && store.logo.startsWith('http') ? store.logo : `${API_BASE_URL}/${store.logo}`} 
         alt={store.name}
         className="h-20 w-20 rounded-full object-cover border-4 border-white shadow-md"
+        onError={(e) => { e.target.src = 'https://placehold.co/80x80?text=Store'; }}
       />
     </div>
     <div className="p-4 text-center">
@@ -239,7 +223,7 @@ const TopSellers = () => {
 
   return (
     <div className="my-12">
-      <SectionHeader title="Top Sellers" linkTo="/vendors" />
+      <SectionHeader title="Top Sellers" linkTo="/products?section=top_sellers" />
       <div className="flex space-x-6 overflow-x-auto scrollbar-hide py-2">
         {loading 
           ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="w-64 h-48 bg-gray-200 rounded-lg animate-pulse"></div>)
@@ -251,3 +235,4 @@ const TopSellers = () => {
 };
 
 export { FlashDeal, FeaturedProducts, TopSellers };
+

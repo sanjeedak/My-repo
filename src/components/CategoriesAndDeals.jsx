@@ -32,7 +32,7 @@ export const CategoriesSection = () => {
             ? `${API_BASE_URL}/${cat.image}`
             : `https://placehold.co/80x80?text=${encodeURIComponent(cat.name)}`
         }));
-        setCategories(formatted); // ✅ removed slice(0,8), show all
+        setCategories(formatted);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       } finally {
@@ -98,7 +98,7 @@ export const FeaturedDealSection = () => {
   useEffect(() => {
     const fetchDeals = async () => {
       try {
-        const data = await apiService('/products?is_featured=true'); // ✅ removed limit
+        const data = await apiService('/products?is_featured=true');
         const enhanced = data.products.map(transformProductData);
         setDeals(enhanced);
       } catch (error) {
@@ -117,7 +117,7 @@ export const FeaturedDealSection = () => {
           <h2 className="text-xl font-bold text-gray-800">Featured Deal</h2>
           <p className="text-sm text-gray-500">See the latest deals and exciting new offers!</p>
         </div>
-        <Link to="/deals?featured=true" className="text-sm text-blue-600 hover:underline">
+        <Link to="/products?section=featured" className="text-sm text-blue-600 hover:underline">
           View All →
         </Link>
       </div>
@@ -144,3 +144,4 @@ export const FeaturedDealSection = () => {
     </div>
   );
 };
+

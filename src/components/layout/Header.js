@@ -9,7 +9,7 @@ import {
   PhoneIcon,
   IndiaFlagIcon,
 } from "../../assets/icons";
-import { LogIn, UserPlus } from "lucide-react"; // 👈 SignIn + SignUp icons
+import { LogIn, UserPlus } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
 const Header = () => {
@@ -36,7 +36,10 @@ const Header = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsDropdownOpen(false);
       }
-      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(e.target)
+      ) {
         setIsUserDropdownOpen(false);
       }
     };
@@ -46,7 +49,7 @@ const Header = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`sticky top-0 z-40 w-full transition-all duration-300 ${
         isScrolled ? "bg-white shadow-md" : "bg-white"
       }`}
     >
