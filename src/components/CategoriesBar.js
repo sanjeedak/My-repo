@@ -1,10 +1,22 @@
-// src/components/CategoriesBar.js
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { apiService } from "./layout/apiService";
 import SubcategoryList from "./SubcategoryList";
-import { categoryIcons } from "../assets/categories_icons";
 import { ChevronRightIcon } from "../assets/icons";
+import { API_BASE_URL } from "../api/config"; // Import your API base URL
+
+// Helper function to get the correct image URL
+const getImageUrl = (imagePath, categoryName) => {
+  if (imagePath && imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  if (imagePath) {
+    return `${API_BASE_URL}/${imagePath}`;
+  }
+  // UPDATED: Use the first word for a more descriptive placeholder
+  const firstWord = categoryName.split(' ')[0];
+  return `https://placehold.co/40x40/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord)}`;
+};
 
 const CategoriesBar = () => {
   const [categories, setCategories] = useState([]);
@@ -15,19 +27,12 @@ const CategoriesBar = () => {
   const [error, setError] = useState(null);
   const hoverTimeoutRef = useRef(null);
 
-  // Fetch top-level categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
         const response = await apiService("/categories");
-        console.log("Categories API response:", response);
-
-        const cats =
-          response?.data?.categories ||
-          response?.categories ||
-          response?.data ||
-          [];
+        const cats = response?.data?.categories || [];
         setCategories(cats);
         setError(null);
       } catch (err) {
@@ -40,23 +45,16 @@ const CategoriesBar = () => {
     fetchCategories();
   }, []);
 
-  // When hovering a category -> fetch its subcategories
-  const handleMouseEnter = async (category) => {
+  const handleMouseEnter = (category) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
 
     hoverTimeoutRef.current = setTimeout(async () => {
       setActiveCategory(category);
-      setSubcategories([]); // Reset subcategories
+      setSubcategories([]); 
       try {
         setSubLoading(true);
-        // FIX: The endpoint should be `/subcategories` with a query parameter.
         const res = await apiService(`/subcategories?category_id=${category.id}`);
-        console.log("Subcategories API response:", res);
-
-        // FIX: Consistently parse the API response.
         const subs =  res?.data?.subCategories || [];
-
-        console.log("Parsed subcategories:", subs);
         setSubcategories(subs);
       } catch (err) {
         console.error("Failed to fetch subcategories:", err);
@@ -89,7 +87,6 @@ const CategoriesBar = () => {
 
   return (
     <div className="flex bg-white border border-gray-200 rounded-lg shadow-sm h-[380px] w-full relative">
-      {/* Main Categories */}
       <ul className="divide-y divide-gray-200 w-full overflow-y-auto">
         {loading ? (
           Array.from({ length: 8 }).map((_, index) => (
@@ -110,13 +107,13 @@ const CategoriesBar = () => {
               <Link
                 to={`/category/${category.slug}`}
                 className="flex justify-between items-center w-full text-sm text-gray-700 text-left px-4 py-2.5 hover:bg-gray-50"
-                onFocus={() => handleMouseEnter(category)}
-                onBlur={handleMouseLeave}
               >
                 <span className="flex items-center gap-3">
-                  {categoryIcons[category.name] || (
-                    <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
-                  )}
+                  <img 
+                    src={getImageUrl(category.image, category.name)} 
+                    alt={category.name}
+                    className="w-5 h-5 rounded-full object-cover"
+                  />
                   <span className="font-medium">{category.name}</span>
                 </span>
                 <ChevronRightIcon />
@@ -156,3 +153,4 @@ const CategoriesBar = () => {
 };
 
 export default CategoriesBar;
+

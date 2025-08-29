@@ -14,6 +14,20 @@ import { Navigation } from 'swiper/modules';
 // Eye icon (lucide or heroicons)
 import { Eye } from 'lucide-react';
 
+// Helper function to get the correct image URL for categories
+const getCategoryImageUrl = (imagePath, categoryName) => {
+  if (imagePath && imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  if (imagePath) {
+    return `${API_BASE_URL}/${imagePath}`;
+  }
+  // UPDATED: Use the first word for a more descriptive placeholder
+  const firstWord = categoryName.split(' ')[0];
+  return `https://placehold.co/80x80/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord)}`;
+};
+
+
 // --- Categories Section ---
 export const CategoriesSection = () => {
   const [categories, setCategories] = useState([]);
@@ -28,9 +42,7 @@ export const CategoriesSection = () => {
           id: cat.id,
           name: cat.name,
           slug: cat.slug,
-          image: cat.image
-            ? `${API_BASE_URL}/${cat.image}`
-            : `https://placehold.co/80x80?text=${encodeURIComponent(cat.name)}`
+          image: getCategoryImageUrl(cat.image, cat.name)
         }));
         setCategories(formatted);
       } catch (error) {
@@ -50,7 +62,7 @@ export const CategoriesSection = () => {
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Categories</h2>
-        <Link to="/categories" className="text-sm text-blue-600 hover:underline">
+        <Link to="/products" className="text-sm text-blue-600 hover:underline">
           View All →
         </Link>
       </div>

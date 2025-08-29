@@ -1,8 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { apiService } from './layout/apiService';
-import { API_BASE_URL } from '../api/config';
+import { API_BASE_URL } from '../api/config'; // Import the shared base URL
+
+// Helper function to fix the malformed image URLs from the API
+const getImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return '/fallback-banner.jpg'; // Provide a default fallback image
+  }
+
+  // This logic handles cases where the API might return a full URL nested inside another URL string.
+  const malformedSegment = 'http://localhost:5000/uploads/banners/';
+  if (imagePath.includes(malformedSegment)) {
+    return imagePath.substring(imagePath.indexOf(malformedSegment));
+  }
+  
+  // If the URL is already a correct, absolute URL, return it as is.
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+
+  // Use the imported API_BASE_URL for relative paths
+  return `${API_BASE_URL}/${imagePath}`;
+};
+
 
 const HeroBanner = () => {
   const [banners, setBanners] = useState([]);
@@ -25,6 +47,12 @@ const HeroBanner = () => {
     };
     fetchBanners();
   }, []);
+  
+  const handleNext = useCallback(() => {
+    if (banners.length > 0) {
+      setCurrentBannerIndex(prevIndex => (prevIndex + 1) % banners.length);
+    }
+  }, [banners.length]);
 
   useEffect(() => {
     if (banners.length > 1) {
@@ -33,7 +61,7 @@ const HeroBanner = () => {
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [banners.length]);
+  }, [banners.length, currentBannerIndex, handleNext]); // Added handleNext to dependency array
 
   const currentBanner = banners[currentBannerIndex];
 
@@ -44,11 +72,9 @@ const HeroBanner = () => {
   };
 
   const handlePrev = () => {
-    setCurrentBannerIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length);
-  };
-
-  const handleNext = () => {
-    setCurrentBannerIndex(prevIndex => (prevIndex + 1) % banners.length);
+    if (banners.length > 0) {
+      setCurrentBannerIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-[380px] bg-gray-200 rounded-lg animate-pulse"></div>;
@@ -58,12 +84,12 @@ const HeroBanner = () => {
   return (
     <div className="relative h-[40vh] md:h-[380px] text-white overflow-hidden rounded-lg">
       {banners.map((banner, index) => {
-        const imageUrl = banner.image ? `${API_BASE_URL}/${banner.image}` : '/fallback-banner.jpg';
+        const imageUrl = getImageUrl(banner.image);
         return (
           <div
             key={banner.id}
             className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
-              index === currentBannerIndex ? 'opacity-100' : 'opacity-0'
+              index === currentBannerIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
             style={{ 
               backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${imageUrl})`,
@@ -121,3 +147,4 @@ const HeroBanner = () => {
 };
 
 export default HeroBanner;
+

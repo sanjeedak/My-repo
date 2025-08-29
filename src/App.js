@@ -20,6 +20,10 @@ import SignUpPage from './pages/SignUpPage';
 import CartPage from './pages/CartPage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
+import AboutUsPage from './pages/AboutUsPage'; // <-- About Us Page
+import ContactUsPage from './pages/ContactUsPage';
+import FAQPage from './pages/FAQPage';
+import BlogPage from './pages/BlogPage';
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
@@ -45,7 +49,13 @@ function App() {
               <Route path="cart" element={<CartPage />} />
               <Route path="checkout" element={<CheckoutPage />} />
               <Route path="products" element={<ProductsPage />} />
-              <Route path="category/:slug" element={<ProductsPage />} /> {/* Both routes point to the new page */}
+              <Route path="about" element={<AboutUsPage />} />
+              <Route path="contact" element={<ContactUsPage />} />
+              <Route path="faq" element={<FAQPage />} />
+              <Route path="blog" element={<BlogPage />} />
+
+
+              <Route path="category/:slug" element={<ProductsPage />} />
               <Route path="product/:slug" element={<ProductDetailsPage />} />
               <Route path="search" element={<ProductsPage />} />
 
