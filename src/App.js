@@ -21,6 +21,7 @@ import SignUpPage from './pages/SignUpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
+import ProfilePage from './pages/ProfilePage'; // <-- Import the new page
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
 import VendorForgotPasswordPage from './pages/VendorForgotPasswordPage';
@@ -30,7 +31,7 @@ import FAQPage from './pages/FAQPage';
 import BlogPage from './pages/BlogPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import TrackOrderPage from './pages/TrackOrderPage';
-import CancellationPolicyPage from './pages/CancellationPolicyPage'; // <-- Import the new page
+import CancellationPolicyPage from './pages/CancellationPolicyPage';
 import ReturnPolicyPage from './pages/ReturnPolicyPage';
 import TermsPage from './pages/TermPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
@@ -62,6 +63,7 @@ function App() {
                 <Route path="wishlist" element={<WishlistPage />} />
                 <Route path="checkout" element={<CheckoutPage />} />
                 <Route path="products" element={<ProductsPage />} />
+                <Route path="profile" element={<ProfilePage />} /> {/* <-- Add the new route */}
                 <Route path="about" element={<AboutUsPage />} />
                 <Route path="contact" element={<ContactUsPage />} />
                 <Route path="faq" element={<FAQPage />} />

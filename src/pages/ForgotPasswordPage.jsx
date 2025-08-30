@@ -52,7 +52,7 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
     try {
       // API call to send password reset link
-      await apiService('/auth/forgot-password', {
+      await apiService('/api/user-auth/forgot-password', {
         method: 'POST',
         body: { email },
       });

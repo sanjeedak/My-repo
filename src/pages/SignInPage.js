@@ -2,26 +2,42 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
-import { useAuth } from '../context/AuthContext'; // Import useAuth hook
-import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
+import { useAuth } from '../context/AuthContext';
+import InfoCards from '../components/layout/InfoCards';
+import { Eye, EyeOff } from 'lucide-react';
 
-const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => (
-  <div>
-    <label htmlFor={id} className="sr-only">{label}</label>
-    <input
-      id={id}
-      type={type}
-      name={name}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
-      aria-label={label}
-      {...props}
-    />
-    {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
-  </div>
-);
+const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordField = type === 'password';
+
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="sr-only">{label}</label>
+      <input
+        id={id}
+        type={isPasswordField && showPassword ? 'text' : type}
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300 pr-12"
+        aria-label={label}
+        {...props}
+      />
+      {isPasswordField && (
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white"
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
+      )}
+      {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
+    </div>
+  );
+};
 
 const RadioButton = ({ id, label, checked, onChange, value }) => (
   <label className="flex items-center text-white cursor-pointer">
@@ -39,9 +55,8 @@ const RadioButton = ({ id, label, checked, onChange, value }) => (
 
 const SignInPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // Get login function from context
+  const { login } = useAuth();
 
-  // RESTORED: All state definitions are now present
   const [useEmail, setUseEmail] = useState(true);
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState('');
@@ -52,7 +67,6 @@ const SignInPage = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // RESTORED: All helper functions are now present
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: sanitizeInput(value) }));
@@ -84,14 +98,14 @@ const SignInPage = () => {
   };
 
   const handleSendOTP = async () => {
-    const newErrors = validateForm();
-    if (newErrors.emailPhone) {
-      setErrors({ emailPhone: newErrors.emailPhone });
+    const emailPhoneError = validateEmailPhone(formData.emailPhone, false);
+    if (emailPhoneError) {
+      setErrors({ emailPhone: emailPhoneError });
       return;
     }
     setIsLoading(true);
     try {
-      await apiService('/auth/send-otp', {
+      await apiService('/api/user-auth/login', {
         method: 'POST',
         body: { phone: formData.emailPhone },
       });
@@ -112,19 +126,21 @@ const SignInPage = () => {
       return;
     }
     setIsLoading(true);
+    setErrors({});
     try {
       const payload = useEmail
         ? { email: formData.emailPhone, password: formData.password }
         : { phone: formData.emailPhone, otp };
-      const response = await apiService('/auth/login', {
+
+      // Updated API endpoint
+      const response = await apiService('/api/user-auth/login', {
         method: 'POST',
         body: payload,
       });
       
-      // UPDATE: Call the login function from AuthContext
       if (response.success && response.data.user) {
-        login(response.data.user); // This updates the global state
-        navigate('/'); // Navigate to home page on success
+        login(response.data.user, response.data.token);
+        navigate('/');
       } else {
         throw new Error(response.message || 'Login failed.');
       }
@@ -139,7 +155,7 @@ const SignInPage = () => {
     if (formData.emailPhone || formData.password || otp) {
       if (!window.confirm('Are you sure you want to close? Unsaved changes will be lost.')) return;
     }
-    navigate(-1); // Go back to the previous page
+    navigate(-1);
   };
 
   return (

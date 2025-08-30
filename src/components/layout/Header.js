@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   SearchIcon,
   WishlistIcon,
@@ -9,9 +9,10 @@ import {
   PhoneIcon,
   IndiaFlagIcon,
 } from "../../assets/icons";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, LogOut, UserPlus } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/AuthContext";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -19,9 +20,16 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const { cartItems } = useCart();
   const { wishlistItems } = useWishlist();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  }
 
   // Handle scroll effect
   useEffect(() => {
@@ -97,7 +105,7 @@ const Header = () => {
             )}
           </Link>
 
-          {/* User Dropdown (Sign In / Sign Up) */}
+          {/* User Dropdown */}
           <div className="relative" ref={userDropdownRef}>
             <button
               onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
@@ -107,22 +115,52 @@ const Header = () => {
             </button>
 
             {isUserDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg z-50">
-                <Link
-                  to="/signin"
-                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                >
-                  <LogIn className="h-4 w-4 text-gray-600" /> Sign In
-                </Link>
-                <Link
-                  to="/signup"
-                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                >
-                  <UserPlus className="h-4 w-4 text-gray-600" /> Sign Up
-                </Link>
+              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
+                {user ? (
+                  <>
+                    <div className="px-4 py-2 border-b">
+                      <p className="text-sm font-semibold truncate">{`${user.first_name} ${user.last_name}`}</p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      <UserIcon className="h-4 w-4 text-gray-600" /> My Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsUserDropdownOpen(false);
+                      }}
+                      className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <LogOut className="h-4 w-4 text-gray-600" /> Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/signin"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <LogIn className="h-4 w-4 text-gray-600" /> Sign In
+                    </Link>
+                    <Link
+                      to="/signup"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <UserPlus className="h-4 w-4 text-gray-600" /> Sign Up
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>
+
 
           {/* Cart */}
           <Link

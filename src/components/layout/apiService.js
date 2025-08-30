@@ -2,6 +2,7 @@ import { API_BASE_URL } from '../../api/config';
 
 export const apiService = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
+  const token = localStorage.getItem('token');
 
   const defaultOptions = {
     headers: {
@@ -18,6 +19,11 @@ export const apiService = async (endpoint, options = {}) => {
       ...options.headers,
     },
   };
+
+  if (token && !endpoint.includes('/signup') && !endpoint.includes('/login')) {
+    mergedOptions.headers['Authorization'] = `Bearer ${token}`;
+  }
+
 
   if (mergedOptions.body) {
     mergedOptions.body = JSON.stringify(mergedOptions.body);

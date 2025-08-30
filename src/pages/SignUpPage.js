@@ -3,24 +3,40 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
 import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
+import { Eye, EyeOff } from 'lucide-react'; // Import Eye icons from lucide-react
 
-const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => (
-  <div>
-    <label htmlFor={id} className="sr-only">{label}</label>
-    <input
-      id={id}
-      type={type}
-      name={name}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
-      aria-label={label}
-      {...props}
-    />
-    {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
-  </div>
-);
+const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordField = type === 'password';
+
+  return (
+    <div className="relative">
+      <label htmlFor={id} className="sr-only">{label}</label>
+      <input
+        id={id}
+        type={isPasswordField && showPassword ? 'text' : type}
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300 pr-12" // Added pr-12 for icon space
+        aria-label={label}
+        {...props}
+      />
+      {isPasswordField && (
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white"
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
+      )}
+      {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
+    </div>
+  );
+};
 
 const RadioButton = ({ id, label, checked, onChange, value }) => (
   <label className="flex items-center text-white cursor-pointer">
@@ -51,11 +67,13 @@ const SignUpPage = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [apiMessage, setApiMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: sanitizeInput(value) }));
-    setErrors((prev) => ({ ...prev, [name]: '', submit: '', terms: '' }));
+    setErrors((prev) => ({ ...prev, [name]: '', submit: '' }));
+    setApiMessage('');
   };
 
   const handleRadioChange = (isEmail) => {
@@ -85,8 +103,9 @@ const SignUpPage = () => {
 
     if (useEmail) {
       if (!formData.password) newErrors.password = 'Password is required';
-      else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,20}$/.test(formData.password))
-        newErrors.password = 'Password must be 6-20 characters with at least one letter and one number';
+      // UPDATED: Changed regex to allow special characters and updated the error message
+      else if (!/^(?=.*[A-Za-z])(?=.*\d).{6,20}$/.test(formData.password))
+        newErrors.password = 'Password must be 6-20 characters with at least one letter and one number.';
       if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
       else if (formData.password !== formData.confirmPassword)
         newErrors.confirmPassword = 'Passwords do not match';
@@ -110,7 +129,7 @@ const SignUpPage = () => {
 
     setIsLoading(true);
     try {
-      await apiService('/auth/send-otp', {
+      await apiService('/auth/send-otp', { // Assuming this is the correct endpoint for sending OTP
         method: 'POST',
         body: { phone: formData.emailPhone },
       });
@@ -132,26 +151,38 @@ const SignUpPage = () => {
     }
 
     setIsLoading(true);
+    setApiMessage('');
     try {
+      const basePayload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+      };
+
       const payload = useEmail
         ? {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
+            ...basePayload,
             email: formData.emailPhone,
             password: formData.password,
           }
         : {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
+            ...basePayload,
             phone: formData.emailPhone,
             otp,
           };
-      const response = await apiService('/auth/signup', {
+
+      const response = await apiService('/user-auth/signup', {
         method: 'POST',
         body: payload,
       });
-      console.log('Signup successful:', response.data);
-      navigate('/signin');
+
+      if (response.success) {
+        setApiMessage(response.message);
+        setTimeout(() => {
+          navigate('/signin');
+        }, 2000);
+      } else {
+        throw new Error(response.message || 'Signup failed. Please try again.');
+      }
     } catch (error) {
       setErrors({ submit: error.message || 'Signup failed. Please try again.' });
     } finally {
@@ -314,7 +345,8 @@ const SignUpPage = () => {
                 </span>
               </label>
             </div>
-
+            
+            {apiMessage && <p className="text-green-400 text-xs text-center">{apiMessage}</p>}
             {errors.terms && <p className="text-red-400 text-xs text-center">{errors.terms}</p>}
             {errors.submit && <p className="text-red-400 text-xs text-center">{errors.submit}</p>}
 
