@@ -13,7 +13,7 @@ import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import BrandPage from './pages/BrandPage';
 import OffersPage from './pages/OffersPage';
-import ProductsPage from './pages/ProductsPage'; // <-- This is the main page
+import ProductsPage from './pages/ProductsPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
@@ -21,11 +21,13 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CartPage from './pages/CartPage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
-import VendorForgotPasswordPage from './pages/VendorForgotPasswordPage'; // Import the new page
-import AboutUsPage from './pages/AboutUsPage'; // <-- About Us Page
+import VendorForgotPasswordPage from './pages/VendorForgotPasswordPage';
+import AboutUsPage from './pages/AboutUsPage';
 import ContactUsPage from './pages/ContactUsPage';
 import FAQPage from './pages/FAQPage';
 import BlogPage from './pages/BlogPage';
+import OrderSuccessPage from './pages/OrderSuccessPage'; // Make sure this is imported
+import TrackOrderPage from './pages/TrackOrderPage';
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
@@ -55,7 +57,8 @@ function App() {
               <Route path="contact" element={<ContactUsPage />} />
               <Route path="faq" element={<FAQPage />} />
               <Route path="blog" element={<BlogPage />} />
-
+              <Route path="track-order" element={<TrackOrderPage />} />
+              <Route path="order-success" element={<OrderSuccessPage />} /> {/* <-- This route was missing */}
 
               <Route path="category/:slug" element={<ProductsPage />} />
               <Route path="product/:slug" element={<ProductDetailsPage />} />
@@ -67,7 +70,7 @@ function App() {
               <Route path="forgot-password" element={<ForgotPasswordPage />} />
               <Route path="vendor/signin" element={<VendorSignInPage />} />
               <Route path="vendor/signup" element={<VendorSignUpPage />} />
-              <Route path="vendor/forgot-password" element={<VendorForgotPasswordPage />} /> {/* Add this route */}
+              <Route path="vendor/forgot-password" element={<VendorForgotPasswordPage />} />
             </Route>
           </Routes>
         </Router>

@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import MapSection from '../components/MapSection';
+import { validateEmailPhone } from '../utils/sanatize';
 
 const CheckoutPage = () => {
   const { cartItems, clearCart } = useCart();
   const navigate = useNavigate();
 
   const [shippingForm, setShippingForm] = useState({
-    name: '', phone: '', address: '', city: '', pincode: ''
+    name: '', phone: '', address: '', city: '', state: '', country: '', pincode: ''
   });
   
   const [billingForm, setBillingForm] = useState({
-    name: '', phone: '', address: '', city: '', pincode: ''
+    name: '', phone: '', address: '', city: '', state: '', country: '', pincode: ''
   });
 
   const [shippingLocation, setShippingLocation] = useState(null);
@@ -20,6 +21,7 @@ const CheckoutPage = () => {
 
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [errors, setErrors] = useState({});
+  const [paymentMethod, setPaymentMethod] = useState('cod');
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -34,14 +36,16 @@ const CheckoutPage = () => {
     const newErrors = {};
     
     if (!shippingForm.name.trim()) newErrors.shipping_name = 'Full name is required.';
-    if (!/^\d{10}$/.test(shippingForm.phone)) newErrors.shipping_phone = 'Phone number must be 10 digits.';
+    const shippingPhoneError = validateEmailPhone(shippingForm.phone, false);
+    if (shippingPhoneError) newErrors.shipping_phone = shippingPhoneError;
     if (!shippingForm.address.trim()) newErrors.shipping_address = 'Address is required.';
     if (!shippingForm.city.trim()) newErrors.shipping_city = 'City is required.';
     if (!/^\d{6}$/.test(shippingForm.pincode)) newErrors.shipping_pincode = 'Pincode must be 6 digits.';
 
     if (!sameAsShipping) {
       if (!billingForm.name.trim()) newErrors.billing_name = 'Full name is required.';
-      if (!/^\d{10}$/.test(billingForm.phone)) newErrors.billing_phone = 'Phone number must be 10 digits.';
+      const billingPhoneError = validateEmailPhone(billingForm.phone, false);
+      if (billingPhoneError) newErrors.billing_phone = billingPhoneError;
       if (!billingForm.address.trim()) newErrors.billing_address = 'Address is required.';
       if (!billingForm.city.trim()) newErrors.billing_city = 'City is required.';
       if (!/^\d{6}$/.test(billingForm.pincode)) newErrors.billing_pincode = 'Pincode must be 6 digits.';
@@ -61,15 +65,30 @@ const CheckoutPage = () => {
     setBillingForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleShippingAddressSelect = (address) => {
+    setShippingForm(prev => ({ ...prev, ...address }));
+  };
+
+  const handleBillingAddressSelect = (address) => {
+    setBillingForm(prev => ({ ...prev, ...address }));
+  };
+
   const handlePlaceOrder = (e) => {
     e.preventDefault();
     if (validateForm()) {
+      const mockOrderId = `SHPZ${Date.now().toString().slice(-6)}`;
+      
       console.log("Order Placed:", {
+        orderId: mockOrderId,
         shippingDetails: { ...shippingForm, location: shippingLocation },
         billingDetails: sameAsShipping ? { ...shippingForm, location: shippingLocation } : { ...billingForm, location: billingLocation },
+        paymentMethod,
+        items: cartItems,
+        total,
       });
+
       clearCart();
-      navigate('/order-success');
+      navigate('/order-success', { state: { orderId: mockOrderId } });
     }
   };
 
@@ -113,7 +132,7 @@ const CheckoutPage = () => {
                 </div>
               </div>
               <h3 className="text-xl font-semibold pt-4">Confirm Your Shipping Location</h3>
-              <MapSection key="shipping-map" onLocationChange={setShippingLocation} />
+              <MapSection key="shipping-map" onLocationChange={setShippingLocation} onAddressSelect={handleShippingAddressSelect} />
             </div>
           </div>
           
@@ -143,14 +162,54 @@ const CheckoutPage = () => {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold pt-4">Confirm Your Billing Location</h3>
-                <MapSection key="billing-map" onLocationChange={setBillingLocation} />
+                <MapSection key="billing-map" onLocationChange={setBillingLocation} onAddressSelect={handleBillingAddressSelect} />
               </div>
             )}
+          </div>
+
+          {/* Payment Method */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Payment Method</h2>
+            <div className="space-y-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="cod"
+                  checked={paymentMethod === 'cod'}
+                  onChange={() => setPaymentMethod('cod')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="ml-2">Cash on Delivery</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="card"
+                  checked={paymentMethod === 'card'}
+                  onChange={() => setPaymentMethod('card')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="ml-2">Credit/Debit Card</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="upi"
+                  checked={paymentMethod === 'upi'}
+                  onChange={() => setPaymentMethod('upi')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="ml-2">UPI</span>
+              </label>
+            </div>
           </div>
           
           <div className="pt-4">
              <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                Proceed to Checkout
+                Place Order
               </button>
           </div>
         </form>

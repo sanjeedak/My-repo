@@ -1,6 +1,5 @@
 // src/pages/OfferPage.jsx
 import React, { useEffect, useState } from 'react';
-import { StarIcon } from '../assets/icons';
 import { apiService } from '../components/layout/apiService'; // Import the service
 
 const OfferPage = () => {
