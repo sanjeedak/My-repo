@@ -11,6 +11,7 @@ import {
 } from "../../assets/icons";
 import { LogIn, UserPlus } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -20,6 +21,7 @@ const Header = () => {
   const userDropdownRef = useRef(null);
 
   const { cartItems } = useCart();
+  const { wishlistItems } = useWishlist();
 
   // Handle scroll effect
   useEffect(() => {
@@ -85,9 +87,14 @@ const Header = () => {
           {/* Wishlist */}
           <Link
             to="/wishlist"
-            className="p-2 rounded-full hover:bg-gray-100 transition"
+            className="relative p-2 rounded-full hover:bg-gray-100 transition"
           >
             <WishlistIcon className="h-6 w-6" />
+            {wishlistItems && wishlistItems.length > 0 && (
+              <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
+                {wishlistItems.length}
+              </span>
+            )}
           </Link>
 
           {/* User Dropdown (Sign In / Sign Up) */}

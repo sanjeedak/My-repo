@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../api/config";
-import { Eye as EyeIcon } from "lucide-react"; // Renamed for clarity
+import { Eye as EyeIcon, Heart } from "lucide-react"; // Renamed for clarity
+import { useWishlist } from "../../context/WishlistContext";
 
 const ProductCard = ({ product, onQuickView }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
+  const { addToWishlist, isInWishlist } = useWishlist();
 
   const handleNavigateDetails = () => {
     if (product?.slug) {
@@ -19,6 +21,13 @@ const ProductCard = ({ product, onQuickView }) => {
     e.stopPropagation(); // Prevent navigating to the details page
     if (onQuickView) {
       onQuickView(product);
+    }
+  };
+
+  const handleAddToWishlist = (e) => {
+    e.stopPropagation();
+    if (!isInWishlist(product.id)) {
+      addToWishlist(product);
     }
   };
 
@@ -44,8 +53,8 @@ const ProductCard = ({ product, onQuickView }) => {
         <div
           className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
         >
-          <button 
-            onClick={handleQuickView} 
+          <button
+            onClick={handleQuickView}
             className="p-2 rounded-full bg-white text-gray-800 hover:bg-gray-200"
             aria-label="Quick view"
           >
@@ -60,7 +69,12 @@ const ProductCard = ({ product, onQuickView }) => {
         >
           {product.name}
         </h3>
-        <p className="text-brand-blue font-bold">₹{product.price}</p>
+        <div className="flex justify-between items-center">
+          <p className="text-brand-blue font-bold">₹{product.price}</p>
+          <button onClick={handleAddToWishlist} className="p-2 rounded-full hover:bg-gray-100">
+            <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? 'text-red-500 fill-current' : 'text-gray-500'}`} />
+          </button>
+        </div>
       </div>
     </div>
   );

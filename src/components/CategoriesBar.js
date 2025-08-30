@@ -21,9 +21,7 @@ const getImageUrl = (imagePath, categoryName) => {
 const CategoriesBar = () => {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [subLoading, setSubLoading] = useState(false);
   const [error, setError] = useState(null);
   const hoverTimeoutRef = useRef(null);
 
@@ -32,6 +30,7 @@ const CategoriesBar = () => {
       try {
         setLoading(true);
         const response = await apiService("/categories");
+        // UPDATED: Access nested categories array
         const cats = response?.data?.categories || [];
         setCategories(cats);
         setError(null);
@@ -48,20 +47,8 @@ const CategoriesBar = () => {
   const handleMouseEnter = (category) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
 
-    hoverTimeoutRef.current = setTimeout(async () => {
+    hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(category);
-      setSubcategories([]); 
-      try {
-        setSubLoading(true);
-        const res = await apiService(`/subcategories?category_id=${category.id}`);
-        const subs =  res?.data?.subCategories || [];
-        setSubcategories(subs);
-      } catch (err) {
-        console.error("Failed to fetch subcategories:", err);
-        setSubcategories([]);
-      } finally {
-        setSubLoading(false);
-      }
     }, 200);
   };
 
@@ -69,7 +56,6 @@ const CategoriesBar = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
-      setSubcategories([]);
     }, 300);
   };
 
@@ -109,8 +95,8 @@ const CategoriesBar = () => {
                 className="flex justify-between items-center w-full text-sm text-gray-700 text-left px-4 py-2.5 hover:bg-gray-50"
               >
                 <span className="flex items-center gap-3">
-                  <img 
-                    src={getImageUrl(category.image, category.name)} 
+                  <img
+                    src={getImageUrl(category.image, category.name)}
                     alt={category.name}
                     className="w-5 h-5 rounded-full object-cover"
                   />
@@ -134,14 +120,12 @@ const CategoriesBar = () => {
         `}
       >
         {activeCategory && (
-          subLoading ? (
-            <div className="p-4 text-gray-500">Loading...</div>
-          ) : subcategories.length > 0 ? (
+          activeCategory.subcategories && activeCategory.subcategories.length > 0 ? (
             <SubcategoryList
               key={activeCategory.id}
               categorySlug={activeCategory.slug}
               categoryName={activeCategory.name}
-              subcategories={subcategories}
+              subcategories={activeCategory.subcategories}
             />
           ) : (
             <div className="p-4 text-gray-500">No subcategories</div>
@@ -153,4 +137,3 @@ const CategoriesBar = () => {
 };
 
 export default CategoriesBar;
-

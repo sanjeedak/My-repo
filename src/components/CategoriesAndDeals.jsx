@@ -38,6 +38,7 @@ export const CategoriesSection = () => {
     const fetchCategories = async () => {
       try {
         const data = await apiService('/categories');
+        // UPDATED: Access nested categories array
         const formatted = data.data.categories.map((cat) => ({
           id: cat.id,
           name: cat.name,
@@ -156,4 +157,3 @@ export const FeaturedDealSection = () => {
     </div>
   );
 };
-
