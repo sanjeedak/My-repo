@@ -20,7 +20,7 @@ const ContactUsPage = () => {
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Email</h3>
                 <p className="text-gray-600">Please reach out to us through the following email:</p>
-                <a href="mailto:support@company.com" className="text-blue-600 hover:underline">support@company.com</a>
+                <a href="mailto:support@company.com" className="text-blue-600 hover:underline">support@shopzeo.in</a>
               </div>
             </div>
 
@@ -41,7 +41,7 @@ const ContactUsPage = () => {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Address</h3>
-                <p className="text-gray-600">123 Business Street, City, State, Country</p>
+                <p className="text-gray-600">2447,16th B Main, Kodihalli, HAL 2nd Stage, Bangalore-560008, India</p>
               </div>
             </div>
           </div>

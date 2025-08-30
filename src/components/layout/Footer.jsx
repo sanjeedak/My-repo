@@ -59,7 +59,6 @@ const Footer = () => {
                                 <li><Link to="/cancellation" className={linkHoverClass}>Cancellation Policy</Link></li>
                             </ul>
                         </div>
-
                         {/* Newsletter */}
                         <div>
                             <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4">Newsletter</h3>

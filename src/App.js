@@ -26,8 +26,13 @@ import AboutUsPage from './pages/AboutUsPage';
 import ContactUsPage from './pages/ContactUsPage';
 import FAQPage from './pages/FAQPage';
 import BlogPage from './pages/BlogPage';
-import OrderSuccessPage from './pages/OrderSuccessPage'; // Make sure this is imported
+import OrderSuccessPage from './pages/OrderSuccessPage';
 import TrackOrderPage from './pages/TrackOrderPage';
+import CancellationPolicyPage from './pages/CancellationPolicyPage'; // <-- Import the new page
+import ReturnPolicyPage from './pages/ReturnPolicyPage';
+import TermsPage from './pages/TermPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import RefundPolicyPage from './pages/RefundPolicyPage';
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
@@ -57,9 +62,13 @@ function App() {
               <Route path="contact" element={<ContactUsPage />} />
               <Route path="faq" element={<FAQPage />} />
               <Route path="blog" element={<BlogPage />} />
+              <Route path="order-success" element={<OrderSuccessPage />} />
               <Route path="track-order" element={<TrackOrderPage />} />
-              <Route path="order-success" element={<OrderSuccessPage />} /> {/* <-- This route was missing */}
-
+              <Route path="cancellation" element={<CancellationPolicyPage />} />
+             <Route path="return" element={<ReturnPolicyPage />} />
+              <Route path="privacy" element={<PrivacyPolicyPage />} />
+              <Route path="terms" element={<TermsPage />} />
+              <Route path="refund" element={<RefundPolicyPage />} />
               <Route path="category/:slug" element={<ProductsPage />} />
               <Route path="product/:slug" element={<ProductDetailsPage />} />
               <Route path="search" element={<ProductsPage />} />
