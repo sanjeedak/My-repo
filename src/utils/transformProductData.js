@@ -14,20 +14,46 @@ export const transformProductData = (apiProduct) => {
     discountPercent = Math.round(((mrp - sellingPrice) / mrp) * 100);
   }
 
-  // FIX: Generate a slug from the product name if one doesn't exist, using product ID as a final fallback.
+  // Generate a slug from the product name if one doesn't exist, using product ID as a final fallback.
   const slug = apiProduct.slug || (apiProduct.name ? apiProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : apiProduct.id);
+
+  // Collect all images from image_1, image_2, etc. and productMedia
+  const images = [];
+  for (let i = 1; i <= 10; i++) {
+    if (apiProduct[`image_${i}`]) {
+      images.push(apiProduct[`image_${i}`]);
+    }
+  }
+  if (apiProduct.productMedia && Array.isArray(apiProduct.productMedia)) {
+    apiProduct.productMedia.forEach(media => {
+      if (media.media_type === 'image' && media.media_url && !images.includes(media.media_url)) {
+        images.push(media.media_url);
+      }
+    });
+  }
+
 
   return {
     id: apiProduct.id,
     name: apiProduct.name,
-    slug: slug, // Use the new slug
+    slug: slug,
     price: sellingPrice,
     originalPrice: mrp,
     discount: discountPercent,
     image: apiProduct.image_1,
+    images: images,
     rating: parseFloat(apiProduct.rating),
     totalReviews: apiProduct.total_reviews || 0,
     quantity: apiProduct.quantity,
     description: apiProduct.description,
+	  store: apiProduct.store,
+    category: apiProduct.category,
+    specifications: [
+      { name: 'Product Code', value: apiProduct.product_code },
+      { name: 'SKU', value: apiProduct.sku_id },
+      { name: 'Color', value: apiProduct.colour },
+      { name: 'Size', value: apiProduct.size },
+      { name: 'Return Policy', value: apiProduct.return_exchange_condition },
+    ].filter(spec => spec.value)
   };
 };

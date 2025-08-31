@@ -4,6 +4,9 @@ import { apiService } from "../components/layout/apiService";
 import { transformProductData } from "../utils/transformProductData";
 import { useCart } from "../context/CartContext";
 import { API_BASE_URL } from "../api/config";
+import ProductImageGallery from "../components/products/ProductImageGallery";
+import SellerInfo from "../components/products/SellerInfo";
+import ProductTabs from "../components/products/ProductTab";
 
 const ProductDetailsPage = () => {
     const { slug } = useParams();
@@ -25,13 +28,13 @@ const ProductDetailsPage = () => {
             }
 
             try {
-                // FIX: Fetch all products and find the one that matches the slug
+                // Fetch all products and find the one that matches the slug
                 const data = await apiService('/products');
-                
+
                 if (data && data.products) {
-                    const transformedProducts = (data.products).map(transformProductData); // FIX: Transform the entire array
+                    const transformedProducts = (data.products).map(transformProductData);
                     const foundProduct = transformedProducts.find(p => p.slug === slug);
-                    
+
                     if (foundProduct) {
                         setProduct(foundProduct);
                     } else {
@@ -64,8 +67,8 @@ const ProductDetailsPage = () => {
             navigate("/checkout");
         }
     };
-    
-    // Fallback for image URLs if the API provides a relative path
+
+    // Fallback for image URLs
     const getImageUrl = (img) => {
         if (!img) return "https://placehold.co/400x400?text=No+Image";
         return img.startsWith("http") ? img : `${API_BASE_URL}/${img}`;
@@ -79,17 +82,17 @@ const ProductDetailsPage = () => {
         return <div className="text-center py-10 text-red-500">{error}</div>;
     }
 
+    if (!product) {
+        return <div className="text-center py-10">Product not found.</div>;
+    }
+    
+    const imageUrls = product.images.map(getImageUrl);
+
     return (
         <div className="container mx-auto px-4 py-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Product Image */}
-                <div className="flex justify-center items-center bg-white border rounded-lg p-6 shadow">
-                    <img
-                        src={getImageUrl(product.image)}
-                        alt={product.name}
-                        className="max-h-96 object-contain"
-                    />
-                </div>
+                {/* Product Image Gallery */}
+                <ProductImageGallery images={imageUrls} productName={product.name} />
 
                 {/* Product Info */}
                 <div>
@@ -102,21 +105,30 @@ const ProductDetailsPage = () => {
                     </p>
 
                     {/* Buttons */}
-                    <div className="mt-3 flex gap-4">
+                    <div className="mt-6 flex gap-4">
                         <button
                             onClick={handleAddToCart}
-                            className="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-600"
+                            className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 font-semibold"
                         >
                             Add to Cart
                         </button>
                         <button
                             onClick={handleBuyNow}
-                            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold"
                         >
                             Buy Now
                         </button>
                     </div>
+
+                    <SellerInfo seller={product.store} />
                 </div>
+            </div>
+            <div className="mt-10">
+                <ProductTabs
+                    description={product.description}
+                    specifications={product.specifications}
+                    reviews={[]} // You can pass reviews here when available from the API
+                />
             </div>
         </div>
     );
