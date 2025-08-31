@@ -1,56 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
-import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
-import { Eye, EyeOff } from 'lucide-react'; // Import Eye icons from lucide-react
-
-const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPasswordField = type === 'password';
-
-  return (
-    <div className="relative">
-      <label htmlFor={id} className="sr-only">{label}</label>
-      <input
-        id={id}
-        type={isPasswordField && showPassword ? 'text' : type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300 pr-12" // Added pr-12 for icon space
-        aria-label={label}
-        {...props}
-      />
-      {isPasswordField && (
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white"
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
-        >
-          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-        </button>
-      )}
-      {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
-    </div>
-  );
-};
-
-const RadioButton = ({ id, label, checked, onChange, value }) => (
-  <label className="flex items-center text-white cursor-pointer">
-    <input
-      id={id}
-      type="radio"
-      checked={checked}
-      onChange={onChange}
-      className="mr-2 h-5 w-5 appearance-none rounded-full border-2 border-gray-400 checked:bg-purple-500 checked:border-transparent transition-colors duration-300"
-      aria-label={label}
-    />
-    <span>{value}</span>
-  </label>
-);
+import InfoCards from '../components/layout/InfoCards';
+import InputField from '../components/forms/InputField';
+import RadioButton from '../components/forms/RadioButton';
+import { endpoints } from '../api/endpoints';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -103,7 +58,6 @@ const SignUpPage = () => {
 
     if (useEmail) {
       if (!formData.password) newErrors.password = 'Password is required';
-      // UPDATED: Changed regex to allow special characters and updated the error message
       else if (!/^(?=.*[A-Za-z])(?=.*\d).{6,20}$/.test(formData.password))
         newErrors.password = 'Password must be 6-20 characters with at least one letter and one number.';
       if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
@@ -129,7 +83,7 @@ const SignUpPage = () => {
 
     setIsLoading(true);
     try {
-      await apiService('/auth/send-otp', { // Assuming this is the correct endpoint for sending OTP
+      await apiService(endpoints.sendOtp, {
         method: 'POST',
         body: { phone: formData.emailPhone },
       });
@@ -170,7 +124,7 @@ const SignUpPage = () => {
             otp,
           };
 
-      const response = await apiService('/user-auth/signup', {
+      const response = await apiService(endpoints.userSignup, {
         method: 'POST',
         body: payload,
       });
@@ -334,14 +288,14 @@ const SignUpPage = () => {
                 />
                 <span className="text-sm text-gray-300">
                   I accept{' '}
-                  <a
-                    href="/terms"
+                  <Link
+                    to="/terms"
                     className="underline font-semibold text-purple-300 hover:text-purple-100 transition-colors duration-300"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     Terms of Use
-                  </a>
+                  </Link>
                 </span>
               </label>
             </div>

@@ -1,10 +1,9 @@
-import React, { useState, useCallback, memo } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-
-const googleMapsApiKey = "AIzaSyBsmtx_w9SAGhpzRw7d4zGviSSqTkGUp_c"; 
+import React, { useState, useCallback, memo, useEffect } from 'react';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { useMap } from '../context/MapProvider';
 
 const LoadingSpinner = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', backgroundColor: '#f0f2f5' }}>
     <style>
       {`
         .map-spinner {
@@ -25,47 +24,54 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const MapSection = ({ onLocationChange, onAddressSelect }) => {
+const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocodingStart, onGeocodingEnd }) => {
+  const { isLoaded } = useMap();
   const containerStyle = {
     width: '100%',
     height: '256px',
     borderRadius: '0.5rem'
   };
 
-  const [markerPosition, setMarkerPosition] = useState({
-    lat: 17.3850,
-    lng: 78.4867
-  });
+  const [markerPosition, setMarkerPosition] = useState(initialCenter || { lat: 17.3850, lng: 78.4867 });
 
-  const getAddressFromLatLng = useCallback((lat, lng) => {
-    if (!window.google || !window.google.maps.Geocoder) {
+  useEffect(() => {
+    if (initialCenter) {
+        setMarkerPosition(initialCenter);
+    }
+  }, [initialCenter]);
+
+
+  const getAddressFromLatLng = useCallback(async (lat, lng) => {
+    if (!isLoaded || !window.google || !window.google.maps.Geocoder) {
       console.error("Google Maps API not loaded yet.");
       return;
     }
     
+    if (onGeocodingStart) onGeocodingStart();
     const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === 'OK') {
+    try {
+        const { results } = await geocoder.geocode({ location: { lat, lng } });
         if (results[0]) {
-          const addressComponents = results[0].address_components;
-          const getAddressComponent = (type) =>
-            addressComponents.find(c => c.types.includes(type))?.long_name || '';
+            const addressComponents = results[0].address_components;
+            const getAddressComponent = (type) =>
+              addressComponents.find(c => c.types.includes(type))?.long_name || '';
 
-          const city = getAddressComponent('locality');
-          const state = getAddressComponent('administrative_area_level_1');
-          const country = getAddressComponent('country');
-          const pincode = getAddressComponent('postal_code');
-          const address = results[0].formatted_address;
+            const city = getAddressComponent('locality');
+            const state = getAddressComponent('administrative_area_level_1');
+            const country = getAddressComponent('country');
+            const pincode = getAddressComponent('postal_code');
+            const address = results[0].formatted_address;
 
-          if (onAddressSelect) {
-            onAddressSelect({ address, city, state, country, pincode });
-          }
+            if (onAddressSelect) {
+              onAddressSelect({ address, city, state, country, pincode });
+            }
         }
-      } else {
-        console.error('Geocoder failed due to: ' + status);
-      }
-    });
-  }, [onAddressSelect]);
+    } catch (error) {
+        console.error('Geocoder failed due to: ' + error);
+    } finally {
+        if (onGeocodingEnd) onGeocodingEnd();
+    }
+  }, [isLoaded, onAddressSelect, onGeocodingStart, onGeocodingEnd]);
 
   const handleMapClick = useCallback((event) => {
     const newPosition = {
@@ -79,12 +85,11 @@ const MapSection = ({ onLocationChange, onAddressSelect }) => {
     getAddressFromLatLng(newPosition.lat, newPosition.lng);
   }, [onLocationChange, getAddressFromLatLng]);
 
+  if (!isLoaded) {
+    return <LoadingSpinner />;
+  }
+
   return (
-    <LoadScript
-      googleMapsApiKey={googleMapsApiKey}
-      libraries={["places", "geocoding"]}
-      loadingElement={<LoadingSpinner />}
-    >
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={markerPosition}
@@ -97,9 +102,8 @@ const MapSection = ({ onLocationChange, onAddressSelect }) => {
       >
         <Marker position={markerPosition} draggable={true} onDragEnd={handleMapClick} />
       </GoogleMap>
-    </LoadScript>
   );
 };
 
-// Wraping component in React.memo to prevent unnecessary re-renders
 export default memo(MapSection);
+

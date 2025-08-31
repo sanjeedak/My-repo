@@ -16,8 +16,10 @@ const CheckoutPage = () => {
     name: '', phone: '', address: '', city: '', state: '', country: '', pincode: ''
   });
 
-  const [shippingLocation, setShippingLocation] = useState(null);
-  const [billingLocation, setBillingLocation] = useState(null);
+  const [shippingLocation, setShippingLocation] = useState({ lat: 17.3850, lng: 78.4867 });
+  const [billingLocation, setBillingLocation] = useState({ lat: 17.3850, lng: 78.4867 });
+  const [isShippingGeocoding, setIsShippingGeocoding] = useState(false);
+  const [isBillingGeocoding, setIsBillingGeocoding] = useState(false);
 
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [errors, setErrors] = useState({});
@@ -25,12 +27,25 @@ const CheckoutPage = () => {
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
+  const handleSameAsShippingChange = (e) => {
+    const isChecked = e.target.checked;
+    setSameAsShipping(isChecked);
+    if (isChecked) {
+      setBillingForm(shippingForm);
+      setBillingLocation(shippingLocation);
+    } else {
+      // When unchecked, initialize the billing location with the current shipping location
+      // This prevents the map from resetting unexpectedly.
+      setBillingLocation(shippingLocation);
+    }
+  };
+  
+  // Syncs billing form if the shipping form changes AND the checkbox is ticked.
   useEffect(() => {
     if (sameAsShipping) {
       setBillingForm(shippingForm);
-      setBillingLocation(shippingLocation);
     }
-  }, [shippingForm, shippingLocation, sameAsShipping]);
+  }, [shippingForm, sameAsShipping]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -131,8 +146,17 @@ const CheckoutPage = () => {
                   {errors.shipping_pincode && <p className="text-red-500 text-xs">{errors.shipping_pincode}</p>}
                 </div>
               </div>
-              <h3 className="text-xl font-semibold pt-4">Confirm Your Shipping Location</h3>
-              <MapSection key="shipping-map" onLocationChange={setShippingLocation} onAddressSelect={handleShippingAddressSelect} />
+              <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">
+                Confirm Your Shipping Location
+                {isShippingGeocoding && <span className="text-sm text-gray-500">(Fetching address...)</span>}
+              </h3>
+              <MapSection 
+                key="shipping-map" 
+                onLocationChange={setShippingLocation} 
+                onAddressSelect={handleShippingAddressSelect}
+                onGeocodingStart={() => setIsShippingGeocoding(true)}
+                onGeocodingEnd={() => setIsShippingGeocoding(false)}
+              />
             </div>
           </div>
           
@@ -140,7 +164,7 @@ const CheckoutPage = () => {
           <div>
             <h2 className="text-2xl font-bold mb-4">Billing Address</h2>
             <div className="flex items-center mb-4">
-              <input type="checkbox" id="sameAsShipping" checked={sameAsShipping} onChange={() => setSameAsShipping(!sameAsShipping)} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+              <input type="checkbox" id="sameAsShipping" checked={sameAsShipping} onChange={handleSameAsShippingChange} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
               <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-gray-900">Billing address is the same as shipping address</label>
             </div>
             {!sameAsShipping && (
@@ -161,8 +185,18 @@ const CheckoutPage = () => {
                     {errors.billing_pincode && <p className="text-red-500 text-xs">{errors.billing_pincode}</p>}
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold pt-4">Confirm Your Billing Location</h3>
-                <MapSection key="billing-map" onLocationChange={setBillingLocation} onAddressSelect={handleBillingAddressSelect} />
+                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">
+                  Confirm Your Billing Location
+                  {isBillingGeocoding && <span className="text-sm text-gray-500">(Fetching address...)</span>}
+                </h3>
+                <MapSection 
+                  key="billing-map" 
+                  initialCenter={billingLocation || shippingLocation}
+                  onLocationChange={setBillingLocation} 
+                  onAddressSelect={handleBillingAddressSelect}
+                  onGeocodingStart={() => setIsBillingGeocoding(true)}
+                  onGeocodingEnd={() => setIsBillingGeocoding(false)}
+                />
               </div>
             )}
           </div>
@@ -242,3 +276,4 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+

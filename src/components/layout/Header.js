@@ -9,7 +9,7 @@ import {
   PhoneIcon,
   IndiaFlagIcon,
 } from "../../assets/icons";
-import { LogIn, LogOut, UserPlus } from "lucide-react";
+import { LogIn, LogOut, UserPlus, Search as SearchIconMobile } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
@@ -17,7 +17,9 @@ import { useAuth } from "../../context/AuthContext";
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -29,6 +31,14 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  }
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setIsMobileSearchOpen(false); // Close mobile search after searching
+    }
   }
 
   // Handle scroll effect
@@ -63,27 +73,30 @@ const Header = () => {
         isScrolled ? "bg-white shadow-md" : "bg-white"
       }`}
     >
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
         {/* --- Left: Logo --- */}
         <Link to="/" className="flex items-center">
           <img
             src="/img/logo_shopzeo.png"
             alt="Shopzeo Logo"
-            className="h-12 w-auto object-contain"
+            className="h-10 sm:h-12 w-auto object-contain"
           />
         </Link>
 
-        {/* --- Middle: Search Bar --- */}
-        <div className="hidden md:flex flex-1 mx-8">
-          <form className="w-full flex">
+        {/* --- Middle: Desktop Search Bar --- */}
+        <div className="hidden md:flex flex-1 mx-8 max-w-xl">
+          <form className="w-full flex" onSubmit={handleSearch}>
             <input
               type="text"
               placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none"
             />
             <button
               type="submit"
               className="bg-teal-500 px-6 text-white hover:bg-teal-600 rounded-r-md"
+              aria-label="Search"
             >
               <SearchIcon className="h-6 w-6" />
             </button>
@@ -91,7 +104,12 @@ const Header = () => {
         </div>
 
         {/* --- Right: Icons --- */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Mobile Search Icon */}
+          <button onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)} className="md:hidden p-2 rounded-full hover:bg-gray-100 transition">
+             <SearchIconMobile className="h-6 w-6 text-gray-700" />
+          </button>
+
           {/* Wishlist */}
           <Link
             to="/wishlist"
@@ -161,7 +179,6 @@ const Header = () => {
             )}
           </div>
 
-
           {/* Cart */}
           <Link
             to="/cart"
@@ -174,9 +191,9 @@ const Header = () => {
               </span>
             )}
           </Link>
-
-          {/* --- Language & Contact Dropdown --- */}
-          <div className="relative" ref={dropdownRef}>
+          
+           {/* --- Language & Contact Dropdown --- */}
+          <div className="relative hidden md:block" ref={dropdownRef}>
             <button
               className="flex items-center gap-1 px-3 py-2 border rounded-md hover:bg-gray-50"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -187,22 +204,45 @@ const Header = () => {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
                 <button className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm">
                   <IndiaFlagIcon className="w-5 h-5 mr-2 rounded-sm" />
                   English
                 </button>
-                <button className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm">
+                <a href="+917348832668" className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm">
                   <PhoneIcon className="w-5 h-5 mr-2" />
                   Contact Us
-                </button>
+                </a>
               </div>
             )}
           </div>
+
         </div>
       </div>
+       {/* Mobile Search Bar */}
+      {isMobileSearchOpen && (
+          <div className="md:hidden px-4 pb-3">
+               <form className="w-full flex" onSubmit={handleSearch}>
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      aria-label="Search"
+                      className="bg-teal-500 px-4 text-white hover:bg-teal-600 rounded-r-md"
+                    >
+                      <SearchIcon className="h-6 w-6" />
+                    </button>
+                </form>
+          </div>
+      )}
     </header>
   );
 };
 
 export default Header;
+

@@ -10,11 +10,12 @@ import { Search } from 'lucide-react';
 import InfoCards from '../components/layout/InfoCards';
 
 const ProductsPage = () => {
-    const [products, setProducts] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
+    const [displayedProducts, setDisplayedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [availableBrands, setAvailableBrands] = useState([]);
-    const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
+    const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [filters, setFilters] = useState({
         maxPrice: 4000,
@@ -27,6 +28,8 @@ const ProductsPage = () => {
     const location = useLocation();
     const { slug: categorySlugFromPath } = useParams();
     const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+
+    const itemsPerPage = 12;
 
     const pageTitle = useMemo(() => {
         const section = searchParams.get('section');
@@ -47,90 +50,79 @@ const ProductsPage = () => {
                 setAvailableBrands(brandData.data.brands);
             }
         }).catch(err => console.error("Failed to fetch brands:", err));
-    }, []);
-    
-    const handlePageChange = (page) => {
-        if (page > 0 && page <= pagination.totalPages && page !== pagination.currentPage) {
-            setPagination(prev => ({ ...prev, currentPage: page }));
-        }
-    };
-
-    useEffect(() => {
-        const fetchProducts = async () => {
+        
+        const fetchAllProducts = async () => {
             setLoading(true);
             setError('');
-            
-            const currentParams = new URLSearchParams(location.search);
-            const section = currentParams.get('section');
-            let endpoint = '/products';
-            const queryParams = new URLSearchParams();
-
-            queryParams.set('page', pagination.currentPage);
-
-            // Special case for top-sellers endpoint which might not support other filters
-            if (section === 'top_sellers') {
-                endpoint = '/products/top-sellers';
-            } else {
-                // Apply general filters for all other cases
-                queryParams.set('sort_by', filters.sortBy);
-                queryParams.set('order', filters.order);
-                if (filters.maxPrice < 4000) queryParams.set('max_price', filters.maxPrice);
-                if (filters.brands.length > 0) queryParams.set('brand_slug', filters.brands.join(','));
-                if (filters.minRating > 0) queryParams.set('rating', filters.minRating);
-
-                // Handle category from either URL path or query param
-                const categorySlug = categorySlugFromPath || currentParams.get('category');
-                if (categorySlug) {
-                    queryParams.set('category_slug', categorySlug);
-                }
-                
-                // Handle brand from query param
-                const brandSlug = currentParams.get('brand');
-                if(brandSlug){
-                    queryParams.set('brand_slug', brandSlug);
-                }
-
-                // Section-specific flags
-                if (section === 'featured') {
-                    queryParams.set('is_featured', 'true');
-                } else if (section === 'flash_deal') {
-                    queryParams.set('on_sale', 'true');
-                }
-            }
-
             try {
-                const finalUrl = `${endpoint}?${queryParams.toString()}`;
-                const data = await apiService(finalUrl);
-                
+                const data = await apiService('/products?limit=1000'); 
                 const productList = data.products || (data.data && data.data.products) || [];
                 const transformed = productList.map(transformProductData);
-                setProducts(transformed);
-
-                const paginationData = data.pagination || (data.data && data.data.pagination);
-                if (paginationData) {
-                    setPagination(prev => ({
-                        ...prev,
-                        totalPages: paginationData.totalPages || 1,
-                        totalItems: paginationData.totalItems || 0,
-                    }));
-                } else {
-                     setPagination({ 
-                        currentPage: data.current_page || 1, 
-                        totalPages: data.last_page || 1,
-                        totalItems: data.total || productList.length,
-                     });
-                }
-
+                setAllProducts(transformed);
             } catch (err) {
                 setError('Could not fetch products. Please try again later.');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchProducts();
-    }, [filters, pagination.currentPage, location.search, categorySlugFromPath]);
+        fetchAllProducts();
+    }, []);
+
+    useEffect(() => {
+        let filtered = [...allProducts];
+        const categorySlug = categorySlugFromPath || searchParams.get('category');
+        const brandSlug = searchParams.get('brand');
+
+        if (categorySlug) {
+            filtered = filtered.filter(p => p.category && p.category.slug === categorySlug);
+        }
+        if (brandSlug) {
+            filtered = filtered.filter(p => p.store && p.store.slug === brandSlug);
+        }
+
+        if (filters.brands.length > 0) {
+            filtered = filtered.filter(p => p.store && filters.brands.includes(p.store.slug));
+        }
+        filtered = filtered.filter(p => p.price <= filters.maxPrice);
+        if (filters.minRating > 0) {
+            filtered = filtered.filter(p => p.rating >= filters.minRating);
+        }
+
+        filtered.sort((a, b) => {
+            if (filters.sortBy === 'name') {
+                return filters.order === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            }
+            if (filters.sortBy === 'price') {
+                return filters.order === 'asc' ? a.price - b.price : b.price - a.price;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+        const totalFilteredItems = filtered.length;
+        const totalPages = Math.ceil(totalFilteredItems / itemsPerPage);
+        
+        const startIndex = (paginationInfo.currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        setDisplayedProducts(filtered.slice(startIndex, endIndex));
+
+        setPaginationInfo(prev => ({
+            ...prev,
+            totalPages: totalPages,
+            totalItems: totalFilteredItems,
+        }));
+
+    }, [allProducts, filters, paginationInfo.currentPage, categorySlugFromPath, searchParams]);
+
+    const handlePageChange = (page) => {
+        if (page > 0 && page <= paginationInfo.totalPages) {
+            setPaginationInfo(prev => ({ ...prev, currentPage: page }));
+        }
+    };
+    
+    useEffect(() => {
+        setPaginationInfo(prev => ({ ...prev, currentPage: 1 }));
+    }, [filters, categorySlugFromPath, searchParams]);
 
     return (
         <>
@@ -138,7 +130,7 @@ const ProductsPage = () => {
                 <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 capitalize">{pageTitle}</h2>
-                        <p className="text-sm text-gray-500">{pagination?.totalItems || products.length} items found</p>
+                        <p className="text-sm text-gray-500">{paginationInfo?.totalItems || 0} items found</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative">
@@ -149,7 +141,7 @@ const ProductsPage = () => {
                             value={`${filters.sortBy}-${filters.order}`}
                             onChange={(e) => {
                                 const [sortBy, order] = e.target.value.split('-');
-                                setFilters(prev => ({ ...prev, sortBy, order, currentPage: 1 }));
+                                setFilters(prev => ({ ...prev, sortBy, order }));
                             }}
                             className="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-blue focus:border-brand-blue"
                         >
@@ -177,8 +169,8 @@ const ProductsPage = () => {
                                 Array.from({ length: 9 }).map((_, i) => (
                                     <div key={i} className="border rounded-lg shadow-sm"><div className="w-full h-80 bg-gray-200 animate-pulse"></div></div>
                                 ))
-                            ) : products.length > 0 ? (
-                                products.map(product => (
+                            ) : displayedProducts.length > 0 ? (
+                                displayedProducts.map(product => (
                                     <ProductCard 
                                         key={product.id} 
                                         product={product}
@@ -193,7 +185,7 @@ const ProductsPage = () => {
                             )}
                         </div>
                         <Pagination 
-                            pagination={pagination} 
+                            pagination={paginationInfo} 
                             handlePageChange={handlePageChange} 
                         />
                     </main>
@@ -206,4 +198,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-

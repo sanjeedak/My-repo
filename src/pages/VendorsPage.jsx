@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { apiService } from '../../../api/apiService';
+import { apiService } from '../components/layout/apiService';
 import SellerCard from '../components/SellerCard'; // Using the existing SellerCard component
 
 // A skeleton that matches the SellerCard design
@@ -25,9 +25,7 @@ const VendorsPage = () => {
   useEffect(() => {
     const fetchStores = async () => {
         try {
-            // Updated endpoint to /stores
             const data = await apiService('/stores');
-            // Updated data mapping to data.data.stores
             if (data.success && Array.isArray(data.data.stores)) {
                 setStores(data.data.stores);
             } else {
@@ -65,7 +63,6 @@ const VendorsPage = () => {
                 {loading ? (
                     Array.from({ length: 6 }).map((_, i) => <SellerCardSkeleton key={i} />)
                 ) : (
-                    // Passing store data to the SellerCard component
                     stores.map(store => <SellerCard key={store.id} seller={store} />)
                 )}
             </div>
@@ -75,3 +72,4 @@ const VendorsPage = () => {
 };
 
 export default VendorsPage;
+

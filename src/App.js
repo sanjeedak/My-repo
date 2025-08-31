@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { MapProvider } from './context/MapProvider'; // Import the new MapProvider
 import CheckoutPage from './pages/CheckoutPage';
 
 // Layout Components
@@ -21,7 +22,7 @@ import SignUpPage from './pages/SignUpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
-import ProfilePage from './pages/ProfilePage'; // <-- Import the new page
+import ProfilePage from './pages/ProfilePage'; 
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
 import VendorForgotPasswordPage from './pages/VendorForgotPasswordPage';
@@ -36,6 +37,7 @@ import ReturnPolicyPage from './pages/ReturnPolicyPage';
 import TermsPage from './pages/TermPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
+import CategoriesPage from './pages/CategoriesPage';
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
@@ -53,42 +55,45 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <WishlistProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<MainLayout />}>
-                <Route index element={<HomePage />} />
-                <Route path="brands" element={<BrandPage />} />
-                <Route path="deals" element={<OffersPage />} />
-                <Route path="cart" element={<CartPage />} />
-                <Route path="wishlist" element={<WishlistPage />} />
-                <Route path="checkout" element={<CheckoutPage />} />
-                <Route path="products" element={<ProductsPage />} />
-                <Route path="profile" element={<ProfilePage />} /> {/* <-- Add the new route */}
-                <Route path="about" element={<AboutUsPage />} />
-                <Route path="contact" element={<ContactUsPage />} />
-                <Route path="faq" element={<FAQPage />} />
-                <Route path="blog" element={<BlogPage />} />
-                <Route path="order-success" element={<OrderSuccessPage />} />
-                <Route path="track-order" element={<TrackOrderPage />} />
-                <Route path="cancellation" element={<CancellationPolicyPage />} />
-                <Route path="return" element={<ReturnPolicyPage />} />
-                <Route path="privacy" element={<PrivacyPolicyPage />} />
-                <Route path="terms" element={<TermsPage />} />
-                <Route path="refund" element={<RefundPolicyPage />} />
-                <Route path="category/:slug" element={<ProductsPage />} />
-                <Route path="product/:slug" element={<ProductDetailsPage />} />
-                <Route path="search" element={<ProductsPage />} />
+          <MapProvider> {/* Wrap the app with MapProvider */}
+            <Router>
+              <Routes>
+                <Route path="/" element={<MainLayout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="brands" element={<BrandPage />} />
+                  <Route path="categories" element={<CategoriesPage />} />
+                  <Route path="deals" element={<OffersPage />} />
+                  <Route path="cart" element={<CartPage />} />
+                  <Route path="wishlist" element={<WishlistPage />} />
+                  <Route path="checkout" element={<CheckoutPage />} />
+                  <Route path="products" element={<ProductsPage />} />
+                  <Route path="profile" element={<ProfilePage />} /> 
+                  <Route path="about" element={<AboutUsPage />} />
+                  <Route path="contact" element={<ContactUsPage />} />
+                  <Route path="faq" element={<FAQPage />} />
+                  <Route path="blog" element={<BlogPage />} />
+                  <Route path="order-success" element={<OrderSuccessPage />} />
+                  <Route path="track-order" element={<TrackOrderPage />} />
+                  <Route path="cancellation" element={<CancellationPolicyPage />} />
+                  <Route path="return" element={<ReturnPolicyPage />} />
+                  <Route path="privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="terms" element={<TermsPage />} />
+                  <Route path="refund" element={<RefundPolicyPage />} />
+                  <Route path="category/:slug" element={<ProductsPage />} />
+                  <Route path="product/:slug" element={<ProductDetailsPage />} />
+                  <Route path="search" element={<ProductsPage />} />
 
-                {/* Auth and Vendor pages */}
-                <Route path="signin" element={<SignInPage />} />
-                <Route path="signup" element={<SignUpPage />} />
-                <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="vendor/signin" element={<VendorSignInPage />} />
-                <Route path="vendor/signup" element={<VendorSignUpPage />} />
-                <Route path="vendor/forgot-password" element={<VendorForgotPasswordPage />} />
-              </Route>
-            </Routes>
-          </Router>
+                  {/* Auth and Vendor pages */}
+                  <Route path="signin" element={<SignInPage />} />
+                  <Route path="signup" element={<SignUpPage />} />
+                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="vendor/signin" element={<VendorSignInPage />} />
+                  <Route path="vendor/signup" element={<VendorSignUpPage />} />
+                  <Route path="vendor/forgot-password" element={<VendorForgotPasswordPage />} />
+                </Route>
+              </Routes>
+            </Router>
+          </MapProvider>
         </WishlistProvider>
       </CartProvider>
     </AuthProvider>

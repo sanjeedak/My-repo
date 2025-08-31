@@ -1,34 +1,58 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { apiService } from './layout/apiService';
-import { API_BASE_URL } from '../api/config'; // Import the shared base URL
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
-// Helper function to fix the malformed image URLs from the API
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
+
+// Custom styles for a more polished look
+const heroBannerStyles = `
+  .hero-swiper .swiper-button-next,
+  .hero-swiper .swiper-button-prev {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    transition: background-color 0.2s;
+  }
+  .hero-swiper .swiper-button-next:hover,
+  .hero-swiper .swiper-button-prev:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .hero-swiper .swiper-button-next::after,
+  .hero-swiper .swiper-button-prev::after {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .hero-swiper .swiper-pagination-bullet {
+    background-color: rgba(255, 255, 255, 0.7);
+    width: 10px;
+    height: 10px;
+    opacity: 1;
+  }
+  .hero-swiper .swiper-pagination-bullet-active {
+    background-color: white;
+    transform: scale(1.2);
+  }
+`;
+
+// Simplified helper for image URLs, as the API provides absolute paths.
 const getImageUrl = (imagePath) => {
-  if (!imagePath) {
-    return '/fallback-banner.jpg'; // Provide a default fallback image
-  }
-
-  // This logic handles cases where the API might return a full URL nested inside another URL string.
-  const malformedSegment = 'http://localhost:5000/uploads/banners/';
-  if (imagePath.includes(malformedSegment)) {
-    return imagePath.substring(imagePath.indexOf(malformedSegment));
-  }
-  
-  // If the URL is already a correct, absolute URL, return it as is.
-  if (imagePath.startsWith('http')) {
+  if (imagePath && imagePath.startsWith('http')) {
     return imagePath;
   }
-
-  // Use the imported API_BASE_URL for relative paths
-  return `${API_BASE_URL}/${imagePath}`;
+  // Provide a descriptive placeholder if the image is missing
+  return 'https://placehold.co/1200x400?text=Promotion';
 };
-
 
 const HeroBanner = () => {
   const [banners, setBanners] = useState([]);
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -47,33 +71,10 @@ const HeroBanner = () => {
     };
     fetchBanners();
   }, []);
-  
-  const handleNext = useCallback(() => {
-    if (banners.length > 0) {
-      setCurrentBannerIndex(prevIndex => (prevIndex + 1) % banners.length);
-    }
-  }, [banners.length]);
 
-  useEffect(() => {
-    if (banners.length > 1) {
-      const interval = setInterval(() => {
-        handleNext();
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [banners.length, currentBannerIndex, handleNext]); // Added handleNext to dependency array
-
-  const currentBanner = banners[currentBannerIndex];
-
-  const handlePrimaryAction = () => {
-    if (currentBanner?.button_url) {
-      navigate(currentBanner.button_url);
-    }
-  };
-
-  const handlePrev = () => {
-    if (banners.length > 0) {
-      setCurrentBannerIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length);
+  const handleActionClick = (url) => {
+    if (url) {
+      navigate(url);
     }
   };
 
@@ -82,67 +83,52 @@ const HeroBanner = () => {
   if (banners.length === 0) return <div className="flex items-center justify-center h-[380px] bg-gray-100 rounded-lg">No banners available.</div>;
 
   return (
-    <div className="relative h-[40vh] md:h-[380px] text-white overflow-hidden rounded-lg">
-      {banners.map((banner, index) => {
-        const imageUrl = getImageUrl(banner.image);
-        return (
-          <div
-            key={banner.id}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${
-              index === currentBannerIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
-            style={{ 
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${imageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
-            {index === currentBannerIndex && (
-              <div className="container mx-auto px-8 md:px-12 h-full flex flex-col justify-center items-start text-left">
-                <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-3 animate-fade-in-down">
-                  {banner.title}
-                </h1>
-                <p className="text-base md:text-lg text-gray-200 mb-6 max-w-lg animate-fade-in-up">
-                  {banner.description}
-                </p>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={handlePrimaryAction}
-                    className="bg-blue-600 text-white font-bold px-6 py-3 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300 animate-fade-in-up"
-                  >
-                    {banner.button_text || 'Shop Now'}
-                  </button>
+    <>
+      <style>{heroBannerStyles}</style>
+      <div className="relative h-[40vh] md:h-[380px] text-white overflow-hidden rounded-lg">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          className="h-full hero-swiper"
+          spaceBetween={0}
+          slidesPerView={1}
+          navigation={banners.length > 1}
+          pagination={{ clickable: true }}
+          loop={true}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+          }}
+        >
+          {banners.map((banner) => (
+            <SwiperSlide key={banner.id}>
+              <div
+                className="w-full h-full bg-cover bg-center"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${getImageUrl(banner.image)})`
+                }}
+              >
+                <div className="container mx-auto px-8 md:px-12 h-full flex flex-col justify-center items-start text-left">
+                  <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-3">
+                    {banner.title}
+                  </h1>
+                  <p className="text-base md:text-lg text-gray-200 mb-6 max-w-lg">
+                    {banner.description}
+                  </p>
+                  {banner.button_text && (
+                     <button
+                        onClick={() => handleActionClick(banner.button_url)}
+                        className="bg-blue-600 text-white font-bold px-6 py-3 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300"
+                      >
+                        {banner.button_text}
+                      </button>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        );
-      })}
-
-      {banners.length > 1 && (
-        <>
-          <button onClick={handlePrev} className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black bg-opacity-40 hover:bg-opacity-60 transition-colors z-20">
-            <ChevronLeft size={24} />
-          </button>
-          <button onClick={handleNext} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black bg-opacity-40 hover:bg-opacity-60 transition-colors z-20">
-            <ChevronRight size={24} />
-          </button>
-        </>
-      )}
-
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
-        {banners.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentBannerIndex(index)}
-            className={`h-2 w-2 rounded-full transition-all duration-300 ${
-              index === currentBannerIndex ? 'bg-white scale-125 w-4' : 'bg-white bg-opacity-50'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
-    </div>
+    </>
   );
 };
 

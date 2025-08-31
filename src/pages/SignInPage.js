@@ -4,54 +4,9 @@ import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
 import { useAuth } from '../context/AuthContext';
 import InfoCards from '../components/layout/InfoCards';
-import { Eye, EyeOff } from 'lucide-react';
-
-const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPasswordField = type === 'password';
-
-  return (
-    <div className="relative">
-      <label htmlFor={id} className="sr-only">{label}</label>
-      <input
-        id={id}
-        type={isPasswordField && showPassword ? 'text' : type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300 pr-12"
-        aria-label={label}
-        {...props}
-      />
-      {isPasswordField && (
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white"
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
-        >
-          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-        </button>
-      )}
-      {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
-    </div>
-  );
-};
-
-const RadioButton = ({ id, label, checked, onChange, value }) => (
-  <label className="flex items-center text-white cursor-pointer">
-    <input
-      id={id}
-      type="radio"
-      checked={checked}
-      onChange={onChange}
-      className="mr-2 h-5 w-5 appearance-none rounded-full border-2 border-gray-400 checked:bg-purple-500 checked:border-transparent transition-colors duration-300"
-      aria-label={label}
-    />
-    <span>{value}</span>
-  </label>
-);
+import InputField from '../components/forms/InputField';
+import RadioButton from '../components/forms/RadioButton';
+import { endpoints } from '../api/endpoints';
 
 const SignInPage = () => {
   const navigate = useNavigate();
@@ -105,7 +60,7 @@ const SignInPage = () => {
     }
     setIsLoading(true);
     try {
-      await apiService('/api/user-auth/login', {
+      await apiService(endpoints.sendOtp, {
         method: 'POST',
         body: { phone: formData.emailPhone },
       });
@@ -132,8 +87,7 @@ const SignInPage = () => {
         ? { email: formData.emailPhone, password: formData.password }
         : { phone: formData.emailPhone, otp };
 
-      // Updated API endpoint
-      const response = await apiService('/api/user-auth/login', {
+      const response = await apiService(endpoints.userLogin, {
         method: 'POST',
         body: payload,
       });

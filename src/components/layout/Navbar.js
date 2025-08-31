@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { apiService } from './apiService';
@@ -54,6 +53,8 @@ const Navbar = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -155,8 +156,30 @@ const Navbar = () => {
           <div className="md:hidden pb-4">
             <nav className="flex flex-col space-y-1">
               {mainNavLinks.map(link => <Link key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{link.text}</Link>)}
+              
+              {/* Mobile Categories Dropdown */}
+              <div className="border-t border-b border-blue-700 my-2">
+                <button
+                  onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                  className="w-full flex justify-between items-center px-3 py-2 text-blue-100 font-semibold"
+                >
+                  Categories
+                  <ChevronDownIcon className={`h-5 w-5 transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isCategoryDropdownOpen && (
+                  <div className="pl-6 border-l-2 border-blue-600 pb-2">
+                    {loading ? <div className="p-2 text-blue-200">Loading...</div> : categories.map(cat => (
+                      <Link key={cat.id} to={`/category/${cat.slug}`} onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-sm text-blue-200 hover:text-white">
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">Brands</Link>
               <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">Offers</Link>
+              
               <div className="border-t border-blue-700 mt-2 pt-2">
                 <h4 className="px-3 text-sm font-semibold text-gray-400 uppercase">Vendor</h4>
                 {vendorZoneLinks.map(link => (
@@ -172,4 +195,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

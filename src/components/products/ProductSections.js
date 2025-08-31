@@ -1,28 +1,24 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
 import { apiService } from '../layout/apiService';
 import { transformProductData } from '../../utils/transformProductData';
 import { API_BASE_URL } from '../../api/config';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 // --- ICONS ---
-const ChevronLeftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-  </svg>
-);
-const ChevronRightIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
-);
 const StarIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
   </svg>
 );
 
-// --- REUSABLE HEADER ---
+// --- REUSABLE COMPONENTS ---
 const SectionHeader = ({ title, linkTo }) => (
   <div className="flex items-center justify-between border-b pb-3 mb-6">
     <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{title}</h2>
@@ -38,7 +34,6 @@ const SectionHeader = ({ title, linkTo }) => (
   </div>
 );
 
-// --- COUNTDOWN TIMER ---
 const CountdownTimer = ({ hours = 48 }) => {
   const [targetDate] = useState(() => {
     const date = new Date();
@@ -84,55 +79,23 @@ const CountdownTimer = ({ hours = 48 }) => {
   );
 };
 
-// --- FEATURED PRODUCTS ---
-const FeaturedProducts = () => {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const data = await apiService('/products?is_featured=true&limit=12');
-        const items = data.products || data.data?.products || [];
-        setFeaturedProducts(items.map(transformProductData));
-      } catch (error) {
-        console.error("Failed to load featured products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFeatured();
-  }, []);
-
-  return (
-    <div className="my-12">
-      <SectionHeader title="Featured Products" linkTo="/products?section=featured" />
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="w-full h-80 bg-gray-200 rounded-lg animate-pulse"></div>
-          ))
-        ) : featuredProducts.length > 0 ? (
-          featuredProducts.map((p) => (
-            <Link key={p.id} to={`/product/${p.slug || p.id}`}>
-              <ProductCard product={p} hideButtons={true} />
-            </Link>
-          ))
-        ) : (
-          <div className="col-span-full text-center text-gray-500">
-            🚀 No featured products available
-          </div>
-        )}
-      </div>
+const ProductCardSkeleton = () => (
+    <div className="border rounded-lg shadow-sm animate-pulse">
+        <div className="w-full h-40 bg-gray-200 rounded-t-lg"></div>
+        <div className="p-4 space-y-3">
+            <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
+            <div className="w-1/2 h-4 bg-gray-200 rounded"></div>
+            <div className="w-1/3 h-5 bg-gray-200 rounded"></div>
+        </div>
     </div>
-  );
-};
+);
 
-// --- FLASH DEAL ---
-const FlashDeal = () => {
+// --- PRODUCT SECTIONS ---
+
+export const FlashDeal = () => {
   const [flashProducts, setFlashProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const scrollRef = useRef(null);
 
   useEffect(() => {
     apiService('/products?on_sale=true&limit=10')
@@ -140,13 +103,6 @@ const FlashDeal = () => {
       .catch(error => console.error("Failed to load flash deals:", error))
       .finally(() => setLoading(false));
   }, []);
-  
-  const handleScroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -300 : 300;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
 
   return (
     <div className="my-12">
@@ -157,34 +113,90 @@ const FlashDeal = () => {
           <p className="my-3 text-blue-100">Hurry up! The offer is limited.</p>
           <CountdownTimer hours={48} />
         </div>
-        <div className="relative lg:col-span-3 group">
-          <div ref={scrollRef} className="flex space-x-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide h-full py-2">
-            {loading 
-              ? Array.from({length: 4}).map((_, i) => <div key={i} className="flex-none w-64 h-full bg-gray-200 rounded-lg animate-pulse snap-start"></div>)
-              : flashProducts.map(p => (
-                  <div key={p.id} className="flex-none w-64 snap-start">
-                    <Link to={`/product/${p.slug || p.id}`}>
-                      <ProductCard product={p} hideButtons={true} />
-                    </Link>
-                  </div>
-              ))
-            }
-          </div>
-          <button onClick={() => handleScroll('left')} className="absolute top-1/2 left-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 -translate-x-4">
-            <ChevronLeftIcon />
-          </button>
-          <button onClick={() => handleScroll('right')} className="absolute top-1/2 right-0 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white transition-all z-10 opacity-0 group-hover:opacity-100 translate-x-4">
-            <ChevronRightIcon />
-          </button>
+        <div className="relative lg:col-span-3">
+            <Swiper
+              modules={[Navigation]}
+              navigation
+              spaceBetween={16}
+              slidesPerView={1}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }}
+            >
+              {loading 
+                ? Array.from({length: 3}).map((_, i) => <SwiperSlide key={i}><ProductCardSkeleton /></SwiperSlide>)
+                : flashProducts.map(p => (
+                    <SwiperSlide key={p.id}>
+                      <ProductCard product={p} />
+                    </SwiperSlide>
+                ))
+              }
+            </Swiper>
         </div>
       </div>
     </div>
   );
 };
 
+
+const ProductSectionLayout = ({ title, linkTo, endpoint }) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await apiService(endpoint);
+        const items = data.products || data.data?.products || [];
+        setProducts(items.map(transformProductData));
+      } catch (error) {
+        console.error(`Failed to load products for ${title}:`, error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [endpoint, title]);
+
+  return (
+    <div className="my-12">
+      <SectionHeader title={title} linkTo={linkTo} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+        ) : products.length > 0 ? (
+          products.map((p) => <ProductCard key={p.id} product={p} />)
+        ) : (
+          <div className="col-span-full text-center text-gray-500 py-10">
+            🚀 No products available right now.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+export const FeaturedProducts = () => (
+    <ProductSectionLayout 
+        title="Featured Products" 
+        linkTo="/products?section=featured" 
+        endpoint="/products?is_featured=true&limit=12"
+    />
+);
+
+export const LatestProducts = () => (
+    <ProductSectionLayout 
+        title="Latest Products" 
+        linkTo="/products?sortBy=created_at" 
+        endpoint="/products?sortBy=created_at&order=desc&limit=12"
+    />
+);
+
 // --- TOP SELLERS ---
 const SellerCard = ({ seller: store }) => (
-  <Link to={`/vendors/${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+  <Link to={`/products?brand=${store.slug}`} className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
     <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <img 
         src={store.logo && store.logo.startsWith('http') ? store.logo : `${API_BASE_URL}/${store.logo}`} 
@@ -193,11 +205,13 @@ const SellerCard = ({ seller: store }) => (
         onError={(e) => { e.target.src = 'https://placehold.co/80x80?text=Store'; }}
       />
     </div>
-    <div className="p-4 text-center">
-      <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">{store.name}</h3>
-      <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
-        <StarIcon />
-        <span className="ml-1">{parseFloat(store.rating || 0).toFixed(1)} Rating</span>
+    <div className="p-4 text-center flex-grow flex flex-col justify-between">
+      <div>
+        <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">{store.name}</h3>
+        <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
+          <StarIcon />
+          <span className="ml-1">{parseFloat(store.rating || 0).toFixed(1)} Rating</span>
+        </div>
       </div>
       <div className="mt-4 text-xs text-gray-400">
         <span>{store.total_products || 0} Products</span>
@@ -206,12 +220,12 @@ const SellerCard = ({ seller: store }) => (
   </Link>
 );
 
-const TopSellers = () => {
+export const TopSellers = () => {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiService('/stores?top=true')
+    apiService('/stores?top=true&limit=10')
       .then(data => {
         if (data.success && data.data.stores) {
           setStores(data.data.stores);
@@ -223,16 +237,32 @@ const TopSellers = () => {
 
   return (
     <div className="my-12">
-      <SectionHeader title="Top Sellers" linkTo="/products?section=top_sellers" />
-      <div className="flex space-x-6 overflow-x-auto scrollbar-hide py-2">
+      <SectionHeader title="Top Sellers" linkTo="/vendors" />
+       <Swiper
+          modules={[Navigation]}
+          navigation
+          spaceBetween={16}
+          slidesPerView={2}
+          breakpoints={{
+            640: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
+            1280: { slidesPerView: 5 },
+          }}
+        >
         {loading 
-          ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="w-64 h-48 bg-gray-200 rounded-lg animate-pulse"></div>)
-          : stores.map(store => <div key={store.id} className="flex-none w-64"><SellerCard seller={store} /></div>)
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <SwiperSlide key={i}>
+                <div className="w-full h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+              </SwiperSlide>
+            ))
+          : stores.map(store => (
+              <SwiperSlide key={store.id} className="h-full">
+                <SellerCard seller={store} />
+              </SwiperSlide>
+            ))
         }
-      </div>
+      </Swiper>
     </div>
   );
 };
-
-export { FlashDeal, FeaturedProducts, TopSellers };
 

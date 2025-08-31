@@ -8,18 +8,18 @@ const getImageUrl = (url) => {
   if (!url) {
     return 'https://placehold.co/80x80?text=Brand';
   }
-  // If the URL is already absolute, use it directly. Otherwise, prepend the base URL.
   if (url.startsWith('http')) {
     return url;
   }
   return `${API_BASE_URL}/${url}`;
 };
 
-// Skeleton component for a better loading experience
+// Skeleton component for a better loading experience, inspired by 6valley
 const BrandCardSkeleton = () => (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center animate-pulse">
-        <div className="h-20 w-20 bg-gray-300 rounded-full mb-4"></div>
-        <div className="h-4 w-2/3 bg-gray-300 rounded mb-2"></div>
+    <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col items-center animate-pulse">
+        <div className="w-full h-20 bg-gray-300 rounded-md mb-[-32px] z-0"></div>
+        <div className="h-16 w-16 bg-gray-300 rounded-full border-4 border-white z-10"></div>
+        <div className="h-4 w-2/3 bg-gray-300 rounded mt-3 mb-2"></div>
         <div className="h-3 w-1/2 bg-gray-300 rounded"></div>
     </div>
 );
@@ -69,9 +69,9 @@ const BrandPage = () => {
 
         {error && <p className="text-center text-red-500 bg-red-100 p-3 rounded-md mb-6">{error}</p>}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
           {page === 1 && loading ? (
-            Array.from({ length: 8 }).map((_, index) => (
+            Array.from({ length: 12 }).map((_, index) => (
               <BrandCardSkeleton key={index} />
             ))
           ) : (
@@ -79,24 +79,34 @@ const BrandPage = () => {
               <Link
                 to={`/products?brand=${brand.slug}`}
                 key={brand.id}
-                className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-rose-500 transition-all duration-300"
+                className="group bg-white border border-gray-200 rounded-lg flex flex-col items-center text-center shadow-sm hover:shadow-lg hover:-translate-y-1 active:scale-95 active:shadow-inner transition-all duration-300"
               >
+                <div className="w-full h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-t-lg"></div>
                 <img
                   src={getImageUrl(brand.logo)}
                   alt={`${brand.name} logo`}
-                  className="h-20 w-auto object-contain mb-4"
+                  className="h-16 w-16 -mt-8 rounded-full object-contain border-4 border-white bg-white transition-transform group-hover:scale-110"
                   onError={(e) => {
                     e.target.src = 'https://placehold.co/80x80?text=Brand';
                   }}
                 />
-                <h2 className="text-md font-semibold text-gray-800">{brand.name}</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {brand.total_products} Products
-                </p>
+                <div className="p-4 pt-2 w-full">
+                    <h2 className="text-md font-semibold text-gray-800 group-hover:text-blue-600 truncate">{brand.name}</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {brand.total_products} Products
+                    </p>
+                </div>
               </Link>
             ))
           )}
         </div>
+        
+         {brands.length === 0 && !loading && !error && (
+            <div className="text-center py-16 col-span-full">
+                <h2 className="text-xl font-semibold text-gray-700">No Brands Found</h2>
+                <p className="text-gray-500 mt-2">We couldn't find any brands at the moment. Please check back later.</p>
+            </div>
+        )}
 
         {pagination && page < pagination.totalPages && (
             <div className="text-center mt-10">
@@ -115,3 +125,4 @@ const BrandPage = () => {
 };
 
 export default BrandPage;
+
