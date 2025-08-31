@@ -17,11 +17,11 @@ export const endpoints = {
   orders: '/orders',
 
   // User Authentication
-  userLogin: '/api/user-auth/login',
+  userLogin: '/user-auth/login',
   userSignup: '/user-auth/signup',
-  userProfile: '/api/user-auth/profile',
-  userChangePassword: '/api/user-auth/change-password',
-  userForgotPassword: '/api/user-auth/forgot-password',
+  userProfile: '/user-auth/profile',
+  userChangePassword: '/user-auth/change-password',
+  userForgotPassword: '/user-auth/forgot-password',
 
   // Vendor Authentication
   vendorLogin: '/auth/vendor/login',
