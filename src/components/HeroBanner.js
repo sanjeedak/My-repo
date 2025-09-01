@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from './layout/apiService';
+import { endpoints } from '../api/endpoints'; // Import endpoints
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
@@ -60,7 +61,7 @@ const HeroBanner = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const data = await apiService('/banners');
+        const data = await apiService(endpoints.banners); // CORRECTED
         setBanners(data.data.banners || []);
       } catch (err) {
         setError(`Failed to load banners: ${err.message}`);
@@ -133,4 +134,3 @@ const HeroBanner = () => {
 };
 
 export default HeroBanner;
-

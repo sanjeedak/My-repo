@@ -20,9 +20,14 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = (userData, token) => {
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-        // Only set the token if a new one is provided
+        // Ensure is_verified flag is part of the user object
+        const userToStore = {
+            ...userData,
+            is_verified: userData.is_verified === 1 || userData.is_verified === true,
+        };
+        setUser(userToStore);
+        localStorage.setItem('user', JSON.stringify(userToStore));
+        
         if (token) {
             localStorage.setItem('token', token);
         }

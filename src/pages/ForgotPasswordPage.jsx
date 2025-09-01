@@ -1,26 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
-import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
-
-const InputField = ({ id, label, type, name, placeholder, value, onChange, error, ...props }) => (
-  <div>
-    <label htmlFor={id} className="sr-only">{label}</label>
-    <input
-      id={id}
-      type={type}
-      name={name}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="w-full p-4 text-white placeholder-gray-400 border border-transparent rounded-full bg-gray-700 bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
-      aria-label={label}
-      {...props}
-    />
-    {error && <p className="text-red-400 text-xs mt-1 pl-2">{error}</p>}
-  </div>
-);
+import InputField from '../components/forms/InputField';
+import { endpoints } from '../api/endpoints';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -51,74 +34,75 @@ const ForgotPasswordPage = () => {
     }
     setIsLoading(true);
     try {
-      // API call to send password reset link
-      await apiService('/api/user-auth/forgot-password', {
+      await apiService(endpoints.userForgotPassword, {
         method: 'POST',
         body: { email },
       });
       setMessage('A password reset link has been sent to your email.');
+      setError('');
     } catch (error) {
       setError(error.message || 'Failed to send reset link. Please try again.');
+      setMessage('');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (email) {
-      if (!window.confirm('Are you sure you want to close? Unsaved changes will be lost.')) return;
-    }
-    navigate(-1);
-  };
-
   return (
-    <div className="bg-slate-50">
-      <div
-        className="flex items-center justify-center min-h-screen p-4 font-sans relative"
-        style={{ background: 'linear-gradient(135deg, #1f1f3a, #000000)' }}
-      >
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 px-4 py-2"
-          aria-label="Close form"
-        >
-          Close
-        </button>
-        <div
-          className="w-full max-w-lg p-10 rounded-3xl shadow-2xl backdrop-blur-lg bg-gray-800 bg-opacity-30"
-          style={{ border: '1px solid rgba(255, 255, 255, 0.2)' }}
-        >
-          <h2 className="text-4xl font-extrabold text-center text-white mb-8 tracking-wide">
-            FORGOT PASSWORD
-          </h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 font-sans">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-6">
+            <Link to="/">
+                <img src="/img/logo_shopzeo.png" alt="Shopzeo Logo" className="h-10 mx-auto" />
+            </Link>
+        </div>
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+                Forgot Password
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+                Enter your email to receive a reset link.
+            </p>
+          </div>
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <InputField
               id="email"
               label="Email"
               type="email"
               name="email"
-              placeholder="Enter your email"
+              placeholder="sanjeeda126@gmail.com"
               value={email}
               onChange={handleChange}
               error={error}
             />
-            {message && <p className="text-green-400 text-xs text-center">{message}</p>}
+            {message && <p className="text-green-600 text-sm text-center font-medium">{message}</p>}
+            {error && !message && <p className="text-red-500 text-xs text-center">{error}</p>}
             <div className="pt-2">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 transition-colors"
                 aria-label="Submit"
               >
-                {isLoading ? 'Sending...' : 'SUBMIT'}
+                {isLoading ? 'Sending...' : 'Send Reset Link'}
               </button>
             </div>
           </form>
+            <div className="mt-8 text-center text-sm">
+                <p className="text-gray-600">
+                    Suddenly remember it?{' '}
+                    <button onClick={() => navigate(-1)} className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none">
+                        Go Back
+                    </button>
+                </p>
+            </div>
         </div>
       </div>
-      <InfoCards />
     </div>
   );
 };
 
 export default ForgotPasswordPage;
+

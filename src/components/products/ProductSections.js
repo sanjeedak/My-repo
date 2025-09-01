@@ -4,6 +4,7 @@ import ProductCard from './ProductCard';
 import { apiService } from '../layout/apiService';
 import { transformProductData } from '../../utils/transformProductData';
 import { API_BASE_URL } from '../../api/config';
+import { endpoints } from '../../api/endpoints'; // Import endpoints
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
@@ -98,7 +99,8 @@ export const FlashDeal = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiService('/products?on_sale=true&limit=10')
+    // UPDATED: Use endpoints object for API call
+    apiService(`${endpoints.products}?on_sale=true&limit=10`)
       .then(data => setFlashProducts((data.products || []).map(transformProductData)))
       .catch(error => console.error("Failed to load flash deals:", error))
       .finally(() => setLoading(false));
@@ -148,7 +150,7 @@ const ProductSectionLayout = ({ title, linkTo, endpoint }) => {
     const fetchProducts = async () => {
       try {
         const data = await apiService(endpoint);
-        const items = data.products || data.data?.products || [];
+        const items = data.products || (data.data && data.data.products) || [];
         setProducts(items.map(transformProductData));
       } catch (error) {
         console.error(`Failed to load products for ${title}:`, error);
@@ -182,7 +184,7 @@ export const FeaturedProducts = () => (
     <ProductSectionLayout 
         title="Featured Products" 
         linkTo="/products?section=featured" 
-        endpoint="/products?is_featured=true&limit=12"
+        endpoint={`${endpoints.products}?is_featured=true&limit=12`}
     />
 );
 
@@ -190,7 +192,7 @@ export const LatestProducts = () => (
     <ProductSectionLayout 
         title="Latest Products" 
         linkTo="/products?sortBy=created_at" 
-        endpoint="/products?sortBy=created_at&order=desc&limit=12"
+        endpoint={`${endpoints.products}?sortBy=created_at&order=desc&limit=12`}
     />
 );
 
@@ -225,7 +227,8 @@ export const TopSellers = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiService('/stores?top=true&limit=10')
+    // UPDATED: Use endpoints object for API call
+    apiService(`${endpoints.stores}?top=true&limit=10`)
       .then(data => {
         if (data.success && data.data.stores) {
           setStores(data.data.stores);

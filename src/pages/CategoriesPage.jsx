@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { API_BASE_URL } from '../api/config';
+import { endpoints } from '../api/endpoints'; // Import endpoints
 
 // Helper function to get the correct image URL for categories
 const getCategoryImageUrl = (imagePath, categoryName) => {
@@ -34,7 +35,8 @@ const CategoriesPage = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await apiService('/categories');
+                // UPDATED: Use endpoints object
+                const response = await apiService(endpoints.categories);
                 if (response.success && Array.isArray(response.data?.categories)) {
                     // Filter for top-level categories only
                     const topLevelCategories = response.data.categories.filter(cat => cat.parent_id === null);

@@ -8,6 +8,7 @@ import { apiService } from '../components/layout/apiService';
 import { transformProductData } from '../utils/transformProductData';
 import { Search } from 'lucide-react';
 import InfoCards from '../components/layout/InfoCards';
+import { endpoints } from '../api/endpoints'; // Import endpoints
 
 const ProductsPage = () => {
     const [allProducts, setAllProducts] = useState([]);
@@ -45,7 +46,8 @@ const ProductsPage = () => {
     }, [searchParams, categorySlugFromPath]);
 
     useEffect(() => {
-        apiService('/brands').then(brandData => {
+        // UPDATED: Use endpoints object for API call
+        apiService(endpoints.brands).then(brandData => {
             if (brandData.success && Array.isArray(brandData.data?.brands)) {
                 setAvailableBrands(brandData.data.brands);
             }
@@ -55,7 +57,8 @@ const ProductsPage = () => {
             setLoading(true);
             setError('');
             try {
-                const data = await apiService('/products?limit=1000'); 
+                // UPDATED: Use endpoints object for API call
+                const data = await apiService(`${endpoints.products}?limit=1000`); 
                 const productList = data.products || (data.data && data.data.products) || [];
                 const transformed = productList.map(transformProductData);
                 setAllProducts(transformed);
@@ -198,3 +201,4 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
+

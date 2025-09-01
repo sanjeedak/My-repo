@@ -1,6 +1,7 @@
 // src/pages/OfferPage.jsx
 import React, { useEffect, useState } from 'react';
-import { apiService } from '../components/layout/apiService'; // Import the service
+import { apiService } from '../components/layout/apiService';
+import { endpoints } from '../api/endpoints'; // Import endpoints
 
 const OfferPage = () => {
   const [offers, setOffers] = useState([]);
@@ -9,8 +10,8 @@ const OfferPage = () => {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        // REFACTORED: Replaced fake API with a call to the apiService
-        const data = await apiService('/products?on_sale=true&limit=8'); // Logical endpoint for offers
+        // UPDATED: Replaced hardcoded string with endpoints object
+        const data = await apiService(`${endpoints.products}?on_sale=true&limit=8`); 
         
         // Your existing data transformation logic
         const formatted = data.products.map((item) => ({

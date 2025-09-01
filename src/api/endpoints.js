@@ -1,33 +1,36 @@
 // src/api/endpoints.js
 export const endpoints = {
   // Products
-  products: '/products',
-  topSellers: '/products/top-sellers',
+  products: '/api/products',
+  topSellers: '/api/products/top-sellers',
 
   // Brands
-  brands: '/brands',
+  brands: '/api/brands',
+  
+  // Stores (Vendors)
+  stores: '/api/stores', // <-- ADDED THIS LINE
 
   // Banners
-  banners: '/banners',
+  banners: '/api/banners',
 
   // Categories
-  categories: '/categories',
+  categories: '/api/categories',
 
   // Orders
-  orders: '/orders',
+  orders: '/api/orders',
 
   // User Authentication
-  userLogin: '/user-auth/login',
-  userSignup: '/user-auth/signup',
-  userProfile: '/user-auth/profile',
-  userChangePassword: '/user-auth/change-password',
-  userForgotPassword: '/user-auth/forgot-password',
+  userLogin: '/api/user-auth/login',
+  userSignup: '/api/user-auth/signup',
+  userProfile: '/api/user-auth/profile',
+  userChangePassword: '/api/user-auth/change-password',
+  userForgotPassword: '/api/user-auth/forgot-password',
+  userVerifyOtp: '/api/user-auth/verify-otp',
+  resetPassword: '/api/user-auth/reset-password',
 
   // Vendor Authentication
-  vendorLogin: '/auth/vendor/login',
-  vendorSignup: '/auth/vendor/signup',
-  vendorForgotPassword: '/auth/vendor/forgot-password',
-
-  // OTP
-  sendOtp: '/auth/send-otp'
+  vendorLogin: '/api/auth/vendor/login',
+  vendorSignup: '/api/auth/vendor/signup',
+  vendorForgotPassword: '/api/auth/vendor/forgot-password',
 };
+

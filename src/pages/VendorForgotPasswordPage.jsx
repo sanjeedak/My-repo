@@ -4,6 +4,7 @@ import AuthFormLayout from '../components/layout/AuthFormLayout';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
 import InfoCards from '../components/layout/InfoCards';
+import { endpoints } from '../api/endpoints'; // Import endpoints
 
 const InputField = ({ id, label, type, value, onChange, error, autoComplete }) => (
     <div>
@@ -57,7 +58,7 @@ const VendorForgotPasswordPage = () => {
         setIsLoading(true);
         try {
             // API call to send password reset link for vendors
-            await apiService('/auth/vendor/forgot-password', {
+            await apiService(endpoints.vendorForgotPassword, { // CORRECTED
                 method: 'POST',
                 body: { email },
             });

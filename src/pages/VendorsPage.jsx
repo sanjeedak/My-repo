@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../components/layout/apiService';
 import SellerCard from '../components/SellerCard'; // Using the existing SellerCard component
+import { endpoints } from '../api/endpoints'; // Import endpoints
 
 // A skeleton that matches the SellerCard design
 const SellerCardSkeleton = () => (
@@ -25,7 +26,7 @@ const VendorsPage = () => {
   useEffect(() => {
     const fetchStores = async () => {
         try {
-            const data = await apiService('/stores');
+            const data = await apiService(endpoints.stores); // CORRECTED
             if (data.success && Array.isArray(data.data.stores)) {
                 setStores(data.data.stores);
             } else {
@@ -72,4 +73,3 @@ const VendorsPage = () => {
 };
 
 export default VendorsPage;
-

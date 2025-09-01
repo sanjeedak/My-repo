@@ -6,6 +6,8 @@ import VendorInfoStep from '../components/VendorInfoStep';
 import ShopInfoStep from '../components/ShopInfoStep';
 import BusinessInfoStep from '../components/BusinessInfoStep';
 import InfoCards from '../components/layout/InfoCards';
+import { apiService } from '../components/layout/apiService';
+import { endpoints } from '../api/endpoints';
 
 // --- Reusable Form Components ---
 export const InputField = ({ id, label, type, value, onChange, error, required = true }) => (
@@ -37,16 +39,13 @@ const VendorSignUpPage = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
-        // Step 1
-        first_name: '', last_name: '', email: '', phone: '', password: '', confirmPassword: '', vendorImage: null,
-        // Step 2
+        first_name: '', last_name: '', email: '', phone: '', password: '', confirmPassword: '',
         name: '', address: '', city: '', state: '', country: '', postal_code: '', logo: null, banner: null,
-        // Step 3
         gst_number: '', pan_number: '',
-        // Final
         agreedToTerms: false,
     });
     const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -86,6 +85,7 @@ const VendorSignUpPage = () => {
         }
         if (currentStep === 3) {
             if (!formData.gst_number) newErrors.gst_number = "GST number is required.";
+            if (!formData.agreedToTerms) newErrors.agreedToTerms = "You must agree to the terms.";
         }
         return newErrors;
     };
@@ -102,20 +102,46 @@ const VendorSignUpPage = () => {
     
     const handleBack = () => setStep(prev => prev - 1);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validateStep(step);
-         if (!formData.agreedToTerms) {
-            validationErrors.agreedToTerms = "You must agree to the terms.";
-        }
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
+        
+        setIsLoading(true);
         setErrors({});
-        console.log('Final Vendor Submission:', formData);
-        // Simulate API call and redirect
-        navigate('/vendor/dashboard');
+
+        const submissionData = new FormData();
+        // Append all fields from state to FormData
+        Object.keys(formData).forEach(key => {
+            if (key !== 'confirmPassword' && key !== 'agreedToTerms') {
+                submissionData.append(key, formData[key]);
+            }
+        });
+
+        try {
+            const response = await apiService(endpoints.vendorSignup, {
+                method: 'POST',
+                body: submissionData,
+                headers: {
+                    // Let the browser set the Content-Type for FormData
+                    'Content-Type': undefined, 
+                },
+            });
+
+            if (response.success) {
+                alert('Application submitted successfully! You will be redirected to the login page.');
+                navigate('/vendor/signin');
+            } else {
+                throw new Error(response.message || 'Submission failed.');
+            }
+        } catch (error) {
+            setErrors({ submit: error.message || 'An error occurred during submission.' });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -132,8 +158,10 @@ const VendorSignUpPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {step === 1 && <VendorInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
                     {step === 2 && <ShopInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
-                    {step === 3 && <BusinessInfoStep formData={formData} handleChange={handleChange} handleFileChange={handleFileChange} errors={errors} />}
+                    {step === 3 && <BusinessInfoStep formData={formData} handleChange={handleChange} errors={errors} />}
                     
+                    {errors.submit && <p className="text-xs text-red-600 text-center">{errors.submit}</p>}
+
                     <div className="pt-4">
                         {step === 1 && (
                             <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Next</button>
@@ -153,7 +181,9 @@ const VendorSignUpPage = () => {
                                 {errors.agreedToTerms && <p className="text-xs text-red-600">{errors.agreedToTerms}</p>}
                                 <div className="flex gap-4">
                                     <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">Back</button>
-                                    <button type="submit" className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Submit Application</button>
+                                    <button type="submit" disabled={isLoading} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400">
+                                        {isLoading ? 'Submitting...' : 'Submit Application'}
+                                    </button>
                                 </div>
                             </div>
                         )}

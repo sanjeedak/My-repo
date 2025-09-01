@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
-import InfoCards from '../components/layout/InfoCards';
+import { useAuth } from '../context/AuthContext';
 import InputField from '../components/forms/InputField';
 import RadioButton from '../components/forms/RadioButton';
 import { endpoints } from '../api/endpoints';
@@ -144,81 +144,59 @@ const SignUpPage = () => {
     }
   };
 
-  const handleClose = () => {
-    if (formData.firstName || formData.lastName || formData.emailPhone || formData.password || formData.confirmPassword || otp) {
-      if (!window.confirm('Are you sure you want to close? Unsaved changes will be lost.')) return;
-    }
-    navigate(-1);
-  };
-
   return (
-    <div className="bg-slate-50">
-      <div
-        className="flex items-center justify-center min-h-screen p-4 font-sans relative"
-        style={{ background: 'linear-gradient(135deg, #1f1f3a, #000000)' }}
-      >
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 px-4 py-2"
-          aria-label="Close signup form"
-        >
-          Close
-        </button>
-        <div
-          className="w-full max-w-lg p-10 rounded-3xl shadow-2xl backdrop-blur-lg bg-gray-800 bg-opacity-30"
-          style={{ border: '1px solid rgba(255, 255, 255, 0.2)' }}
-        >
-          <h2 className="text-4xl font-extrabold text-center text-white mb-8 tracking-wide">
-            REGISTER
-          </h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 font-sans">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-6">
+            <Link to="/">
+                <img src="/img/logo_shopzeo.png" alt="Shopzeo Logo" className="h-10 mx-auto" />
+            </Link>
+        </div>
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+                Create an Account
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+                Join us and start shopping!
+            </p>
+          </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-4">
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField
                 id="firstName"
+                name="firstName"
                 label="First Name"
                 type="text"
-                name="firstName"
-                placeholder="First Name"
+                placeholder="Sanjeeda"
                 value={formData.firstName}
                 onChange={handleChange}
                 error={errors.firstName}
               />
               <InputField
                 id="lastName"
+                name="lastName"
                 label="Last Name"
                 type="text"
-                name="lastName"
-                placeholder="Last Name"
+                placeholder="Khatoon"
                 value={formData.lastName}
                 onChange={handleChange}
                 error={errors.lastName}
               />
             </div>
 
-            <div className="flex justify-center space-x-6 mb-4">
-              <RadioButton
-                id="email"
-                label="Use Email"
-                checked={useEmail}
-                onChange={() => handleRadioChange(true)}
-                value="Email"
-              />
-              <RadioButton
-                id="phone"
-                label="Use Phone"
-                checked={!useEmail}
-                onChange={() => handleRadioChange(false)}
-                value="Phone"
-              />
+            <div className="flex justify-center space-x-8 pt-2">
+                <RadioButton id="email" label="Use Email" checked={useEmail} onChange={() => handleRadioChange(true)} value="Email" />
+                <RadioButton id="phone" label="Use Phone" checked={!useEmail} onChange={() => handleRadioChange(false)} value="Phone" />
             </div>
 
             <InputField
               id="emailPhone"
+              name="emailPhone"
               label={useEmail ? 'Email' : 'Phone Number'}
               type={useEmail ? 'email' : 'tel'}
-              name="emailPhone"
-              placeholder={useEmail ? 'Email' : 'Phone Number'}
+              placeholder={useEmail ? 'sanjeeda126@gmail.com' : 'e.g., 9876543210'}
               value={formData.emailPhone}
               onChange={handleChange}
               error={errors.emailPhone}
@@ -229,8 +207,7 @@ const SignUpPage = () => {
                 type="button"
                 onClick={handleSendOTP}
                 disabled={isLoading}
-                className="w-full py-2 text-white font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
-                aria-label="Send OTP"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 {isLoading ? 'Sending...' : 'Send OTP'}
               </button>
@@ -239,14 +216,12 @@ const SignUpPage = () => {
             {showOTP && (
               <InputField
                 id="otp"
+                name="otp"
                 label="Enter OTP"
                 type="text"
-                placeholder="Enter OTP"
+                placeholder="Enter 6-digit OTP"
                 value={otp}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  if (value.length <= 6) setOtp(value);
-                }}
+                onChange={(e) => setOtp(e.target.value)}
                 error={errors.otp}
               />
             )}
@@ -255,20 +230,20 @@ const SignUpPage = () => {
               <>
                 <InputField
                   id="password"
+                  name="password"
                   label="Password"
                   type="password"
-                  name="password"
-                  placeholder="Password"
+                  placeholder="••••••"
                   value={formData.password}
                   onChange={handleChange}
                   error={errors.password}
                 />
                 <InputField
                   id="confirmPassword"
+                  name="confirmPassword"
                   label="Confirm Password"
                   type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
+                  placeholder="••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   error={errors.confirmPassword}
@@ -276,50 +251,48 @@ const SignUpPage = () => {
               </>
             )}
 
-            <div className="flex items-center justify-center pt-1">
-              <label className="flex items-center text-white cursor-pointer select-none space-x-2">
-                <input
-                  id="terms"
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="h-5 w-5 appearance-none rounded-md border-2 border-gray-400 checked:bg-purple-500 checked:border-transparent transition-colors duration-300"
-                  aria-label="Accept Terms of Use"
-                />
-                <span className="text-sm text-gray-300">
-                  I accept{' '}
-                  <Link
-                    to="/terms"
-                    className="underline font-semibold text-purple-300 hover:text-purple-100 transition-colors duration-300"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Terms of Use
-                  </Link>
-                </span>
+            <div className="flex items-center">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                I accept the <Link to="/terms" className="font-medium text-indigo-600 hover:text-indigo-500">Terms of Use</Link>
               </label>
             </div>
             
-            {apiMessage && <p className="text-green-400 text-xs text-center">{apiMessage}</p>}
-            {errors.terms && <p className="text-red-400 text-xs text-center">{errors.terms}</p>}
-            {errors.submit && <p className="text-red-400 text-xs text-center">{errors.submit}</p>}
+            {apiMessage && <p className="text-green-600 text-sm text-center font-medium">{apiMessage}</p>}
+            {errors.terms && <p className="text-red-500 text-xs">{errors.terms}</p>}
+            {errors.submit && <p className="text-red-500 text-xs text-center">{errors.submit}</p>}
 
-            <div className="pt-2">
+            <div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 text-white text-lg font-bold rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 disabled:opacity-50"
-                aria-label="Register"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 transition-colors"
               >
-                {isLoading ? 'Registering...' : 'REGISTER NOW'}
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
             </div>
           </form>
+          
+           <div className="mt-8 text-center text-sm">
+                <p className="text-gray-600">
+                    Already have an account?{' '}
+                    <Link to="/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
+                        Sign In
+                    </Link>
+                </p>
+            </div>
         </div>
       </div>
-      <InfoCards />
     </div>
   );
 };
 
 export default SignUpPage;
+

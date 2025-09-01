@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiService } from './layout/apiService';
 import { API_BASE_URL } from '../api/config';
+import { endpoints } from '../api/endpoints'; // Import endpoints
 import { transformProductData } from '../utils/transformProductData';
 import ProductCard from './products/ProductCard';
 
@@ -22,7 +23,6 @@ const getCategoryImageUrl = (imagePath, categoryName) => {
   if (imagePath) {
     return `${API_BASE_URL}/${imagePath}`;
   }
-  // UPDATED: Use the first word for a more descriptive placeholder
   const firstWord = categoryName.split(' ')[0];
   return `https://placehold.co/80x80/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord)}`;
 };
@@ -37,8 +37,8 @@ export const CategoriesSection = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await apiService('/categories');
-        // UPDATED: Access nested categories array
+        // UPDATED: Use the centralized endpoints object
+        const data = await apiService(endpoints.categories);
         const formatted = data.data.categories.map((cat) => ({
           id: cat.id,
           name: cat.name,
@@ -111,7 +111,8 @@ export const FeaturedDealSection = () => {
   useEffect(() => {
     const fetchDeals = async () => {
       try {
-        const data = await apiService('/products?is_featured=true');
+        // UPDATED: Use the centralized endpoints object
+        const data = await apiService(`${endpoints.products}?is_featured=true`);
         const enhanced = data.products.map(transformProductData);
         setDeals(enhanced);
       } catch (error) {

@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { API_BASE_URL } from '../api/config';
+import { endpoints } from '../api/endpoints';
+import { Building2 } from 'lucide-react'; // Using an icon for visual appeal
 
-// A function to construct the correct image URL
+// Helper function to get the correct image URL
 const getImageUrl = (url) => {
   if (!url) {
-    return 'https://placehold.co/80x80?text=Brand';
+    return 'https://placehold.co/80x80/EBF4FF/7F9CF5?text=Brand';
   }
   if (url.startsWith('http')) {
     return url;
@@ -14,13 +16,13 @@ const getImageUrl = (url) => {
   return `${API_BASE_URL}/${url}`;
 };
 
-// Skeleton component for a better loading experience, inspired by 6valley
+// Skeleton component for a better loading experience
 const BrandCardSkeleton = () => (
     <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col items-center animate-pulse">
-        <div className="w-full h-20 bg-gray-300 rounded-md mb-[-32px] z-0"></div>
+        <div className="w-full h-20 bg-gray-200 rounded-md mb-[-32px] z-0"></div>
         <div className="h-16 w-16 bg-gray-300 rounded-full border-4 border-white z-10"></div>
-        <div className="h-4 w-2/3 bg-gray-300 rounded mt-3 mb-2"></div>
-        <div className="h-3 w-1/2 bg-gray-300 rounded"></div>
+        <div className="h-4 w-2/3 bg-gray-200 rounded mt-3 mb-2"></div>
+        <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
     </div>
 );
 
@@ -32,9 +34,11 @@ const BrandPage = () => {
   const [error, setError] = useState('');
 
   const fetchBrands = async (pageNum) => {
-    setLoading(true);
+    // Set loading to true only for the initial fetch
+    if (pageNum === 1) setLoading(true);
+    
     try {
-      const data = await apiService(`/brands?page=${pageNum}`);
+      const data = await apiService(`${endpoints.brands}?page=${pageNum}`);
       
       if (data.success && Array.isArray(data.data.brands)) {
           setBrands(prevBrands => pageNum === 1 ? data.data.brands : [...prevBrands, ...data.data.brands]);
@@ -63,9 +67,15 @@ const BrandPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-slate-800 text-center mb-10">
-          All Brands
-        </h1>
+        <div className="text-center mb-10">
+            <Building2 className="mx-auto h-12 w-12 text-blue-500" />
+            <h1 className="text-4xl font-extrabold text-slate-800 mt-4">
+              All Brands
+            </h1>
+            <p className="mt-2 text-gray-500">
+                Explore products from our curated list of top-rated brands.
+            </p>
+        </div>
 
         {error && <p className="text-center text-red-500 bg-red-100 p-3 rounded-md mb-6">{error}</p>}
 
@@ -115,7 +125,7 @@ const BrandPage = () => {
                     disabled={loading}
                     className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
                 >
-                    {loading ? 'Loading...' : 'Load More'}
+                    {loading && page > 1 ? 'Loading...' : 'Load More'}
                 </button>
             </div>
         )}

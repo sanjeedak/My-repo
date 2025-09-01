@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { MapProvider } from './context/MapProvider'; // Import the new MapProvider
 import CheckoutPage from './pages/CheckoutPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Layout Components
 import Header from './components/layout/Header';
@@ -86,6 +87,7 @@ function App() {
                   {/* Auth and Vendor pages */}
                   <Route path="signin" element={<SignInPage />} />
                   <Route path="signup" element={<SignUpPage />} />
+                  <Route path="reset-password" element={<ResetPasswordPage />} />
                   <Route path="forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="vendor/signin" element={<VendorSignInPage />} />
                   <Route path="vendor/signup" element={<VendorSignUpPage />} />

@@ -4,9 +4,11 @@ import { apiService } from "../components/layout/apiService";
 import { transformProductData } from "../utils/transformProductData";
 import { useCart } from "../context/CartContext";
 import { API_BASE_URL } from "../api/config";
+import { endpoints } from "../api/endpoints";
 import ProductImageGallery from "../components/products/ProductImageGallery";
 import SellerInfo from "../components/products/SellerInfo";
 import ProductTabs from "../components/products/ProductTab";
+import { Plus, Minus, ShoppingCart } from 'lucide-react';
 
 const ProductDetailsPage = () => {
     const { slug } = useParams();
@@ -16,6 +18,8 @@ const ProductDetailsPage = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [quantity, setQuantity] = useState(1);
+    const [addToCartMessage, setAddToCartMessage] = useState('');
 
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -28,8 +32,9 @@ const ProductDetailsPage = () => {
             }
 
             try {
-                // Fetch all products and find the one that matches the slug
-                const data = await apiService('/products');
+                // This fetches all products. For a large catalog, a dedicated API endpoint 
+                // like /api/products/{slug} would be more efficient.
+                const data = await apiService(endpoints.products);
 
                 if (data && data.products) {
                     const transformedProducts = (data.products).map(transformProductData);
@@ -54,26 +59,31 @@ const ProductDetailsPage = () => {
         fetchProductDetails();
     }, [slug]);
 
+    const handleQuantityChange = (amount) => {
+        setQuantity(prev => {
+            const newQuantity = prev + amount;
+            if (newQuantity < 1) return 1;
+            // Add a check against product stock if available
+            // if (newQuantity > product.stock) return product.stock; 
+            return newQuantity;
+        });
+    };
+
     const handleAddToCart = () => {
         if (product) {
-            addToCart(product);
-            alert("Product added to cart!");
+            addToCart({ ...product, quantity });
+            setAddToCartMessage(`${quantity} × "${product.name}" added to cart!`);
+            setTimeout(() => setAddToCartMessage(''), 3000); // Hide message after 3 seconds
         }
     };
 
     const handleBuyNow = () => {
         if (product) {
-            addToCart(product);
+            addToCart({ ...product, quantity });
             navigate("/checkout");
         }
     };
-
-    // Fallback for image URLs
-    const getImageUrl = (img) => {
-        if (!img) return "https://placehold.co/400x400?text=No+Image";
-        return img.startsWith("http") ? img : `${API_BASE_URL}/${img}`;
-    };
-
+    
     if (loading) {
         return <div className="text-center py-10">Loading product details...</div>;
     }
@@ -86,7 +96,9 @@ const ProductDetailsPage = () => {
         return <div className="text-center py-10">Product not found.</div>;
     }
     
-    const imageUrls = product.images.map(getImageUrl);
+    const imageUrls = product.images.map(img => 
+        img && img.startsWith("http") ? img : `${API_BASE_URL}/${img}`
+    );
 
     return (
         <div className="container mx-auto px-4 py-10">
@@ -97,24 +109,46 @@ const ProductDetailsPage = () => {
                 {/* Product Info */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
-                    <p className="text-blue-600 text-2xl font-semibold mt-3">
-                        ₹{product.price}
-                    </p>
+                    <div className="flex items-baseline gap-3 mt-3">
+                        <p className="text-blue-600 text-3xl font-bold">₹{product.price}</p>
+                        {product.discount > 0 && (
+                            <p className="text-gray-500 line-through text-lg">₹{product.originalPrice}</p>
+                        )}
+                    </div>
+                    
+                    {/* Add to Cart Message */}
+                    {addToCartMessage && (
+                        <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md text-center transition-opacity duration-300">
+                            {addToCartMessage}
+                        </div>
+                    )}
+
                     <p className="mt-4 text-gray-600 leading-relaxed">
                         {product.description || "No description available for this product."}
                     </p>
 
-                    {/* Buttons */}
-                    <div className="mt-6 flex gap-4">
+                    {/* Quantity Selector */}
+                    <div className="mt-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
+                        <div className="flex items-center border border-gray-300 rounded-md w-fit">
+                            <button onClick={() => handleQuantityChange(-1)} className="p-3 hover:bg-gray-100 rounded-l-md"><Minus size={16}/></button>
+                            <span className="px-5 font-semibold">{quantity}</span>
+                            <button onClick={() => handleQuantityChange(1)} className="p-3 hover:bg-gray-100 rounded-r-md"><Plus size={16}/></button>
+                        </div>
+                    </div>
+
+
+                    {/* Action Buttons */}
+                    <div className="mt-6 flex flex-col sm:flex-row gap-4">
                         <button
                             onClick={handleAddToCart}
-                            className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 font-semibold"
+                            className="flex-1 flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 font-semibold transition-colors"
                         >
-                            Add to Cart
+                            <ShoppingCart size={20} /> Add to Cart
                         </button>
                         <button
                             onClick={handleBuyNow}
-                            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold"
+                            className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors"
                         >
                             Buy Now
                         </button>
@@ -135,3 +169,4 @@ const ProductDetailsPage = () => {
 };
 
 export default ProductDetailsPage;
+

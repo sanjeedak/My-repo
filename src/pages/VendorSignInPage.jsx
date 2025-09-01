@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthFormLayout from '../components/layout/AuthFormLayout';
-import InfoCards from '../components/layout/InfoCards'; // Import InfoCards
+import InfoCards from '../components/layout/InfoCards';
+import { apiService } from '../components/layout/apiService';
+import { endpoints } from '../api/endpoints';
+import { useAuth } from '../context/AuthContext'; // Assuming a unified auth context
 
-// A styled input field with a label.
 const InputField = ({ id, label, type, value, onChange, error, autoComplete }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
         <input
             id={id}
             type={type}
+            name={id}
             value={value}
             onChange={onChange}
             autoComplete={autoComplete}
@@ -19,32 +22,42 @@ const InputField = ({ id, label, type, value, onChange, error, autoComplete }) =
     </div>
 );
 
-// --- Main Vendor Sign-In Page Component ---
-
 const VendorSignInPage = () => {
     const navigate = useNavigate();
+    const { login } = useAuth(); // Using the same login for simplicity
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value });
-        if (errors[e.target.id]) {
-            setErrors({ ...errors, [e.target.id]: null });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (errors[e.target.name] || errors.submit) {
+            setErrors({ ...errors, [e.target.name]: null, submit: null });
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // --- Your API call for vendor sign-in would go here ---
-        console.log('Vendor sign-in attempt:', formData);
+        setErrors({});
+        try {
+            const response = await apiService(endpoints.vendorLogin, {
+                method: 'POST',
+                body: formData,
+            });
 
-        // Simulate API call
-        setTimeout(() => {
+            if (response.success && response.data.token) {
+                // Assuming vendor login returns a user-like object and token
+                login(response.data.vendor, response.data.token);
+                navigate('/vendor/dashboard'); // Redirect to a vendor-specific dashboard
+            } else {
+                throw new Error(response.message || 'Login failed.');
+            }
+        } catch (error) {
+            setErrors({ submit: error.message || 'Invalid credentials. Please try again.' });
+        } finally {
             setIsLoading(false);
-            navigate('/vendor/dashboard'); // Redirect on successful login
-        }, 1500);
+        }
     };
 
     return (
@@ -78,6 +91,7 @@ const VendorSignInPage = () => {
                         onChange={handleChange}
                         error={errors.password}
                     />
+                    {errors.submit && <p className="text-xs text-red-600 text-center">{errors.submit}</p>}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />

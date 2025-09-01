@@ -1,171 +1,176 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { apiService } from '../components/layout/apiService';
+import { InputField } from './VendorSignUpPage';
+import { Lock, LogOut, Camera, Save } from 'lucide-react'; // Correctly imported Save icon
 
 const ProfilePage = () => {
-    const { user, logout, login } = useAuth();
+    const { user, login, logout } = useAuth();
     const navigate = useNavigate();
-    const [profile, setProfile] = useState(user);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
-    const [updateForm, setUpdateForm] = useState({
+    const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
-    });
-
-    const [passwordForm, setPasswordForm] = useState({
-        current_password: '',
-        new_password: '',
+        email: '',
+        phone: '',
+        profileImage: null,
+        profileImageUrl: '',
     });
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            if (!user) {
-                navigate('/signin');
-                return;
-            }
-            try {
-                const data = await apiService('/api/user-auth/profile');
-                if (data.success) {
-                    setProfile(data.data.user);
-                    setUpdateForm({
-                        first_name: data.data.user.first_name,
-                        last_name: data.data.user.last_name,
-                    });
-                } else {
-                    throw new Error(data.message || 'Failed to fetch profile.');
-                }
-            } catch (err) {
-                setError(err.message);
-                if (err.message.toLowerCase().includes('unauthorized')) {
-                    logout();
-                    navigate('/signin');
-                }
-            } finally {
-                setLoading(false);
-            }
+        if (user) {
+            setFormData({
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                email: user.email || '',
+                phone: user.phone || '',
+                profileImage: null,
+                profileImageUrl: user.vendorImage || '',
+            });
+        }
+    }, [user]);
+
+    const [errors, setErrors] = useState({});
+    const fileInputRef = useRef(null);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
+        }
+    };
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setFormData(prev => ({
+                ...prev,
+                profileImage: file,
+                profileImageUrl: URL.createObjectURL(file)
+            }));
+        }
+    };
+    
+    const validate = () => {
+        const newErrors = {};
+        if (!formData.first_name) newErrors.first_name = "First name is required.";
+        if (!formData.last_name) newErrors.last_name = "Last name is required.";
+        return newErrors;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const validationErrors = validate();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        
+        console.log("Updated user data:", formData);
+        const updatedUser = {
+            ...user,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            phone: formData.phone,
+            vendorImage: formData.profileImageUrl,
         };
-
-        fetchProfile();
-    }, [user, navigate, logout]);
-
-    const handleInfoChange = (e) => {
-        setUpdateForm({ ...updateForm, [e.target.name]: e.target.value });
+        login(updatedUser);
+        alert("Profile saved successfully!");
     };
-
-    const handlePasswordChange = (e) => {
-        setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
-    };
-
-    const handleUpdateProfile = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        try {
-            const response = await apiService('/api/user-auth/profile', {
-                method: 'PUT',
-                body: updateForm,
-            });
-            if (response.success) {
-                setSuccess('Profile updated successfully!');
-                const token = localStorage.getItem('token');
-                login(response.data.user, token); // Update context and local storage
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to update profile.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleChangePassword = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        try {
-            const response = await apiService('/api/user-auth/change-password', {
-                method: 'POST',
-                body: passwordForm,
-            });
-            if (response.success) {
-                setSuccess('Password changed successfully!');
-                setPasswordForm({ current_password: '', new_password: '' });
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to change password.');
-        } finally {
-            setLoading(false);
-        }
+    
+    const handleImageClick = () => {
+        fileInputRef.current.click();
     };
 
     const handleLogout = () => {
         logout();
-        navigate('/');
+        navigate('/signin');
+    };
+    
+    const generateAvatarUrl = () => {
+        if (formData.first_name && formData.last_name) {
+            return `https://ui-avatars.com/api/?name=${formData.first_name}+${formData.last_name}&background=EBF4FF&color=7F9CF5&size=128`;
+        }
+        return 'https://placehold.co/128x128?text=User';
     };
 
-    if (loading && !profile) {
-        return <div className="container mx-auto px-4 py-10 text-center">Loading profile...</div>;
-    }
-
     return (
-        <div className="container mx-auto px-4 py-10">
-            <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">My Profile</h1>
-                    {error && <p className="mt-2 text-center text-red-500 bg-red-50 p-3 rounded-md">{error}</p>}
-                    {success && <p className="mt-2 text-center text-green-500 bg-green-50 p-3 rounded-md">{success}</p>}
+        <div className="bg-slate-50 min-h-screen py-12">
+            <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                    {/* Left Column: User Card & Actions */}
+                    <div className="lg:col-span-4 space-y-8">
+                        <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
+                            <div className="relative w-32 h-32 mx-auto">
+                                <img
+                                    src={formData.profileImageUrl || generateAvatarUrl()}
+                                    alt="Profile"
+                                    className="w-full h-full rounded-full object-cover ring-4 ring-blue-100"
+                                />
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                    accept="image/*"
+                                />
+                                <button 
+                                    onClick={handleImageClick}
+                                    className="absolute bottom-1 right-1 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-transform hover:scale-110 shadow-md"
+                                    aria-label="Change profile picture"
+                                >
+                                   <Camera className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-800 mt-4">{`${formData.first_name} ${formData.last_name}`}</h2>
+                            <p className="text-gray-500 mt-1">{formData.email}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl shadow-lg">
+                             <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Account Actions</h3>
+                             <div className="space-y-3">
+                                 <button 
+                                    onClick={() => navigate('/reset-password')}
+                                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                                >
+                                    <Lock className="h-5 w-5 text-gray-500" /> Reset Password
+                                </button>
+                                <button 
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                                >
+                                    <LogOut className="h-5 w-5 text-gray-500" /> Logout
+                                </button>
+                             </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Edit Form */}
+                    <div className="lg:col-span-8">
+                        <div className="bg-white p-8 rounded-2xl shadow-lg">
+                             <h3 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-slate-100">Edit Your Profile</h3>
+                             <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <InputField name="first_name" id="first_name" label="First Name" type="text" value={formData.first_name} onChange={handleChange} error={errors.first_name} />
+                                    <InputField name="last_name" id="last_name" label="Last Name" type="text" value={formData.last_name} onChange={handleChange} error={errors.last_name} />
+                                </div>
+                                <InputField name="email" id="email" label="Email" type="email" value={formData.email} onChange={handleChange} error={errors.email} />
+                                <InputField name="phone" id="phone" label="Phone Number" type="tel" value={formData.phone} onChange={handleChange} error={errors.phone} />
+                                
+                                <div className="flex justify-end pt-4">
+                                    <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
+                                        <Save className="h-5 w-5" /> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-
-                {/* Update Profile Form */}
-                <form onSubmit={handleUpdateProfile} className="space-y-4">
-                    <h2 className="text-2xl font-semibold text-slate-700 border-b pb-2">Update Information</h2>
-                    <div>
-                        <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">First Name</label>
-                        <input type="text" name="first_name" id="first_name" value={updateForm.first_name} onChange={handleInfoChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-                    </div>
-                    <div>
-                        <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">Last Name</label>
-                        <input type="text" name="last_name" id="last_name" value={updateForm.last_name} onChange={handleInfoChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-                    </div>
-                     <div className="pt-2">
-                        <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold transition-colors disabled:bg-blue-300">
-                            {loading ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
-
-                {/* Change Password Form */}
-                <form onSubmit={handleChangePassword} className="space-y-4">
-                    <h2 className="text-2xl font-semibold text-slate-700 border-b pb-2">Change Password</h2>
-                    <div>
-                        <label htmlFor="current_password" className="block text-sm font-medium text-gray-700">Current Password</label>
-                        <input type="password" name="current_password" id="current_password" value={passwordForm.current_password} onChange={handlePasswordChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-                    </div>
-                    <div>
-                        <label htmlFor="new_password" className="block text-sm font-medium text-gray-700">New Password</label>
-                        <input type="password" name="new_password" id="new_password" value={passwordForm.new_password} onChange={handlePasswordChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-                    </div>
-                     <div className="pt-2">
-                        <button type="submit" disabled={loading} className="w-full bg-gray-700 text-white px-6 py-2 rounded-lg hover:bg-gray-800 font-semibold transition-colors disabled:bg-gray-400">
-                           {loading ? 'Updating...' : 'Update Password'}
-                        </button>
-                    </div>
-                </form>
-                
-                <button
-                    onClick={handleLogout}
-                    className="w-full bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-semibold transition-colors"
-                >
-                    Logout
-                </button>
             </div>
         </div>
     );
 };
 
-export default ProfilePage;
+export default ProfilePage; 
