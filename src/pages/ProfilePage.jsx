@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { InputField } from './VendorSignUpPage';
-import { Lock, LogOut, Camera, Save } from 'lucide-react'; // Correctly imported Save icon
+import { Lock, LogOut, Camera, Save } from 'lucide-react';
 
 const ProfilePage = () => {
     const { user, login, logout } = useAuth();
@@ -157,7 +157,17 @@ const ProfilePage = () => {
                                     <InputField name="last_name" id="last_name" label="Last Name" type="text" value={formData.last_name} onChange={handleChange} error={errors.last_name} />
                                 </div>
                                 <InputField name="email" id="email" label="Email" type="email" value={formData.email} onChange={handleChange} error={errors.email} />
-                                <InputField name="phone" id="phone" label="Phone Number" type="tel" value={formData.phone} onChange={handleChange} error={errors.phone} />
+                                <InputField
+                                    name="phone"
+                                    id="phone"
+                                    label="Phone Number"
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    error={errors.phone}
+                                    disabled={true}
+                                    placeholder={formData.phone ? "" : "N/A"}
+                                />
                                 
                                 <div className="flex justify-end pt-4">
                                     <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
@@ -173,4 +183,4 @@ const ProfilePage = () => {
     );
 };
 
-export default ProfilePage; 
+export default ProfilePage;

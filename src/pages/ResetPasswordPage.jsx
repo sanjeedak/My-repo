@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import InputField from '../components/forms/InputField';
+import { apiService } from '../components/layout/apiService';
+import { endpoints } from '../api/endpoints';
 
 const ResetPasswordPage = () => {
     const navigate = useNavigate();
@@ -11,6 +13,7 @@ const ResetPasswordPage = () => {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [apiMessage, setApiMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -36,7 +39,7 @@ const ResetPasswordPage = () => {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
@@ -45,13 +48,36 @@ const ResetPasswordPage = () => {
         }
 
         setIsLoading(true);
-        console.log("Password reset data:", formData);
-        
-        setTimeout(() => {
+        setApiMessage('');
+        try {
+            const payload = {
+                old_password: formData.currentPassword,
+                new_password: formData.newPassword
+            };
+
+            const response = await apiService(endpoints.userChangePassword, {
+                method: 'POST',
+                body: payload,
+            });
+
+            if (response.success) {
+                setApiMessage('Password has been reset successfully!');
+                setTimeout(() => {
+                    navigate('/signin');
+                }, 2000);
+            } else {
+                throw new Error(response.message || 'Password reset failed.');
+            }
+        } catch (error) {
+            // Check for the specific verification error message
+            if (error.message.includes('not verified')) {
+                setErrors({ submit: 'Account not verified. Please complete verification before changing your password.' });
+            } else {
+                setErrors({ submit: error.message || 'An error occurred during password reset.' });
+            }
+        } finally {
             setIsLoading(false);
-            alert('Password has been reset successfully!');
-            navigate('/signin');
-        }, 1500);
+        }
     };
     
     return (
@@ -100,6 +126,8 @@ const ResetPasswordPage = () => {
                             onChange={handleChange} 
                             error={errors.confirmPassword} 
                         />
+                        {apiMessage && <p className="text-green-600 text-sm text-center font-medium">{apiMessage}</p>}
+                        {errors.submit && <p className="text-red-500 text-xs text-center">{errors.submit}</p>}
                         <div className="pt-2">
                             <button 
                                 type="submit" 
