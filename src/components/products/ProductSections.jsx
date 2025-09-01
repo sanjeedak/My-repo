@@ -4,7 +4,7 @@ import ProductCard from './ProductCard';
 import { apiService } from '../layout/apiService';
 import { transformProductData } from '../../utils/transformProductData';
 import { API_BASE_URL } from '../../api/config';
-import { endpoints } from '../../api/endpoints'; // Import endpoints
+import { endpoints } from '../../api/endpoints';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
@@ -99,7 +99,6 @@ export const FlashDeal = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // UPDATED: Use endpoints object for API call
     apiService(`${endpoints.products}?on_sale=true&limit=10`)
       .then(data => setFlashProducts((data.products || []).map(transformProductData)))
       .catch(error => console.error("Failed to load flash deals:", error))
@@ -227,7 +226,6 @@ export const TopSellers = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // UPDATED: Use endpoints object for API call
     apiService(`${endpoints.stores}?top=true&limit=10`)
       .then(data => {
         if (data.success && data.data.stores) {
@@ -268,4 +266,3 @@ export const TopSellers = () => {
     </div>
   );
 };
-

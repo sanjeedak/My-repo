@@ -4,9 +4,8 @@ import { apiService } from "./layout/apiService";
 import SubcategoryList from "./SubcategoryList";
 import { ChevronRightIcon } from "../assets/icons";
 import { API_BASE_URL } from "../api/config";
-import { endpoints } from "../api/endpoints"; // Import the endpoints object
+import { endpoints } from "../api/endpoints";
 
-// Helper function to get the correct image URL
 const getImageUrl = (imagePath, categoryName) => {
   if (imagePath && imagePath.startsWith('http')) {
     return imagePath;
@@ -14,7 +13,6 @@ const getImageUrl = (imagePath, categoryName) => {
   if (imagePath) {
     return `${API_BASE_URL}/${imagePath}`;
   }
-  // Use the first word for a more descriptive placeholder
   const firstWord = categoryName.split(' ')[0];
   return `https://placehold.co/40x40/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord)}`;
 };
@@ -30,10 +28,8 @@ const CategoriesBar = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        // UPDATED: Use the centralized endpoints object for the API call
         const response = await apiService(endpoints.categories);
         
-        // Access nested categories array
         const cats = response?.data?.categories || [];
         setCategories(cats);
         setError(null);
@@ -112,7 +108,6 @@ const CategoriesBar = () => {
         )}
       </ul>
 
-      {/* Subcategories Panel */}
       <div
         onMouseEnter={handlePanelMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -140,4 +135,3 @@ const CategoriesBar = () => {
 };
 
 export default CategoriesBar;
-

@@ -9,6 +9,8 @@ import { endpoints } from '../api/endpoints';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // 'login' is now used in handleSubmit()
+  
   const [useEmail, setUseEmail] = useState(true);
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState('');
@@ -110,6 +112,7 @@ const SignUpPage = () => {
       const basePayload = {
         first_name: formData.firstName,
         last_name: formData.lastName,
+        role: 'customer'
       };
 
       const payload = useEmail
@@ -130,10 +133,9 @@ const SignUpPage = () => {
       });
 
       if (response.success) {
-        setApiMessage(response.message);
-        setTimeout(() => {
-          navigate('/signin');
-        }, 2000);
+        // Here we use the 'login' function after a successful signup
+        login(response.data.user, response.data.token);
+        navigate('/'); // Redirect to the homepage after logging in
       } else {
         throw new Error(response.message || 'Signup failed. Please try again.');
       }
@@ -295,4 +297,3 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-

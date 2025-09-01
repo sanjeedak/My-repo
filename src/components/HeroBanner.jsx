@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from './layout/apiService';
-import { endpoints } from '../api/endpoints'; // Import endpoints
+import { endpoints } from '../api/endpoints';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
@@ -11,7 +11,6 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
-// Custom styles for a more polished look
 const heroBannerStyles = `
   .hero-swiper .swiper-button-next,
   .hero-swiper .swiper-button-prev {
@@ -43,12 +42,10 @@ const heroBannerStyles = `
   }
 `;
 
-// Simplified helper for image URLs, as the API provides absolute paths.
 const getImageUrl = (imagePath) => {
   if (imagePath && imagePath.startsWith('http')) {
     return imagePath;
   }
-  // Provide a descriptive placeholder if the image is missing
   return 'https://placehold.co/1200x400?text=Promotion';
 };
 
@@ -61,7 +58,7 @@ const HeroBanner = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const data = await apiService(endpoints.banners); // CORRECTED
+        const data = await apiService(endpoints.banners);
         setBanners(data.data.banners || []);
       } catch (err) {
         setError(`Failed to load banners: ${err.message}`);

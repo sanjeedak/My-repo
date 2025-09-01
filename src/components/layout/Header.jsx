@@ -37,11 +37,10 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
         navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        setIsMobileSearchOpen(false); // Close mobile search after searching
+        setIsMobileSearchOpen(false);
     }
   }
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -50,7 +49,6 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handle dropdown click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -74,7 +72,6 @@ const Header = () => {
       }`}
     >
       <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-        {/* --- Left: Logo --- */}
         <Link to="/" className="flex items-center">
           <img
             src="/img/logo_shopzeo.png"
@@ -82,8 +79,6 @@ const Header = () => {
             className="h-10 sm:h-12 w-auto object-contain"
           />
         </Link>
-
-        {/* --- Middle: Desktop Search Bar --- */}
         <div className="hidden md:flex flex-1 mx-8 max-w-xl">
           <form className="w-full flex" onSubmit={handleSearch}>
             <input
@@ -102,15 +97,10 @@ const Header = () => {
             </button>
           </form>
         </div>
-
-        {/* --- Right: Icons --- */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Mobile Search Icon */}
           <button onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)} className="md:hidden p-2 rounded-full hover:bg-gray-100 transition">
              <SearchIconMobile className="h-6 w-6 text-gray-700" />
           </button>
-
-          {/* Wishlist */}
           <Link
             to="/wishlist"
             className="relative p-2 rounded-full hover:bg-gray-100 transition"
@@ -122,8 +112,6 @@ const Header = () => {
               </span>
             )}
           </Link>
-
-          {/* User Dropdown */}
           <div className="relative" ref={userDropdownRef}>
             <button
               onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
@@ -131,7 +119,6 @@ const Header = () => {
             >
               <UserIcon className="h-6 w-6" />
             </button>
-
             {isUserDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
                 {user ? (
@@ -178,8 +165,6 @@ const Header = () => {
               </div>
             )}
           </div>
-
-          {/* Cart */}
           <Link
             to="/cart"
             className="relative p-2 rounded-full hover:bg-gray-100 transition"
@@ -191,8 +176,6 @@ const Header = () => {
               </span>
             )}
           </Link>
-          
-           {/* --- Language & Contact Dropdown --- */}
           <div className="relative hidden md:block" ref={dropdownRef}>
             <button
               className="flex items-center gap-1 px-3 py-2 border rounded-md hover:bg-gray-50"
@@ -202,7 +185,6 @@ const Header = () => {
               <span className="text-sm">EN</span>
               <ChevronDownIcon className="h-4 w-4" />
             </button>
-
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
                 <button className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm">
@@ -216,10 +198,8 @@ const Header = () => {
               </div>
             )}
           </div>
-
         </div>
       </div>
-       {/* Mobile Search Bar */}
       {isMobileSearchOpen && (
           <div className="md:hidden px-4 pb-3">
                <form className="w-full flex" onSubmit={handleSearch}>
@@ -245,4 +225,3 @@ const Header = () => {
 };
 
 export default Header;
-

@@ -116,4 +116,3 @@ const ProductImageGallery = ({ images, productName }) => {
 };
 
 export default ProductImageGallery;
-

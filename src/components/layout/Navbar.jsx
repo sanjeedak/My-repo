@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { apiService } from './apiService';
-import { endpoints } from '../../api/endpoints'; // Import endpoints
+import { endpoints } from '../../api/endpoints';
 import { GridIcon, ChevronDownIcon } from '../../assets/icons';
 import { Menu, X } from 'lucide-react';
 
@@ -60,7 +60,6 @@ const Navbar = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // UPDATED: Use endpoints object for API calls
         const [catResponse, brandResponse] = await Promise.all([
           apiService(`${endpoints.categories}?parent_id=null`),
           apiService(`${endpoints.brands}?limit=8`) 

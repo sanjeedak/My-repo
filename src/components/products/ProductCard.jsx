@@ -111,4 +111,3 @@ const ProductCard = ({ product, onQuickView }) => {
 };
 
 export default ProductCard;
-
