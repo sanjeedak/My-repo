@@ -140,6 +140,7 @@ const SignInPage = () => {
                 value={formData.emailPhone}
                 onChange={handleChange}
                 error={errors.emailPhone}
+                placeholder={useEmail ? 'Enter your email here' : 'Enter your phone number here'}
               />
 
               {useEmail ? (
@@ -151,6 +152,7 @@ const SignInPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                     error={errors.password}
+                    placeholder="Enter your password here"
                 />
               ) : showOTP ? (
                  <InputField 
@@ -161,6 +163,7 @@ const SignInPage = () => {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     error={errors.otp}
+                    placeholder="Enter the 6-digit OTP here"
                 />
               ) : null}
 

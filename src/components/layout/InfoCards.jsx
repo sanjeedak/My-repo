@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // --- SVG Icons with color props ---
 const AboutIcon = ({ className = "h-10 w-10" }) => (
@@ -37,11 +38,12 @@ const InfoCard = ({ icon, title, description, to, bgColor, iconColor }) => (
 );
 
 const InfoCards = () => {
+  const { t } = useTranslation();
   const companyCards = [
-    { icon: <AboutIcon />, title: 'About Us', description: 'Know about our company.', to: '/about', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
-    { icon: <ContactIcon />, title: 'Contact Us', description: 'We are Here to Help.', to: '/contact', bgColor: 'bg-green-100', iconColor: 'text-green-600' },
-    { icon: <FaqIcon />, title: 'FAQ', description: 'Get all Your Answers.', to: '/faq', bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600' },
-    { icon: <BlogIcon />, title: 'Blog', description: 'Check Our Latest Blogs.', to: '/blog', bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
+    { icon: <AboutIcon />, title: t('about_us'), description: t('know_about_company'), to: '/about', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
+    { icon: <ContactIcon />, title: t('contact_us'), description: t('here_to_help'), to: '/contact', bgColor: 'bg-green-100', iconColor: 'text-green-600' },
+    { icon: <FaqIcon />, title: t('faq'), description: t('get_all_answers'), to: '/faq', bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600' },
+    { icon: <BlogIcon />, title: t('blog'), description: t('check_our_latest_blogs'), to: '/blog', bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
   ];
 
   return (

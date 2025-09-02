@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiService } from './layout/apiService';
 import { API_BASE_URL } from '../api/config';
 import { endpoints } from '../api/endpoints'; // Import endpoints
@@ -30,6 +31,7 @@ const getCategoryImageUrl = (imagePath, categoryName) => {
 
 // --- Categories Section ---
 export const CategoriesSection = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -62,9 +64,9 @@ export const CategoriesSection = () => {
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Categories</h2>
+        <h2 className="text-xl font-bold text-gray-800">{t('categories')}</h2>
         <Link to="/products" className="text-sm text-blue-600 hover:underline">
-          View All →
+          {t('view_all')} →
         </Link>
       </div>
       {loading ? (

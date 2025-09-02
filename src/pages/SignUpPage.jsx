@@ -171,7 +171,7 @@ const SignUpPage = () => {
                 name="firstName"
                 label="First Name"
                 type="text"
-                placeholder="Sanjeeda"
+                placeholder="Enter your first name"
                 value={formData.firstName}
                 onChange={handleChange}
                 error={errors.firstName}
@@ -181,7 +181,7 @@ const SignUpPage = () => {
                 name="lastName"
                 label="Last Name"
                 type="text"
-                placeholder="Khatoon"
+                placeholder="Enter your last name"
                 value={formData.lastName}
                 onChange={handleChange}
                 error={errors.lastName}
@@ -198,7 +198,7 @@ const SignUpPage = () => {
               name="emailPhone"
               label={useEmail ? 'Email' : 'Phone Number'}
               type={useEmail ? 'email' : 'tel'}
-              placeholder={useEmail ? 'sanjeeda126@gmail.com' : 'e.g., 9876543210'}
+              placeholder={useEmail ? 'Enter your email here' : 'Enter your phone number here'}
               value={formData.emailPhone}
               onChange={handleChange}
               error={errors.emailPhone}
@@ -221,7 +221,7 @@ const SignUpPage = () => {
                 name="otp"
                 label="Enter OTP"
                 type="text"
-                placeholder="Enter 6-digit OTP"
+                placeholder="Enter 6-digit OTP here"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 error={errors.otp}
@@ -235,7 +235,7 @@ const SignUpPage = () => {
                   name="password"
                   label="Password"
                   type="password"
-                  placeholder="••••••"
+                  placeholder="Enter your password here"
                   value={formData.password}
                   onChange={handleChange}
                   error={errors.password}
@@ -245,7 +245,7 @@ const SignUpPage = () => {
                   name="confirmPassword"
                   label="Confirm Password"
                   type="password"
-                  placeholder="••••••"
+                  placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   error={errors.confirmPassword}

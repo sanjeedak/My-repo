@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // --- SVG Icons with color props ---
 const DeliveryIcon = ({ className = "h-10 w-10" }) => (
@@ -39,11 +40,12 @@ const InfoCard = ({ icon, title, to, bgColor, iconColor }) => (
 );
 
 const DeliveryInfo = () => {
+  const { t } = useTranslation();
   const deliveryCards = [
-    { icon: <DeliveryIcon />, title: 'Fast Delivery all across the country', to: '/delivery-info', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
-    { icon: <PaymentIcon />, title: 'Safe Payment', to: '/payment-info', bgColor: 'bg-green-100', iconColor: 'text-green-600' },
-    { icon: <ReturnIcon />, title: 'Easy Return Policy', to: '/return-policy', bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600' },
-    { icon: <AuthenticIcon />, title: '100% Authentic Products', to: '/authenticity', bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
+    { icon: <DeliveryIcon />, title: t('fast_delivery'), to: '/delivery-info', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
+    { icon: <PaymentIcon />, title: t('safe_payment'), to: '/payment-info', bgColor: 'bg-green-100', iconColor: 'text-green-600' },
+    { icon: <ReturnIcon />, title: t('easy_return'), to: '/return-policy', bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600' },
+    { icon: <AuthenticIcon />, title: t('authentic_products'), to: '/authenticity', bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
   ];
 
   return (

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ProductCard from './ProductCard';
 import { apiService } from '../layout/apiService';
 import { transformProductData } from '../../utils/transformProductData';
@@ -15,27 +16,31 @@ import 'swiper/css/navigation';
 // --- ICONS ---
 const StarIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8-2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
   </svg>
 );
 
 // --- REUSABLE COMPONENTS ---
-const SectionHeader = ({ title, linkTo }) => (
-  <div className="flex items-center justify-between border-b pb-3 mb-6">
-    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{title}</h2>
-    <Link 
-      to={linkTo} 
-      className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
-    >
-      View All
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-      </svg>
-    </Link>
-  </div>
-);
+const SectionHeader = ({ title, linkTo }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex items-center justify-between border-b pb-3 mb-6">
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{title}</h2>
+            <Link 
+            to={linkTo} 
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
+            >
+            {t('view_all')}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+            </Link>
+        </div>
+    );
+};
 
 const CountdownTimer = ({ hours = 48 }) => {
+  const { t } = useTranslation();
   const [targetDate] = useState(() => {
     const date = new Date();
     date.setHours(date.getHours() + hours);
@@ -62,10 +67,10 @@ const CountdownTimer = ({ hours = 48 }) => {
   }, [targetDate]);
 
   const timerItems = [
-    { label: 'Days', value: timeLeft.days },
-    { label: 'Hours', value: timeLeft.hours },
-    { label: 'Mins', value: timeLeft.minutes },
-    { label: 'Secs', value: timeLeft.seconds },
+    { label: t('days'), value: timeLeft.days },
+    { label: t('hours'), value: timeLeft.hours },
+    { label: t('mins'), value: timeLeft.minutes },
+    { label: t('secs'), value: timeLeft.seconds },
   ];
 
   return (
@@ -95,6 +100,7 @@ const ProductCardSkeleton = () => (
 // --- PRODUCT SECTIONS ---
 
 export const FlashDeal = () => {
+  const { t } = useTranslation();
   const [flashProducts, setFlashProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -107,11 +113,11 @@ export const FlashDeal = () => {
 
   return (
     <div className="my-12">
-      <SectionHeader title="Flash Deals" linkTo="/products?section=flash_deal" />
+      <SectionHeader title={t('flash_deals')} linkTo="/products?section=flash_deal" />
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch">
         <div className="lg:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-lg p-6 flex flex-col justify-center text-center shadow-lg">
-          <h3 className="text-3xl font-extrabold tracking-tight">Flash Deals</h3>
-          <p className="my-3 text-blue-100">Hurry up! The offer is limited.</p>
+          <h3 className="text-3xl font-extrabold tracking-tight">{t('flash_deals')}</h3>
+          <p className="my-3 text-blue-100">{t('hurry_up_offer_limited')}</p>
           <CountdownTimer hours={48} />
         </div>
         <div className="relative lg:col-span-3">
@@ -179,21 +185,27 @@ const ProductSectionLayout = ({ title, linkTo, endpoint }) => {
 };
 
 
-export const FeaturedProducts = () => (
-    <ProductSectionLayout 
-        title="Featured Products" 
-        linkTo="/products?section=featured" 
-        endpoint={`${endpoints.products}?is_featured=true&limit=12`}
-    />
-);
+export const FeaturedProducts = () => {
+    const { t } = useTranslation();
+    return (
+        <ProductSectionLayout 
+            title={t('featured_products')} 
+            linkTo="/products?section=featured" 
+            endpoint={`${endpoints.products}?is_featured=true&limit=12`}
+        />
+    );
+}
 
-export const LatestProducts = () => (
-    <ProductSectionLayout 
-        title="Latest Products" 
-        linkTo="/products?sortBy=created_at" 
-        endpoint={`${endpoints.products}?sortBy=created_at&order=desc&limit=12`}
-    />
-);
+export const LatestProducts = () => {
+    const { t } = useTranslation();
+    return (
+        <ProductSectionLayout 
+            title={t('latest_products')} 
+            linkTo="/products?sortBy=created_at" 
+            endpoint={`${endpoints.products}?sortBy=created_at&order=desc&limit=12`}
+        />
+    );
+}
 
 // --- TOP SELLERS ---
 const SellerCard = ({ seller: store }) => (
@@ -222,6 +234,7 @@ const SellerCard = ({ seller: store }) => (
 );
 
 export const TopSellers = () => {
+  const { t } = useTranslation();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -238,7 +251,7 @@ export const TopSellers = () => {
 
   return (
     <div className="my-12">
-      <SectionHeader title="Top Sellers" linkTo="/vendors" />
+      <SectionHeader title={t('top_sellers')} linkTo="/vendors" />
        <Swiper
           modules={[Navigation]}
           navigation
