@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next'; // <-- Import useTranslation
 import {
   SearchIcon,
   WishlistIcon,
   UserIcon,
   CartIcon,
   ChevronDownIcon,
-  PhoneIcon,
   IndiaFlagIcon,
+  UKFlagIcon,
 } from "../../assets/icons";
 import { LogIn, LogOut, UserPlus, Search as SearchIconMobile } from "lucide-react";
 import { useCart } from "../../context/CartContext";
@@ -15,6 +16,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
 
 const Header = () => {
+  const { t, i18n } = useTranslation(); // <-- Initialize translation hook
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -27,6 +29,14 @@ const Header = () => {
   const { cartItems } = useCart();
   const { wishlistItems } = useWishlist();
   const { user, logout } = useAuth();
+  
+  const languages = [
+    { code: 'en', name: t('english'), Icon: UKFlagIcon },
+    { code: 'hi', name: t('hindi'), Icon: IndiaFlagIcon },
+  ];
+  
+  const [selectedLang, setSelectedLang] = useState(languages.find(l => l.code === i18n.language) || languages[0]);
+
 
   const handleLogout = () => {
     logout();
@@ -40,6 +50,12 @@ const Header = () => {
         setIsMobileSearchOpen(false);
     }
   }
+  
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang.code); // <-- Change the language
+    setSelectedLang(lang);
+    setIsDropdownOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,7 +99,7 @@ const Header = () => {
           <form className="w-full flex" onSubmit={handleSearch}>
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder={t('search_placeholder')} // <-- Use translated text
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none"
@@ -181,20 +197,22 @@ const Header = () => {
               className="flex items-center gap-1 px-3 py-2 border rounded-md hover:bg-gray-50"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <IndiaFlagIcon className="w-5 h-5 rounded-sm" />
-              <span className="text-sm">EN</span>
+              <selectedLang.Icon className="w-5 h-5 rounded-sm" />
+              <span className="text-sm">{selectedLang.code.toUpperCase()}</span>
               <ChevronDownIcon className="h-4 w-4" />
             </button>
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-50">
-                <button className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm">
-                  <IndiaFlagIcon className="w-5 h-5 mr-2 rounded-sm" />
-                  English
-                </button>
-                <a href="+917348832668" className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm">
-                  <PhoneIcon className="w-5 h-5 mr-2" />
-                  Contact Us
-                </a>
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang)}
+                    className="flex items-center w-full px-3 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    <lang.Icon className="w-5 h-5 mr-2 rounded-sm" />
+                    {lang.name}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -205,7 +223,7 @@ const Header = () => {
                <form className="w-full flex" onSubmit={handleSearch}>
                     <input
                       type="text"
-                      placeholder="Search..."
+                      placeholder={t('search_placeholder')} // <-- Use translated text
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none"

@@ -90,3 +90,25 @@ export const PhoneIcon = ({ className = "h-4 w-4" }) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
   </svg>
 );
+// ... existing icons ...
+
+// 🇬🇧 UK Flag Icon
+export const UKFlagIcon = ({ className = "w-5 h-5 rounded-sm" }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30">
+        <clipPath id="a">
+            <path d="M0 0v30h60V0z"/>
+        </clipPath>
+        <clipPath id="b">
+            <path d="M0 0l30 15L0 15V0zm30 0l30 15L30 15V0zM0 30l30-15L0 15v15zm30 30l30-15L30 15v15z"/>
+        </clipPath>
+        <g clipPath="url(#a)">
+            <path d="M0 0v30h60V0z" fill="#00247d"/>
+            <path d="M0 0l60 30M0 30L60 0" stroke="#fff" strokeWidth="6"/>
+            <path d="M0 0l60 30M0 30L60 0" clipPath="url(#b)" stroke="#cf142b" strokeWidth="4"/>
+            <path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/>
+            <path d="M30 0v30M0 15h60" stroke="#cf142b" strokeWidth="6"/>
+        </g>
+    </svg>
+);
+
+// ... existing icons ...
