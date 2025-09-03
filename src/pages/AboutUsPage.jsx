@@ -1,5 +1,6 @@
 import React from 'react';
 import InfoCards from '../components/layout/InfoCards'; // Import the InfoCards component
+import { useTranslation } from 'react-i18next';
 
 // --- Icon Components for different sections ---
 const StoryIcon = () => (
@@ -22,6 +23,7 @@ const ValuesIcon = () => (
 
 
 const AboutUsPage = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="py-12 px-4 sm:px-6 lg:px-8">
@@ -36,10 +38,10 @@ const AboutUsPage = () => {
               </div>
             </div>
             <h1 className="text-5xl font-extrabold text-slate-800">
-              About Shopzeo
+              {t('about_shopzeo')}
             </h1>
             <p className="mt-3 text-lg text-gray-600">
-              Making business simple, efficient, and customer-friendly.
+              {t('about_intro')}
             </p>
           </div>
 
@@ -51,9 +53,9 @@ const AboutUsPage = () => {
                 <StoryIcon />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-700">Our Story</h2>
+                <h2 className="text-2xl font-bold text-slate-700">{t('our_story')}</h2>
                 <p className="mt-2 text-gray-600 leading-relaxed">
-                  Welcome to our company! We are dedicated to providing the best services and solutions to our customers. Our journey started with the vision of making business simple, efficient, and customer-friendly.
+                  {t('our_story_desc')}
                 </p>
               </div>
             </div>
@@ -64,9 +66,9 @@ const AboutUsPage = () => {
                 <MissionIcon />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-700">Our Mission</h2>
+                <h2 className="text-2xl font-bold text-slate-700">{t('our_mission')}</h2>
                 <p className="mt-2 text-gray-600 leading-relaxed">
-                  Our mission is to empower businesses and delight customers by creating a seamless, intuitive, and reliable e-commerce platform that connects buyers and sellers effortlessly.
+                  {t('our_mission_desc')}
                 </p>
               </div>
             </div>
@@ -77,9 +79,9 @@ const AboutUsPage = () => {
                 <ValuesIcon />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-700">Our Values</h2>
+                <h2 className="text-2xl font-bold text-slate-700">{t('our_values')}</h2>
                 <p className="mt-2 text-gray-600 leading-relaxed">
-                  We believe in transparency, innovation, and unwavering customer satisfaction. Know more about the core values and the story that drives us to be better every single day.
+                  {t('our_values_desc')}
                 </p>
               </div>
             </div>

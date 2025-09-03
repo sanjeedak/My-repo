@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import MapSection from '../components/MapSection';
 import { validateEmailPhone } from '../utils/sanatize';
@@ -7,6 +8,7 @@ import { validateEmailPhone } from '../utils/sanatize';
 const CheckoutPage = () => {
   const { cartItems, clearCart } = useCart();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [shippingForm, setShippingForm] = useState({
     name: '', phone: '', address: '', city: '', state: '', country: '', pincode: ''
@@ -110,12 +112,12 @@ const CheckoutPage = () => {
   if (cartItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10 text-center">
-        <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('cart_empty')}</h2>
         <button
           onClick={() => navigate('/products')}
           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
         >
-          Continue Shopping
+          {t('continue_shopping')}
         </button>
       </div>
     );
@@ -128,7 +130,7 @@ const CheckoutPage = () => {
         <form onSubmit={handlePlaceOrder} className="space-y-6">
           {/* Shipping Address */}
           <div>
-            <h2 className="text-2xl font-bold mb-4">Shipping Address</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('shipping_address')}</h2>
             <div className="space-y-4">
               <input type="text" name="name" placeholder="Full Name" value={shippingForm.name} onChange={handleShippingChange} className={`w-full border px-4 py-2 rounded ${errors.shipping_name ? 'border-red-500' : 'border-gray-300'}`} />
               {errors.shipping_name && <p className="text-red-500 text-xs">{errors.shipping_name}</p>}
@@ -162,10 +164,10 @@ const CheckoutPage = () => {
           
           {/* Billing Address */}
           <div>
-            <h2 className="text-2xl font-bold mb-4">Billing Address</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('billing_address')}</h2>
             <div className="flex items-center mb-4">
               <input type="checkbox" id="sameAsShipping" checked={sameAsShipping} onChange={handleSameAsShippingChange} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-              <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-gray-900">Billing address is the same as shipping address</label>
+              <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-gray-900">{t('same_as_shipping')}</label>
             </div>
             {!sameAsShipping && (
               <div className="space-y-4">
@@ -203,7 +205,7 @@ const CheckoutPage = () => {
 
           {/* Payment Method */}
           <div>
-            <h2 className="text-2xl font-bold mb-4">Payment Method</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('payment_method')}</h2>
             <div className="space-y-4">
               <label className="flex items-center">
                 <input
@@ -214,7 +216,7 @@ const CheckoutPage = () => {
                   onChange={() => setPaymentMethod('cod')}
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="ml-2">Cash on Delivery</span>
+                <span className="ml-2">{t('cod')}</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -225,7 +227,7 @@ const CheckoutPage = () => {
                   onChange={() => setPaymentMethod('card')}
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="ml-2">Credit/Debit Card</span>
+                <span className="ml-2">{t('card')}</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -236,14 +238,14 @@ const CheckoutPage = () => {
                   onChange={() => setPaymentMethod('upi')}
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span className="ml-2">UPI</span>
+                <span className="ml-2">{t('upi')}</span>
               </label>
             </div>
           </div>
           
           <div className="pt-4">
              <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                Place Order
+                {t('place_order')}
               </button>
           </div>
         </form>
@@ -251,7 +253,7 @@ const CheckoutPage = () => {
 
       {/* Right: Order Summary */}
       <div className="bg-white p-6 rounded-lg shadow h-fit">
-        <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('order_summary')}</h2>
         {cartItems.map((item) => (
           <div key={item.id} className="flex justify-between items-center border-b py-3">
             <span className="text-gray-600">{item.name} × {item.quantity}</span>
@@ -261,13 +263,13 @@ const CheckoutPage = () => {
           </div>
         ))}
         <div className="mt-6 space-y-2">
-            <div className="flex justify-between"><span className="text-gray-600">Subtotal:</span> <span>₹{total.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">{t('subtotal')}</span> <span>₹{total.toFixed(2)}</span></div>
             <div className="flex justify-between"><span className="text-gray-600">GSTIN:</span> <span>₹{(total * 0.05).toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-gray-600">Shipping:</span> <span>₹80.00</span></div>
-            <div className="flex justify-between"><span className="text-gray-600">Discount:</span> <span>- ₹0.00</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">{t('shipping')}</span> <span>₹80.00</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">{t('discount')}</span> <span>- ₹0.00</span></div>
         </div>
         <div className="flex justify-between items-center mt-6 border-t pt-4">
-          <span className="text-xl font-bold">Total</span>
+          <span className="text-xl font-bold">{t('total')}</span>
           <span className="text-xl font-bold text-blue-600">₹{(total + (total * 0.05) + 80).toFixed(2)}</span>
         </div>
       </div>
@@ -276,4 +278,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-

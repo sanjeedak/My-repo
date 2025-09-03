@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { InputField } from './VendorSignUpPage';
 import { Lock, LogOut, Camera, Save } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Lock, LogOut, Camera, Save } from 'lucide-react';
 const ProfilePage = () => {
     const { user, login, logout } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -129,19 +131,19 @@ const ProfilePage = () => {
                             <p className="text-gray-500 mt-1">{formData.email}</p>
                         </div>
                         <div className="bg-white p-6 rounded-2xl shadow-lg">
-                             <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Account Actions</h3>
+                             <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{t('account_actions')}</h3>
                              <div className="space-y-3">
                                  <button 
                                     onClick={() => navigate('/reset-password')}
                                     className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
                                 >
-                                    <Lock className="h-5 w-5 text-gray-500" /> Reset Password
+                                    <Lock className="h-5 w-5 text-gray-500" /> {t('reset_password')}
                                 </button>
                                 <button 
                                     onClick={handleLogout}
                                     className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
                                 >
-                                    <LogOut className="h-5 w-5 text-gray-500" /> Logout
+                                    <LogOut className="h-5 w-5 text-gray-500" /> {t('logout')}
                                 </button>
                              </div>
                         </div>
@@ -150,17 +152,17 @@ const ProfilePage = () => {
                     {/* Right Column: Edit Form */}
                     <div className="lg:col-span-8">
                         <div className="bg-white p-8 rounded-2xl shadow-lg">
-                             <h3 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-slate-100">Edit Your Profile</h3>
+                             <h3 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-slate-100">{t('edit_profile')}</h3>
                              <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <InputField name="first_name" id="first_name" label="First Name" type="text" value={formData.first_name} onChange={handleChange} error={errors.first_name} />
-                                    <InputField name="last_name" id="last_name" label="Last Name" type="text" value={formData.last_name} onChange={handleChange} error={errors.last_name} />
+                                    <InputField name="first_name" id="first_name" label={t('first_name')} type="text" value={formData.first_name} onChange={handleChange} error={errors.first_name} />
+                                    <InputField name="last_name" id="last_name" label={t('last_name')} type="text" value={formData.last_name} onChange={handleChange} error={errors.last_name} />
                                 </div>
-                                <InputField name="email" id="email" label="Email" type="email" value={formData.email} onChange={handleChange} error={errors.email} />
+                                <InputField name="email" id="email" label={t('email')} type="email" value={formData.email} onChange={handleChange} error={errors.email} />
                                 <InputField
                                     name="phone"
                                     id="phone"
-                                    label="Phone Number"
+                                    label={t('phone_number')}
                                     type="tel"
                                     value={formData.phone}
                                     onChange={handleChange}
@@ -171,7 +173,7 @@ const ProfilePage = () => {
                                 
                                 <div className="flex justify-end pt-4">
                                     <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
-                                        <Save className="h-5 w-5" /> Save Changes
+                                        <Save className="h-5 w-5" /> {t('save_changes')}
                                     </button>
                                 </div>
                             </form>

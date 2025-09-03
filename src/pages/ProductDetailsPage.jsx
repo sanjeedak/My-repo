@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { apiService } from "../components/layout/apiService";
 import { transformProductData } from "../utils/transformProductData";
 import { useCart } from "../context/CartContext";
@@ -11,6 +12,7 @@ import ProductTabs from "../components/products/ProductTab";
 import { Plus, Minus, ShoppingCart } from 'lucide-react';
 
 const ProductDetailsPage = () => {
+    const { t } = useTranslation();
     const { slug } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
@@ -129,7 +131,7 @@ const ProductDetailsPage = () => {
 
                     {/* Quantity Selector */}
                     <div className="mt-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('quantity')}</label>
                         <div className="flex items-center border border-gray-300 rounded-md w-fit">
                             <button onClick={() => handleQuantityChange(-1)} className="p-3 hover:bg-gray-100 rounded-l-md"><Minus size={16}/></button>
                             <span className="px-5 font-semibold">{quantity}</span>
@@ -144,13 +146,13 @@ const ProductDetailsPage = () => {
                             onClick={handleAddToCart}
                             className="flex-1 flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 font-semibold transition-colors"
                         >
-                            <ShoppingCart size={20} /> Add to Cart
+                            <ShoppingCart size={20} /> {t('add_to_cart')}
                         </button>
                         <button
                             onClick={handleBuyNow}
                             className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors"
                         >
-                            Buy Now
+                            {t('buy_now')}
                         </button>
                     </div>
 
@@ -169,4 +171,3 @@ const ProductDetailsPage = () => {
 };
 
 export default ProductDetailsPage;
-

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthFormLayout from '../components/layout/AuthFormLayout';
 import InfoCards from '../components/layout/InfoCards';
 import { apiService } from '../components/layout/apiService';
 import { endpoints } from '../api/endpoints';
-import { useAuth } from '../context/AuthContext'; // Assuming a unified auth context
+import { useAuth } from '../context/AuthContext'; 
 
 const InputField = ({ id, label, type, value, onChange, error, autoComplete }) => (
     <div>
@@ -24,7 +25,8 @@ const InputField = ({ id, label, type, value, onChange, error, autoComplete }) =
 
 const VendorSignInPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuth(); // Using the same login for simplicity
+    const { login } = useAuth(); 
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -47,9 +49,8 @@ const VendorSignInPage = () => {
             });
 
             if (response.success && response.data.token) {
-                // Assuming vendor login returns a user-like object and token
                 login(response.data.vendor, response.data.token);
-                navigate('/vendor/dashboard'); // Redirect to a vendor-specific dashboard
+                navigate('/vendor/dashboard'); 
             } else {
                 throw new Error(response.message || 'Login failed.');
             }
@@ -65,17 +66,17 @@ const VendorSignInPage = () => {
             <AuthFormLayout>
                 <div className="text-center mb-6">
                     <h2 className="text-3xl font-extrabold text-gray-900">
-                        Vendor Login
+                        {t('vendor_login')}
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Welcome back! Please sign in to your dashboard.
+                        {t('vendor_signin_welcome')}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <InputField
                         id="email"
-                        label="Your Email"
+                        label={t('your_email')}
                         type="email"
                         autoComplete="email"
                         value={formData.email}
@@ -84,7 +85,7 @@ const VendorSignInPage = () => {
                     />
                     <InputField
                         id="password"
-                        label="Password"
+                        label={t('password')}
                         type="password"
                         autoComplete="current-password"
                         value={formData.password}
@@ -95,11 +96,11 @@ const VendorSignInPage = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Remember me</label>
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">{t('remember_me')}</label>
                         </div>
                         <div className="text-sm">
                             <Link to="/vendor/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                                Forgot password?
+                                {t('forgot_password')}?
                             </Link>
                         </div>
                     </div>
@@ -109,16 +110,16 @@ const VendorSignInPage = () => {
                             disabled={isLoading}
                             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
                         >
-                            {isLoading ? 'Signing In...' : 'Sign In'}
+                            {isLoading ? t('sending') : t('sign_in')}
                         </button>
                     </div>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
-                        Don't have a vendor account?{' '}
+                        {t('dont_have_vendor_account')}{' '}
                         <Link to="/vendor/signup" className="font-semibold text-blue-600 hover:underline">
-                            Sign Up Now
+                            {t('signup_now')}
                         </Link>
                     </p>
                 </div>

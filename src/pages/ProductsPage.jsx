@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/products/ProductCard';
 import FilterSidebar from '../components/products/FilterSidebar';
 import Pagination from '../components/Pagination';
@@ -11,6 +12,7 @@ import InfoCards from '../components/layout/InfoCards';
 import { endpoints } from '../api/endpoints'; // Import endpoints
 
 const ProductsPage = () => {
+    const { t } = useTranslation();
     const [allProducts, setAllProducts] = useState([]);
     const [displayedProducts, setDisplayedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,13 +39,13 @@ const ProductsPage = () => {
         const brandSlug = searchParams.get('brand');
         const categorySlug = categorySlugFromPath || searchParams.get('category');
         
-        if (section === 'featured') return 'Featured Products';
-        if (section === 'flash_deal') return 'Flash Deals';
-        if (section === 'top_sellers') return 'Top Selling Products';
+        if (section === 'featured') return t('featured_products');
+        if (section === 'flash_deal') return t('flash_deals');
+        if (section === 'top_sellers') return t('top_sellers');
         if (categorySlug) return `Products in ${categorySlug.replace(/-/g, ' ')}`;
         if (brandSlug) return `Products from ${brandSlug.replace(/-/g, ' ')}`;
         return 'All Products';
-    }, [searchParams, categorySlugFromPath]);
+    }, [searchParams, categorySlugFromPath, t]);
 
     useEffect(() => {
         // UPDATED: Use endpoints object for API call
@@ -133,11 +135,11 @@ const ProductsPage = () => {
                 <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 capitalize">{pageTitle}</h2>
-                        <p className="text-sm text-gray-500">{paginationInfo?.totalItems || 0} items found</p>
+                        <p className="text-sm text-gray-500">{paginationInfo?.totalItems || 0} {t('items_found')}</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <input type="text" placeholder="Search for items..." className="border-gray-300 rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48 focus:ring-brand-blue focus:border-brand-blue"/>
+                            <input type="text" placeholder={t('search_placeholder')} className="border-gray-300 rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48 focus:ring-brand-blue focus:border-brand-blue"/>
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         </div>
                         <select
@@ -148,11 +150,11 @@ const ProductsPage = () => {
                             }}
                             className="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-blue focus:border-brand-blue"
                         >
-                            <option value="created_at-desc">Sort by Default</option>
-                            <option value="name-asc">Name (A-Z)</option>
-                            <option value="name-desc">Name (Z-A)</option>
-                            <option value="price-asc">Price (Low to High)</option>
-                            <option value="price-desc">Price (High to Low)</option>
+                            <option value="created_at-desc">{t('sort_by_default')}</option>
+                            <option value="name-asc">{t('sort_name_asc')}</option>
+                            <option value="name-desc">{t('sort_name_desc')}</option>
+                            <option value="price-asc">{t('sort_price_asc')}</option>
+                            <option value="price-desc">{t('sort_price_desc')}</option>
                         </select>
                     </div>
                 </div>
@@ -182,8 +184,8 @@ const ProductsPage = () => {
                                 ))
                             ) : (
                                 <div className="col-span-full text-center py-16">
-                                    <h2 className="text-xl font-semibold text-gray-700">No Products Found</h2>
-                                    <p className="text-gray-500 mt-2">Try adjusting your filters.</p>
+                                    <h2 className="text-xl font-semibold text-gray-700">{t('no_products_found')}</h2>
+                                    <p className="text-gray-500 mt-2">{t('adjust_filters_prompt')}</p>
                                 </div>
                             )}
                         </div>
@@ -201,4 +203,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-

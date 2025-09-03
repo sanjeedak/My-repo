@@ -22,7 +22,7 @@ const Stepper = ({ currentStep }) => {
                             >
                                 {isCompleted ? '✔' : stepNumber}
                             </div>
-                            <p className={`mt-2 text-xs font-semibold ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                            <p className={`mt-2 text-[10px] sm:text-xs font-semibold ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
                                 {step}
                             </p>
                         </div>

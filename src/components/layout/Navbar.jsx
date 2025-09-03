@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiService } from './apiService';
 import { endpoints } from '../../api/endpoints';
 import { GridIcon, ChevronDownIcon } from '../../assets/icons';
@@ -50,6 +51,7 @@ const DropdownMenu = ({
 
 // --- Main Navbar ---
 const Navbar = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,22 +82,22 @@ const Navbar = () => {
     fetchData();
   }, []);
 
-  const mainNavLinks = [{ to: '/', text: 'Home' }];
+  const mainNavLinks = [{ to: '/', text: t('home') }];
 
   const offerLinks = [
-      { to: "/deals?type=flash", text: "Flash Deals" },
-      { to: "/products?featured=true", text: "Featured Products" },
-      { to: "/products?top_rated=true", text: "Top Rated" },
+      { to: "/deals?type=flash", text: t('flash_deals') },
+      { to: "/products?featured=true", text: t('featured_products') },
+      { to: "/products?top_rated=true", text: t('top_rated') },
   ];
 
   const brandLinks = [
     ...brands.map(brand => ({ to: `/products?brand=${brand.slug}`, text: brand.name })),
-    { to: "/brands", text: "View All Brands", isBold: true }
+    { to: "/brands", text: t('view_all_brands'), isBold: true }
   ];
 
   const vendorZoneLinks = [
-    { to: '/vendor/signup', text: 'Become a Vendor' },
-    { to: '/vendor/signin', text: 'Vendor Login' },
+    { to: '/vendor/signup', text: t('become_a_vendor') },
+    { to: '/vendor/signin', text: t('vendor_login') },
   ];
 
   const categoryLinks = loading
@@ -116,7 +118,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-x-1 w-full">
             <DropdownMenu
               buttonClassName={categoriesButtonClass}
-              buttonContent={<><GridIcon className="h-5 w-5 mr-2" /><span>Categories</span><ChevronDownIcon className="h-5 w-5 ml-2 text-gray-400" /></>}
+              buttonContent={<><GridIcon className="h-5 w-5 mr-2" /><span>{t('categories')}</span><ChevronDownIcon className="h-5 w-5 ml-2 text-gray-400" /></>}
               links={categoryLinks}
               dropdownWidth="w-72"
               isScrollable
@@ -126,18 +128,18 @@ const Navbar = () => {
               <NavLink key={link.text} to={link.to} className={({ isActive }) => `px-4 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-blue-900 text-white' : 'text-blue-100 hover:bg-blue-700'}`}>{link.text}</NavLink>
             ))}
             <DropdownMenu
-              buttonContent={<><span>Brands</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
+              buttonContent={<><span>{t('brands')}</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
               buttonClassName={defaultButtonClass}
               links={brandLinks}
               isLoading={loading}
             />
             <DropdownMenu
-              buttonContent={<><span>Offers</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
+              buttonContent={<><span>{t('offers')}</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
               buttonClassName={defaultButtonClass}
               links={offerLinks}
             />
             <DropdownMenu
-              buttonContent={<><span>Vendor Zone</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
+              buttonContent={<><span>{t('vendor_zone')}</span><ChevronDownIcon className="h-5 w-5 ml-1 text-blue-200" /></>}
               buttonClassName={defaultButtonClass}
               links={vendorZoneLinks}
               dropdownWidth="w-56"
@@ -164,7 +166,7 @@ const Navbar = () => {
                   onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
                   className="w-full flex justify-between items-center px-3 py-2 text-blue-100 font-semibold"
                 >
-                  Categories
+                  {t('categories')}
                   <ChevronDownIcon className={`h-5 w-5 transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isCategoryDropdownOpen && (
@@ -178,8 +180,8 @@ const Navbar = () => {
                 )}
               </div>
 
-              <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">Brands</Link>
-              <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">Offers</Link>
+              <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{t('brands')}</Link>
+              <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{t('offers')}</Link>
               
               <div className="border-t border-blue-700 mt-2 pt-2">
                 <h4 className="px-3 text-sm font-semibold text-gray-400 uppercase">Vendor</h4>

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthFormLayout from '../components/layout/AuthFormLayout';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
 import InfoCards from '../components/layout/InfoCards';
-import { endpoints } from '../api/endpoints'; // Import endpoints
+import { endpoints } from '../api/endpoints'; 
 
 const InputField = ({ id, label, type, value, onChange, error, autoComplete }) => (
     <div>
@@ -23,6 +24,7 @@ const InputField = ({ id, label, type, value, onChange, error, autoComplete }) =
 
 const VendorForgotPasswordPage = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -57,8 +59,7 @@ const VendorForgotPasswordPage = () => {
         }
         setIsLoading(true);
         try {
-            // API call to send password reset link for vendors
-            await apiService(endpoints.vendorForgotPassword, { // CORRECTED
+            await apiService(endpoints.vendorForgotPassword, {
                 method: 'POST',
                 body: { email },
             });
@@ -82,17 +83,17 @@ const VendorForgotPasswordPage = () => {
                 </button>
                 <div className="text-center mb-6">
                     <h2 className="text-3xl font-extrabold text-gray-900">
-                        Vendor Forgot Password
+                        {t('vendor_login')} {t('forgot_password')}
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Enter your email to receive a reset link.
+                        {t('vendor_forgot_password_prompt')}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <InputField
                         id="email"
-                        label="Your Email"
+                        label={t('your_email')}
                         type="email"
                         autoComplete="email"
                         value={email}
@@ -106,16 +107,16 @@ const VendorForgotPasswordPage = () => {
                             disabled={isLoading}
                             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
                         >
-                            {isLoading ? 'Sending...' : 'Send Reset Link'}
+                            {isLoading ? t('sending') : t('send_reset_link')}
                         </button>
                     </div>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
-                        Remember your password?{' '}
+                        {t('remember_password')}{' '}
                         <Link to="/vendor/signin" className="font-semibold text-blue-600 hover:underline">
-                            Sign In
+                            {t('sign_in')}
                         </Link>
                     </p>
                 </div>

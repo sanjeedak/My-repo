@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const FAQItem = ({ faq, isOpen, onToggle }) => (
   <div className="border-b">
@@ -25,6 +26,7 @@ const FAQItem = ({ faq, isOpen, onToggle }) => (
 );
 
 const FAQPage = () => {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState(null);
 
   const faqs = [
@@ -55,9 +57,9 @@ const FAQPage = () => {
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10">
           <div className="text-center">
-            <h1 className="text-4xl font-extrabold text-slate-800">Frequently Asked Questions</h1>
+            <h1 className="text-4xl font-extrabold text-slate-800">{t('faq_title')}</h1>
             <p className="mt-2 text-md text-gray-500">
-              We understand that you may have questions. Here are some of the most common queries and their answers.
+              {t('faq_desc')}
             </p>
           </div>
           <div className="mt-8">

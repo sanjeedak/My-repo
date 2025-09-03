@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthFormLayout from '../components/layout/AuthFormLayout';
 import Stepper from '../components/layout/Stepper';
 import VendorInfoStep from '../components/VendorInfoStep';
@@ -37,6 +38,7 @@ export const FileUpload = ({ id, label, onChange, fileName, helpText, required =
 // --- Main Page Component ---
 const VendorSignUpPage = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', email: '', phone: '', password: '', confirmPassword: '',
@@ -126,7 +128,6 @@ const VendorSignUpPage = () => {
                 method: 'POST',
                 body: submissionData,
                 headers: {
-                    // Let the browser set the Content-Type for FormData
                     'Content-Type': undefined, 
                 },
             });
@@ -147,11 +148,11 @@ const VendorSignUpPage = () => {
     return (
         <div className="bg-slate-50">
             <AuthFormLayout
-                footerText="Already have an account?"
+                footerText={t('already_have_account')}
                 footerLink="/vendor/signin"
-                footerActionText="Sign In"
+                footerActionText={t('sign_in')}
             >
-                <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Create a Vendor Account</h2>
+                <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">{t('create_vendor_account')}</h2>
                 
                 <Stepper currentStep={step} />
 
@@ -164,25 +165,25 @@ const VendorSignUpPage = () => {
 
                     <div className="pt-4">
                         {step === 1 && (
-                            <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Next</button>
+                            <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">{t('next')}</button>
                         )}
                         {step === 2 && (
                             <div className="flex gap-4">
-                                <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">Back</button>
-                                <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Next</button>
+                                <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">{t('back')}</button>
+                                <button type="button" onClick={handleNext} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">{t('next')}</button>
                             </div>
                         )}
                         {step === 3 && (
                             <div className="space-y-4">
                                 <div className="flex items-center">
                                     <input id="agreedToTerms" name="agreedToTerms" type="checkbox" checked={formData.agreedToTerms} onChange={handleChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                                    <label htmlFor="agreedToTerms" className="ml-2 block text-sm text-gray-900">I agree to the <Link to="/terms" className="text-blue-600 hover:underline">terms and conditions</Link></label>
+                                    <label htmlFor="agreedToTerms" className="ml-2 block text-sm text-gray-900">{t('i_agree_to_terms')} <Link to="/terms" className="text-blue-600 hover:underline">{t('terms_and_conditions')}</Link></label>
                                 </div>
                                 {errors.agreedToTerms && <p className="text-xs text-red-600">{errors.agreedToTerms}</p>}
                                 <div className="flex gap-4">
-                                    <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">Back</button>
+                                    <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">{t('back')}</button>
                                     <button type="submit" disabled={isLoading} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400">
-                                        {isLoading ? 'Submitting...' : 'Submit Application'}
+                                        {isLoading ? t('submitting') : t('submit_application')}
                                     </button>
                                 </div>
                             </div>
