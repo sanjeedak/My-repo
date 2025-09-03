@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { apiService } from './apiService';
 import { endpoints } from '../../api/endpoints';
 import { GridIcon, ChevronDownIcon } from '../../assets/icons';
-import { Menu, X } from 'lucide-react';
 
 // --- Reusable DropdownMenu ---
 const DropdownMenu = ({
@@ -49,15 +48,12 @@ const DropdownMenu = ({
 };
 
 
-// --- Main Navbar ---
+// --- Main Navbar (Desktop Only) ---
 const Navbar = () => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,12 +106,10 @@ const Navbar = () => {
   const defaultButtonClass = "flex items-center font-medium text-blue-100 hover:text-white transition-colors text-base px-3 py-2 cursor-pointer";
 
   return (
-    <nav className="bg-blue-800 text-white shadow-md font-poppins sticky top-[64px] md:top-auto z-30">
+    <nav className="hidden md:block bg-blue-800 text-white shadow-md font-poppins z-30">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-x-1 w-full">
+          <div className="flex items-center gap-x-1 w-full">
             <DropdownMenu
               buttonClassName={categoriesButtonClass}
               buttonContent={<><GridIcon className="h-5 w-5 mr-2" /><span>{t('categories')}</span><ChevronDownIcon className="h-5 w-5 ml-2 text-gray-400" /></>}
@@ -145,53 +139,7 @@ const Navbar = () => {
               dropdownWidth="w-56"
             />
           </div>
-
-          {/* Mobile Hamburger Button */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white focus:outline-none p-2" aria-label="Open menu">
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden pb-4">
-            <nav className="flex flex-col space-y-1">
-              {mainNavLinks.map(link => <Link key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{link.text}</Link>)}
-              
-              {/* Mobile Categories Dropdown */}
-              <div className="border-t border-b border-blue-700 my-2">
-                <button
-                  onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                  className="w-full flex justify-between items-center px-3 py-2 text-blue-100 font-semibold"
-                >
-                  {t('categories')}
-                  <ChevronDownIcon className={`h-5 w-5 transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isCategoryDropdownOpen && (
-                  <div className="pl-6 border-l-2 border-blue-600 pb-2">
-                    {loading ? <div className="p-2 text-blue-200">Loading...</div> : categories.map(cat => (
-                      <Link key={cat.id} to={`/category/${cat.slug}`} onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-sm text-blue-200 hover:text-white">
-                        {cat.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <Link to="/brands" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{t('brands')}</Link>
-              <Link to="/deals" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{t('offers')}</Link>
-              
-              <div className="border-t border-blue-700 mt-2 pt-2">
-                <h4 className="px-3 text-sm font-semibold text-gray-400 uppercase">Vendor</h4>
-                {vendorZoneLinks.map(link => (
-                    <Link key={link.text} to={link.to} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-blue-100 hover:bg-blue-700">{link.text}</Link>
-                ))}
-              </div>
-            </nav>
-          </div>
-        )}
       </div>
     </nav>
   );
