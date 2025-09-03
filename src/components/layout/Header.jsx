@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ✅ FIXED: Removed unused NavLink import
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import {
   SearchIcon,
@@ -9,9 +9,8 @@ import {
   ChevronDownIcon,
   IndiaFlagIcon,
   UKFlagIcon,
-  // ✅ FIXED: Removed Globe from this import
 } from "../../assets/icons";
-import { LogIn, LogOut, UserPlus, Search as SearchIconMobile, Menu, X, Globe } from "lucide-react"; // Globe is correctly imported here
+import { LogIn, LogOut, UserPlus, Search as SearchIconMobile, Menu, X, Globe } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";

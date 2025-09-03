@@ -9,7 +9,7 @@ import { endpoints } from '../api/endpoints';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // 'login' is now used in handleSubmit()
+  const { login } = useAuth();
   
   const [useEmail, setUseEmail] = useState(true);
   const [showOTP, setShowOTP] = useState(false);
@@ -133,9 +133,8 @@ const SignUpPage = () => {
       });
 
       if (response.success) {
-        // Here we use the 'login' function after a successful signup
         login(response.data.user, response.data.token);
-        navigate('/'); // Redirect to the homepage after logging in
+        navigate('/');
       } else {
         throw new Error(response.message || 'Signup failed. Please try again.');
       }
@@ -147,7 +146,10 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 font-sans">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center p-4 font-sans" 
+      style={{backgroundImage: "url('/img/auth-background.jpg')"}}
+    >
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
             <Link to="/">
@@ -285,7 +287,7 @@ const SignUpPage = () => {
            <div className="mt-8 text-center text-sm">
                 <p className="text-gray-600">
                     Already have an account?{' '}
-                    <Link to="/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
+                    <Link to="/signin" className="font-semibold text-indigo-600 hover:text-indigo-500">
                         Sign In
                     </Link>
                 </p>

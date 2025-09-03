@@ -109,16 +109,19 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 font-sans">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center p-4 font-sans" 
+      style={{backgroundImage: "url('/img/auth-background.jpg')"}}
+    >
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
             <Link to="/">
                 <img src="/img/logo_shopzeo.png" alt="Shopzeo Logo" className="h-12 mx-auto" />
             </Link>
         </div>
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
                 Welcome Back!
             </h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -172,7 +175,7 @@ const SignInPage = () => {
                     type="button"
                     onClick={handleSendOTP}
                     disabled={isLoading}
-                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
                 >
                     {isLoading ? 'Sending OTP...' : 'Send OTP'}
                 </button>
@@ -180,11 +183,11 @@ const SignInPage = () => {
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                    <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">Remember me</label>
                 </div>
                 <div className="text-sm">
-                    <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                    <Link to="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
                         Forgot password?
                     </Link>
                 </div>
@@ -196,7 +199,7 @@ const SignInPage = () => {
                   <button 
                       type="submit" 
                       disabled={isLoading}
-                      className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
+                      className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 transition-colors"
                   >
                       {isLoading ? 'Signing In...' : 'Sign In'}
                   </button>
@@ -206,7 +209,7 @@ const SignInPage = () => {
           <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                     Don't have an account?{' '}
-                    <Link to="/signup" className="font-semibold text-blue-600 hover:underline">
+                    <Link to="/signup" className="font-semibold text-indigo-600 hover:underline">
                         Sign Up
                     </Link>
                 </p>
