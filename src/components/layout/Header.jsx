@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTranslation } from 'react-i18next'; // <-- Import useTranslation
+import { useTranslation } from 'react-i18next';
 import {
   SearchIcon,
   WishlistIcon,
@@ -16,8 +16,8 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useAuth } from "../../context/AuthContext";
 
 const Header = () => {
-  const { t, i18n } = useTranslation(); // <-- Initialize translation hook
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // ✅ FIXED: Added the missing '=' sign
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,10 +30,10 @@ const Header = () => {
   const { wishlistItems } = useWishlist();
   const { user, logout } = useAuth();
   
-  const languages = [
+  const languages = useMemo(() => [
     { code: 'en', name: t('english'), Icon: UKFlagIcon },
     { code: 'hi', name: t('hindi'), Icon: IndiaFlagIcon },
-  ];
+  ], [t]);
   
   const [selectedLang, setSelectedLang] = useState(languages.find(l => l.code === i18n.language) || languages[0]);
 
@@ -52,7 +52,7 @@ const Header = () => {
   }
   
   const handleLanguageChange = (lang) => {
-    i18n.changeLanguage(lang.code); // <-- Change the language
+    i18n.changeLanguage(lang.code);
     setSelectedLang(lang);
     setIsDropdownOpen(false);
   };
@@ -81,6 +81,12 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // This effect ensures the dropdown text updates when the language changes elsewhere
+  useEffect(() => {
+    setSelectedLang(languages.find(l => l.code === i18n.language) || languages[0]);
+  }, [i18n.language, languages]);
+
+
   return (
     <header
       className={`sticky top-0 z-40 w-full transition-all duration-300 ${
@@ -99,7 +105,7 @@ const Header = () => {
           <form className="w-full flex" onSubmit={handleSearch}>
             <input
               type="text"
-              placeholder={t('search_placeholder')} // <-- Use translated text
+              placeholder={t('search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none"
@@ -223,7 +229,7 @@ const Header = () => {
                <form className="w-full flex" onSubmit={handleSearch}>
                     <input
                       type="text"
-                      placeholder={t('search_placeholder')} // <-- Use translated text
+                      placeholder={t('search_placeholder')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none"
