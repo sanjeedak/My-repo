@@ -2,13 +2,15 @@
 export const endpoints = {
   // Products
   products: '/api/products',
+  productDetails: (slug) => `/api/products/${slug}`, // Add this new endpoint
+  productSearch: '/api/products/search',
   topSellers: '/api/products/top-sellers',
 
   // Brands
   brands: '/api/brands',
   
   // Stores (Vendors)
-  stores: '/api/stores', // <-- ADDED THIS LINE
+  stores: '/api/stores',
 
   // Banners
   banners: '/api/banners',
@@ -33,4 +35,3 @@ export const endpoints = {
   vendorSignup: '/api/auth/vendor/signup',
   vendorForgotPassword: '/api/auth/vendor/forgot-password',
 };
-
