@@ -11,6 +11,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
+// Swiper button and pagination styles (unchanged)
 const heroBannerStyles = `
   .hero-swiper .swiper-button-next,
   .hero-swiper .swiper-button-prev {
@@ -70,7 +71,8 @@ const HeroBanner = () => {
     fetchBanners();
   }, []);
 
-  const handleActionClick = (url) => {
+  // Handler for clicking the entire slide
+  const handleSlideClick = (url) => {
     if (url) {
       navigate(url);
     }
@@ -98,29 +100,18 @@ const HeroBanner = () => {
           }}
         >
           {banners.map((banner) => (
-            <SwiperSlide key={banner.id}>
+            <SwiperSlide
+              key={banner.id}
+              onClick={() => handleSlideClick(banner.button_url)}
+              style={{ cursor: banner.button_url ? 'pointer' : 'default' }}
+            >
               <div
                 className="w-full h-full bg-cover bg-center"
                 style={{
-                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${getImageUrl(banner.image)})`
+                  backgroundImage: `url(${getImageUrl(banner.image)})`
                 }}
               >
-                <div className="container mx-auto px-8 md:px-12 h-full flex flex-col justify-center items-start text-left">
-                  <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-3">
-                    {banner.title}
-                  </h1>
-                  <p className="text-base md:text-lg text-gray-200 mb-6 max-w-lg">
-                    {banner.description}
-                  </p>
-                  {banner.button_text && (
-                     <button
-                        onClick={() => handleActionClick(banner.button_url)}
-                        className="bg-blue-600 text-white font-bold px-6 py-3 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300"
-                      >
-                        {banner.button_text}
-                      </button>
-                  )}
-                </div>
+                {/* All text and button elements have been removed from here */}
               </div>
             </SwiperSlide>
           ))}

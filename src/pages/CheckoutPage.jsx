@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import MapSection from '../components/MapSection';
 import { validateEmailPhone } from '../utils/sanatize';
+import axios from 'axios'; // Import axios for making API requests
 
 const CheckoutPage = () => {
   const { cartItems, clearCart } = useCart();
@@ -26,6 +27,7 @@ const CheckoutPage = () => {
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [errors, setErrors] = useState({});
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [isSubmitting, setIsSubmitting] = useState(false); // State to handle submission status
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -53,19 +55,19 @@ const CheckoutPage = () => {
     const newErrors = {};
     
     if (!shippingForm.name.trim()) newErrors.shipping_name = 'Full name is required.';
-    const shippingPhoneError = validateEmailPhone(shippingForm.phone, false);
+    const shippingPhoneError = validateEmailPhone(shippingForm.phone, false); //
     if (shippingPhoneError) newErrors.shipping_phone = shippingPhoneError;
-    if (!shippingForm.address.trim()) newErrors.shipping_address = 'Address is required.';
-    if (!shippingForm.city.trim()) newErrors.shipping_city = 'City is required.';
-    if (!/^\d{6}$/.test(shippingForm.pincode)) newErrors.shipping_pincode = 'Pincode must be 6 digits.';
+    if (!shippingForm.address.trim()) newErrors.shipping_address = 'Address is required.'; //
+    if (!shippingForm.city.trim()) newErrors.shipping_city = 'City is required.'; //
+    if (!/^\d{6}$/.test(shippingForm.pincode)) newErrors.shipping_pincode = 'Pincode must be 6 digits.'; //
 
     if (!sameAsShipping) {
-      if (!billingForm.name.trim()) newErrors.billing_name = 'Full name is required.';
-      const billingPhoneError = validateEmailPhone(billingForm.phone, false);
+      if (!billingForm.name.trim()) newErrors.billing_name = 'Full name is required.'; //
+      const billingPhoneError = validateEmailPhone(billingForm.phone, false); //
       if (billingPhoneError) newErrors.billing_phone = billingPhoneError;
-      if (!billingForm.address.trim()) newErrors.billing_address = 'Address is required.';
-      if (!billingForm.city.trim()) newErrors.billing_city = 'City is required.';
-      if (!/^\d{6}$/.test(billingForm.pincode)) newErrors.billing_pincode = 'Pincode must be 6 digits.';
+      if (!billingForm.address.trim()) newErrors.billing_address = 'Address is required.'; //
+      if (!billingForm.city.trim()) newErrors.billing_city = 'City is required.'; //
+      if (!/^\d{6}$/.test(billingForm.pincode)) newErrors.billing_pincode = 'Pincode must be 6 digits.'; //
     }
     
     setErrors(newErrors);
@@ -90,22 +92,34 @@ const CheckoutPage = () => {
     setBillingForm(prev => ({ ...prev, ...address }));
   };
 
-  const handlePlaceOrder = (e) => {
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      const mockOrderId = `SHPZ${Date.now().toString().slice(-6)}`;
-      
-      console.log("Order Placed:", {
-        orderId: mockOrderId,
-        shippingDetails: { ...shippingForm, location: shippingLocation },
-        billingDetails: sameAsShipping ? { ...shippingForm, location: shippingLocation } : { ...billingForm, location: billingLocation },
+      setIsSubmitting(true);
+      const orderData = {
+        items: cartItems.map(item => ({ productId: item.id, quantity: item.quantity })),
+        shippingAddress: { ...shippingForm, location: shippingLocation },
+        billingAddress: sameAsShipping ? { ...shippingForm, location: shippingLocation } : { ...billingForm, location: billingLocation },
         paymentMethod,
-        items: cartItems,
-        total,
-      });
+      };
 
-      clearCart();
-      navigate('/order-success', { state: { orderId: mockOrderId } });
+      try {
+        const token = localStorage.getItem('token'); // Get the auth token from storage
+        const response = await axios.post('/api/orders', orderData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          clearCart();
+          navigate('/order-success', { state: { orderId: response.data.data.orderNumber } });
+        }
+      } catch (error) {
+        console.error("Order failed:", error.response?.data?.message || error.message);
+        // Optionally, display an error message to the user
+        setErrors(prev => ({ ...prev, api: 'There was an error placing your order. Please try again.' }));
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -244,9 +258,14 @@ const CheckoutPage = () => {
           </div>
           
           <div className="pt-4">
-             <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                {t('place_order')}
+             <button 
+                type="submit" 
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-blue-300"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Placing Order...' : t('place_order')}
               </button>
+              {errors.api && <p className="text-red-500 text-sm mt-2 text-center">{errors.api}</p>}
           </div>
         </form>
       </div>
