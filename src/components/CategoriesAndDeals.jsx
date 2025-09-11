@@ -105,6 +105,80 @@ export const CategoriesSection = () => {
   );
 };
 
+// --- Brands Section ---
+export const BrandsSection = () => {
+    const { t } = useTranslation();
+    const [brands, setBrands] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const getBrandImageUrl = (logo) => {
+        if (!logo) return 'https://placehold.co/80x80/EBF4FF/7F9CF5?text=Brand';
+        if (logo.startsWith('http')) return logo;
+        return `${API_BASE_URL}/${logo}`;
+    };
+
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const data = await apiService(`${endpoints.brands}?limit=12`);
+                if (data.success && Array.isArray(data.data?.brands)) {
+                    setBrands(data.data.brands);
+                }
+            } catch (error) {
+                console.error('Failed to fetch brands:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBrands();
+    }, []);
+
+    return (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">{t('brands')}</h2>
+                <Link to="/brands" className="text-sm text-blue-600 hover:underline">
+                    {t('view_all_brands')} →
+                </Link>
+            </div>
+            {loading ? (
+                <div className="text-center text-gray-500">Loading brands...</div>
+            ) : (
+                <Swiper
+                    modules={[Navigation]}
+                    navigation
+                    spaceBetween={16}
+                    slidesPerView={4}
+                    breakpoints={{
+                        640: { slidesPerView: 5 },
+                        1024: { slidesPerView: 8 },
+                    }}
+                >
+                    {brands.map((brand) => (
+                        <SwiperSlide key={brand.id}>
+                            <Link
+                                to={`/products?brand=${brand.slug}`}
+                                className="cursor-pointer group flex flex-col items-center text-center p-2 border rounded-md hover:shadow-md transition"
+                            >
+                                <div className="w-20 h-20 flex items-center justify-center">
+                                    <img 
+                                        src={getBrandImageUrl(brand.logo)} 
+                                        alt={brand.name} 
+                                        className="max-w-full max-h-full object-contain"
+                                        onError={(e) => { e.target.src = 'https://placehold.co/80x80/EBF4FF/7F9CF5?text=Brand'; }}
+                                    />
+                                </div>
+                                <p className="mt-2 text-xs text-gray-700 group-hover:text-blue-600 truncate w-full">{brand.name}</p>
+                            </Link>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
+            )}
+        </div>
+    );
+};
+
+
 // --- Featured Deal Section ---
 export const FeaturedDealSection = () => {
   const [deals, setDeals] = useState([]);

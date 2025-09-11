@@ -1,10 +1,11 @@
 import React from 'react';
 import CategoriesBar from '../components/CategoriesBar';
 import HeroBanner from '../components/HeroBanner';
-import { FlashDeal, FeaturedProducts, TopSellers } from '../components/products/ProductSections';
-import { CategoriesSection } from '../components/CategoriesAndDeals';
-import InfoCards from '../components/layout/InfoCards';
+import { FlashDeal, FeaturedProducts, TopRatedProducts, LatestProducts, TopSellers } from '../components/products/ProductSections';
+import { CategoriesSection, BrandsSection } from '../components/CategoriesAndDeals';
+import AppPromotion from '../components/layout/AppPromotion';
 import DeliveryInfo from '../components/layout/DeliveryInfo';
+import InfoCards from '../components/layout/InfoCards';
 
 const HomePage = () => {
   return (
@@ -25,10 +26,14 @@ const HomePage = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-16">
           <FlashDeal />
+          <DeliveryInfo />
           <FeaturedProducts />
+          <TopRatedProducts />
+          <LatestProducts />
+          <BrandsSection />
           <TopSellers />
           <CategoriesSection />
-          <DeliveryInfo />
+          <AppPromotion />
           <InfoCards />
         </div>
       </div>

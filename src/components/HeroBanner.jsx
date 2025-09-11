@@ -11,7 +11,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
-// Swiper button and pagination styles (unchanged)
+// Swiper button and pagination styles
 const heroBannerStyles = `
   .hero-swiper .swiper-button-next,
   .hero-swiper .swiper-button-prev {
@@ -71,7 +71,6 @@ const HeroBanner = () => {
     fetchBanners();
   }, []);
 
-  // Handler for clicking the entire slide
   const handleSlideClick = (url) => {
     if (url) {
       navigate(url);
@@ -99,20 +98,21 @@ const HeroBanner = () => {
             disableOnInteraction: false,
           }}
         >
-          {banners.map((banner) => (
+          {banners.map((banner, index) => (
             <SwiperSlide
               key={banner.id}
               onClick={() => handleSlideClick(banner.button_url)}
               style={{ cursor: banner.button_url ? 'pointer' : 'default' }}
+              className="bg-gray-100"
             >
-              <div
-                className="w-full h-full bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${getImageUrl(banner.image)})`
-                }}
-              >
-                {/* All text and button elements have been removed from here */}
-              </div>
+               <img
+                src={getImageUrl(banner.image)}
+                alt={`Promotion ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
+                decoding="async"
+              />
             </SwiperSlide>
           ))}
         </Swiper>
