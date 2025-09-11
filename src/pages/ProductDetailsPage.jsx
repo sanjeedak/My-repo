@@ -34,8 +34,6 @@ const ProductDetailsPage = () => {
             }
 
             try {
-                // This fetches all products. For a large catalog, a dedicated API endpoint 
-                // like /api/products/{slug} would be more efficient.
                 const data = await apiService(endpoints.products);
 
                 if (data && data.products) {
@@ -65,8 +63,6 @@ const ProductDetailsPage = () => {
         setQuantity(prev => {
             const newQuantity = prev + amount;
             if (newQuantity < 1) return 1;
-            // Add a check against product stock if available
-            // if (newQuantity > product.stock) return product.stock; 
             return newQuantity;
         });
     };
@@ -75,7 +71,7 @@ const ProductDetailsPage = () => {
         if (product) {
             addToCart({ ...product, quantity });
             setAddToCartMessage(`${quantity} × "${product.name}" added to cart!`);
-            setTimeout(() => setAddToCartMessage(''), 3000); // Hide message after 3 seconds
+            setTimeout(() => setAddToCartMessage(''), 3000);
         }
     };
 
@@ -103,54 +99,52 @@ const ProductDetailsPage = () => {
     );
 
     return (
-        <div className="container mx-auto px-4 py-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Product Image Gallery */}
-                <ProductImageGallery images={imageUrls} productName={product.name} />
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Product Image Gallery (Takes 1/3 space on desktop) */}
+                <div className="md:col-span-1">
+                    <ProductImageGallery images={imageUrls} productName={product.name} />
+                </div>
 
-                {/* Product Info */}
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
-                    <div className="flex items-baseline gap-3 mt-3">
-                        <p className="text-blue-600 text-3xl font-bold">₹{product.price}</p>
+                {/* Product Info (Takes 2/3 space on desktop) */}
+                <div className="md:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                    <h1 className="text-2xl font-bold text-gray-800">{product.name}</h1>
+                    <div className="flex items-baseline gap-3 mt-2">
+                        <p className="text-blue-600 text-2xl font-bold">₹{product.price}</p>
                         {product.discount > 0 && (
-                            <p className="text-gray-500 line-through text-lg">₹{product.originalPrice}</p>
+                            <p className="text-gray-500 line-through text-md">₹{product.originalPrice}</p>
                         )}
                     </div>
                     
-                    {/* Add to Cart Message */}
                     {addToCartMessage && (
                         <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md text-center transition-opacity duration-300">
                             {addToCartMessage}
                         </div>
                     )}
 
-                    <p className="mt-4 text-gray-600 leading-relaxed">
+                    <p className="mt-4 text-gray-600 leading-relaxed text-sm">
                         {product.description || "No description available for this product."}
                     </p>
 
-                    {/* Quantity Selector */}
-                    <div className="mt-6">
+                    <div className="mt-5">
                         <label className="block text-sm font-medium text-gray-700 mb-2">{t('quantity')}</label>
                         <div className="flex items-center border border-gray-300 rounded-md w-fit">
-                            <button onClick={() => handleQuantityChange(-1)} className="p-3 hover:bg-gray-100 rounded-l-md"><Minus size={16}/></button>
-                            <span className="px-5 font-semibold">{quantity}</span>
-                            <button onClick={() => handleQuantityChange(1)} className="p-3 hover:bg-gray-100 rounded-r-md"><Plus size={16}/></button>
+                            <button onClick={() => handleQuantityChange(-1)} className="p-2.5 hover:bg-gray-100 rounded-l-md"><Minus size={16}/></button>
+                            <span className="px-5 font-semibold text-sm">{quantity}</span>
+                            <button onClick={() => handleQuantityChange(1)} className="p-2.5 hover:bg-gray-100 rounded-r-md"><Plus size={16}/></button>
                         </div>
                     </div>
 
-
-                    {/* Action Buttons */}
-                    <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                    <div className="mt-5 flex flex-col sm:flex-row gap-3">
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 font-semibold transition-colors"
+                            className="flex-1 flex items-center justify-center gap-2 bg-yellow-500 text-white px-6 py-2.5 rounded-lg hover:bg-yellow-600 font-semibold transition-colors"
                         >
-                            <ShoppingCart size={20} /> {t('add_to_cart')}
+                            <ShoppingCart size={18} /> {t('add_to_cart')}
                         </button>
                         <button
                             onClick={handleBuyNow}
-                            className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors"
+                            className="flex-1 bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 font-semibold transition-colors"
                         >
                             {t('buy_now')}
                         </button>
@@ -163,7 +157,7 @@ const ProductDetailsPage = () => {
                 <ProductTabs
                     description={product.description}
                     specifications={product.specifications}
-                    reviews={[]} // You can pass reviews here when available from the API
+                    reviews={[]}
                 />
             </div>
         </div>

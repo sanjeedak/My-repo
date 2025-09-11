@@ -46,8 +46,8 @@ const ProductCard = ({ product, onQuickView }) => {
     <div
       className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer text-left relative overflow-hidden group h-full"
     >
-      {/* Image Container */}
-      <div className="p-3 relative aspect-square" onClick={handleNavigateDetails}>
+      {/* Image Container with 2:3 Aspect Ratio and Bottom Border */}
+      <div className="relative aspect-[1/1] w-full overflow-hidden border-b border-gray-200" onClick={handleNavigateDetails}>
         {product.discount > 0 && (
           <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">
             {product.discount}% OFF
@@ -56,7 +56,7 @@ const ProductCard = ({ product, onQuickView }) => {
         <img
           src={getImageUrl(product.image)}
           alt={product.name}
-          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2"
         />
         <div
           className="absolute top-2 right-2 flex flex-col gap-2 transition-opacity duration-300 opacity-0 group-hover:opacity-100"

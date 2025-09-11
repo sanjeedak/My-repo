@@ -14,7 +14,7 @@ const getImageUrl = (imagePath, categoryName) => {
     return `${API_BASE_URL}/${imagePath}`;
   }
   const firstWord = categoryName.split(' ')[0];
-  return `https://placehold.co/40x40/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord)}`;
+  return `https://placehold.co/40x40/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord.charAt(0))}`;
 };
 
 const CategoriesBar = () => {
@@ -48,14 +48,14 @@ const CategoriesBar = () => {
 
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(category);
-    }, 200);
+    }, 150); // Faster activation
   };
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
-    }, 300);
+    }, 200); // Faster deactivation
   };
 
   const handlePanelMouseEnter = () => {
@@ -71,8 +71,11 @@ const CategoriesBar = () => {
   }
 
   return (
-    <div className="flex bg-white border border-gray-200 rounded-lg shadow-sm h-[380px] w-full relative">
-      <ul className="divide-y divide-gray-200 w-full overflow-y-auto">
+    <div 
+      onMouseLeave={handleMouseLeave} 
+      className="flex bg-white border border-gray-200 rounded-lg shadow-sm h-[380px] w-full relative"
+    >
+      <ul className="divide-y divide-gray-100 w-full overflow-y-auto scrollbar-hide">
         {loading ? (
           Array.from({ length: 8 }).map((_, index) => (
             <li key={index} className="p-4">
@@ -87,11 +90,11 @@ const CategoriesBar = () => {
             <li
               key={category.id}
               onMouseEnter={() => handleMouseEnter(category)}
-              onMouseLeave={handleMouseLeave}
+              className={`transition-colors duration-200 ${activeCategory?.id === category.id ? 'bg-blue-50' : ''}`}
             >
               <Link
                 to={`/category/${category.slug}`}
-                className="flex justify-between items-center w-full text-sm text-gray-700 text-left px-4 py-2.5 hover:bg-gray-50"
+                className="flex justify-between items-center w-full text-sm text-gray-700 text-left px-4 py-2.5 "
               >
                 <span className="flex items-center gap-3">
                   <img
@@ -99,9 +102,11 @@ const CategoriesBar = () => {
                     alt={category.name}
                     className="w-5 h-5 rounded-full object-cover"
                   />
-                  <span className="font-medium">{category.name}</span>
+                  <span className={`font-medium ${activeCategory?.id === category.id ? 'text-blue-600' : ''}`}>
+                    {category.name}
+                  </span>
                 </span>
-                <ChevronRightIcon />
+                {category.subcategories && category.subcategories.length > 0 && <ChevronRightIcon />}
               </Link>
             </li>
           ))
@@ -110,24 +115,21 @@ const CategoriesBar = () => {
 
       <div
         onMouseEnter={handlePanelMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className={`
           absolute left-full top-0 w-[550px] h-full bg-white border-l border-gray-200 shadow-lg z-10 p-5
-          transition-opacity duration-300 ease-in-out
-          ${activeCategory ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
+          transition-all duration-300 ease-in-out
+          ${activeCategory && activeCategory.subcategories && activeCategory.subcategories.length > 0
+            ? "opacity-100 pointer-events-auto transform-none" 
+            : "opacity-0 pointer-events-none transform -translate-x-2"}
         `}
       >
         {activeCategory && (
-          activeCategory.subcategories && activeCategory.subcategories.length > 0 ? (
-            <SubcategoryList
-              key={activeCategory.id}
-              categorySlug={activeCategory.slug}
-              categoryName={activeCategory.name}
-              subcategories={activeCategory.subcategories}
-            />
-          ) : (
-            <div className="p-4 text-gray-500">No subcategories</div>
-          )
+          <SubcategoryList
+            key={activeCategory.id}
+            categorySlug={activeCategory.slug}
+            categoryName={activeCategory.name}
+            subcategories={activeCategory.subcategories || []}
+          />
         )}
       </div>
     </div>

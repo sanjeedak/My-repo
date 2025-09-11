@@ -73,3 +73,45 @@ input[type="range"]::-moz-range-thumb {
 .animate-fade-in-up {
   animation: fade-in-up 0.3s ease-out forwards;
 }
+
+/* --- Global Enhancements for a Better Look & Feel --- */
+
+/* Add font smoothing for crisper text */
+body, html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Add a subtle transition to all links and buttons for smoother interactions */
+a, button {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Custom focus ring for better accessibility and branding */
+*:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Custom, subtle scrollbar for a modern look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9; /* slate-100 */
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* slate-400 */
+}
+
+/* A helper class for consistent section padding */
+@layer components {
+  .section-padding {
+    @apply py-8 sm:py-12;
+  }
+}
+
