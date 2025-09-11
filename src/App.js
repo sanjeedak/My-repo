@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
-import { MapProvider } from './context/MapProvider'; // Import the new MapProvider
+import { MapProvider } from './context/MapProvider'; 
 import CheckoutPage from './pages/CheckoutPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 
@@ -23,7 +23,7 @@ import SignUpPage from './pages/SignUpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
-import ProfilePage from './pages/ProfilePage'; 
+import ProfilePage from './pages/ProfilePage';
 import VendorSignUpPage from './pages/VendorSignUpPage';
 import VendorSignInPage from './pages/VendorSignInPage';
 import VendorForgotPasswordPage from './pages/VendorForgotPasswordPage';
@@ -39,6 +39,9 @@ import TermsPage from './pages/TermPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import CategoriesPage from './pages/CategoriesPage';
+
+// Import the ProtectedRoute component
+import ProtectedRoute from './components/ProtectedRoute';
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
@@ -68,7 +71,17 @@ function App() {
                   <Route path="wishlist" element={<WishlistPage />} />
                   <Route path="checkout" element={<CheckoutPage />} />
                   <Route path="products" element={<ProductsPage />} />
-                  <Route path="profile" element={<ProfilePage />} /> 
+                  
+                  {/* Protect the ProfilePage route */}
+                  <Route 
+                    path="profile" 
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  
                   <Route path="about" element={<AboutUsPage />} />
                   <Route path="contact" element={<ContactUsPage />} />
                   <Route path="faq" element={<FAQPage />} />
