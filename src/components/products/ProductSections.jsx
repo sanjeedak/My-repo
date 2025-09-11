@@ -100,24 +100,19 @@ const CountdownTimer = ({ hours = 48 }) => {
 };
 
 // --- PRODUCT CARD SKELETON ---
-const ProductCardSkeleton = ({ small = false }) => (
-  <div
-    className={`border rounded-md shadow-sm animate-pulse ${
-      small ? "max-w-[140px]" : ""
-    }`}
-  >
-    <div
-      className={`w-full ${
-        small ? "aspect-[3/4]" : "aspect-[1/1]"
-      } bg-gray-200 rounded-t-md`}
-    ></div>
-    <div className="p-2 space-y-1">
-      <div className="w-3/4 h-2.5 bg-gray-200 rounded"></div>
-      <div className="w-1/2 h-2.5 bg-gray-200 rounded"></div>
-      <div className="w-1/3 h-3 bg-gray-200 rounded"></div>
+const ProductCardSkeleton = () => (
+    <div className="border rounded-lg shadow-sm animate-pulse flex flex-col bg-white">
+        <div className="w-full aspect-square bg-gray-200 rounded-t-lg"></div>
+        <div className="p-3 flex-1 flex flex-col">
+            <div className="w-1/2 h-3 bg-gray-200 rounded mb-2"></div>
+            <div className="w-full h-4 bg-gray-200 rounded mb-1"></div>
+            <div className="w-3/4 h-4 bg-gray-200 rounded mb-2"></div>
+            <div className="w-1/3 h-5 bg-gray-200 rounded mt-auto"></div>
+        </div>
+        <div className="h-7 bg-gray-300 rounded-b-lg"></div>
     </div>
-  </div>
 );
+
 
 // --- FLASH DEAL ---
 export const FlashDeal = () => {
@@ -140,8 +135,7 @@ export const FlashDeal = () => {
         title={t("flash_deals")}
         linkTo="/products?section=flash_deal"
       />
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-stretch">
-        {/* LEFT INFO BOX */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -156,38 +150,32 @@ export const FlashDeal = () => {
           <CountdownTimer hours={48} />
         </motion.div>
 
-        {/* PRODUCT SLIDER */}
         <div className="relative lg:col-span-4">
           <Swiper
             modules={[Navigation]}
             navigation={{ nextEl: ".flash-next", prevEl: ".flash-prev" }}
-            spaceBetween={10}
+            spaceBetween={24}
             slidesPerView={2}
             breakpoints={{
-              360: { slidesPerView: 2.3 },
-              480: { slidesPerView: 3 },
-              640: { slidesPerView: 3.5 },
+              640: { slidesPerView: 3 },
               768: { slidesPerView: 4 },
               1024: { slidesPerView: 5 },
-              1280: { slidesPerView: 6 },
             }}
           >
             {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <SwiperSlide key={i}>
-                    <ProductCardSkeleton small />
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <SwiperSlide key={i} className="h-full">
+                    <ProductCardSkeleton />
                   </SwiperSlide>
                 ))
               : flashProducts.map((p) => (
-                  <SwiperSlide key={p.id}>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                      <ProductCard product={p} small />
+                  <SwiperSlide key={p.id} className="h-full">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full">
+                      <ProductCard product={p} />
                     </motion.div>
                   </SwiperSlide>
                 ))}
           </Swiper>
-
-          {/* CUSTOM NAV BUTTONS */}
           <button className="flash-prev absolute -left-3 top-1/2 -translate-y-1/2 bg-white text-gray-600 p-2 rounded-full shadow hover:bg-gray-100 z-10">
             ‹
           </button>
@@ -225,20 +213,15 @@ const ProductSectionLayout = ({ title, linkTo, endpoint }) => {
   return (
     <div className="my-8">
       <SectionHeader title={title} linkTo={linkTo} />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
         {loading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <ProductCardSkeleton key={i} small />
+          Array.from({ length: 6 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
           ))
         ) : products.length > 0 ? (
-          products.map((p) => <ProductCard key={p.id} product={p} small />)
+          products.map((p) => <ProductCard key={p.id} product={p} />)
         ) : (
           <div className="col-span-full text-center py-10 text-gray-500">
-            <img
-              src="/no-products.svg"
-              alt="No products"
-              className="w-32 mx-auto mb-3"
-            />
             <p className="text-sm">🚀 No products available right now.</p>
             <Link
               to="/products"
@@ -271,7 +254,7 @@ export const LatestProducts = () => {
     <ProductSectionLayout
       title={t("latest_products")}
       linkTo="/products?sortBy=created_at"
-      endpoint={`${endpoints.products}?sortBy=created_at&order=desc&limit=18`}
+      endpoint={`${endpoints.products}?sortBy=created_at&order=desc&limit=12`}
     />
   );
 };
@@ -280,10 +263,10 @@ export const LatestProducts = () => {
 export const TopRatedProducts = () => {
     const { t } = useTranslation();
     return (
-        <ProductSectionLayout 
-            title={t('top_rated_product')} 
-            linkTo="/products?top_rated=true" 
-            endpoint={`${endpoints.products}?top_rated=true&limit=12`}
+        <ProductSectionLayout
+            title={t('top_rated_product')}
+            linkTo="/products?top_rated=true"
+            endpoint={`${endpoints.products}?top_rated=true&limit=6`}
         />
     );
 };

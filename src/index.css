@@ -1,12 +1,13 @@
 /* src/index.css */
 
 /* Import Tailwind's base, components, and utilities */
-/* Removed @tailwind directives for plain CSS compatibility */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Apply global styles to the body */
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  background-color: #f3f4f6; /* Tailwind's gray-100 */
+  @apply font-sans bg-gray-100;
   /* Sets the light gray background like the example */
 }
 
@@ -83,15 +84,12 @@ body, html {
 
 /* Add a subtle transition to all links and buttons for smoother interactions */
 a, button {
-a, button {
-  transition-property: all;
-  transition-duration: 200ms;
-  transition-timing-function: ease-in-out;
+  @apply transition-all duration-200 ease-in-out;
 }
+
+/* Custom focus ring for better accessibility and branding */
 *:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px #fff; /* Approximate Tailwind ring-blue-500 with offset */
-}
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
 }
 
 /* Custom, subtle scrollbar for a modern look */
@@ -109,16 +107,11 @@ a, button {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8; /* slate-400 */
 }
-.section-padding {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-}
 
-@media (min-width: 640px) {
+/* A helper class for consistent section padding */
+@layer components {
   .section-padding {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    @apply py-8 sm:py-12;
   }
 }
-
 

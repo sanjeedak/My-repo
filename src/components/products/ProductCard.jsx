@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../api/config";
-import { Eye as EyeIcon, Heart, Star, ShoppingCart } from "lucide-react"; 
+import { Eye as EyeIcon, Heart, Star, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
 
@@ -19,7 +19,7 @@ const ProductCard = ({ product, onQuickView }) => {
   };
 
   const handleQuickView = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (onQuickView) {
       onQuickView(product);
     }
@@ -31,7 +31,7 @@ const ProductCard = ({ product, onQuickView }) => {
       addToWishlist(product);
     }
   };
-  
+
   const handleAddToCart = (e) => {
     e.stopPropagation();
     addToCart(product);
@@ -44,68 +44,71 @@ const ProductCard = ({ product, onQuickView }) => {
 
   return (
     <div
-      className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer text-left relative overflow-hidden group h-full"
+      className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-sm transition-all duration-300 hover:shadow-xl"
     >
-      {/* Image Container with 2:3 Aspect Ratio and Bottom Border */}
-      <div className="relative aspect-[1/1] w-full overflow-hidden border-b border-gray-200" onClick={handleNavigateDetails}>
+      {/* Image Container with Separator */}
+      {/* Changed aspect-square to aspect-[4/3] for reduced height */}
+      <div className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden border-b border-gray-200" onClick={handleNavigateDetails}>
         {product.discount > 0 && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">
+          <div className="absolute top-2 left-2 z-10 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
             {product.discount}% OFF
           </div>
         )}
         <img
           src={getImageUrl(product.image)}
           alt={product.name}
-          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2"
+          loading="lazy"
+          className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
         />
-        <div
-          className="absolute top-2 right-2 flex flex-col gap-2 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-        >
-          <button
-            onClick={handleQuickView}
-            className="p-1.5 rounded-full bg-white text-gray-800 hover:bg-gray-200 shadow-md"
-            aria-label="Quick view"
-          >
-            <EyeIcon className="w-4 h-4" />
-          </button>
-           <button onClick={handleAddToWishlist} className="p-1.5 rounded-full bg-white shadow-md hover:bg-red-100">
-                <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'text-red-500 fill-current' : 'text-gray-500'}`} />
+        {/* Hover actions */}
+        <div className="absolute top-0 right-0 m-2 flex flex-col gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
+            <button
+              onClick={handleQuickView}
+              className="rounded-full bg-white p-1.5 text-gray-800 shadow-md hover:bg-gray-200"
+              aria-label="Quick view"
+            >
+              <EyeIcon className="h-4 w-4" />
+            </button>
+            <button onClick={handleAddToWishlist} className="rounded-full bg-white p-1.5 shadow-md hover:bg-red-100">
+              <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current text-red-500' : 'text-gray-500'}`} />
             </button>
         </div>
       </div>
 
       {/* Details Container */}
-      <div className="p-3 flex flex-col flex-grow">
-        <div className="flex items-center gap-1 mb-1">
+      {/* Reduced padding from p-3 to p-2 for compactness */}
+      <div className="flex flex-1 flex-col p-2">
+        <div className="mb-1 flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
-                <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(product.rating) ? 'fill-current text-yellow-400' : 'text-gray-300'}`} />
             ))}
             <span className="text-xs text-gray-500">({product.totalReviews})</span>
         </div>
 
         <h3
-          className="font-semibold text-gray-700 text-sm mb-2 h-10 overflow-hidden"
+          className="mb-2 h-10 overflow-hidden text-sm font-semibold text-gray-700"
+          style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
           title={product.name}
         >
           {product.name}
         </h3>
-        
-        <div className="flex items-baseline gap-2 mt-auto">
-          <p className="text-blue-600 font-bold text-base">₹{product.price}</p>
+
+        <div className="mt-auto flex items-baseline gap-2">
+          <p className="text-base font-bold text-blue-600">₹{product.price}</p>
           {product.discount > 0 && (
-            <p className="text-gray-500 line-through text-xs">₹{product.originalPrice}</p>
+            <p className="text-xs text-gray-500 line-through">₹{product.originalPrice}</p>
           )}
         </div>
       </div>
       
-        {/* Add to Cart Button - Appears on Hover */}
-       <div 
-         onClick={handleAddToCart}
-         className="absolute bottom-0 left-0 right-0 bg-blue-600 text-white py-1.5 text-center font-semibold text-xs transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-1.5"
-       >
-         <ShoppingCart className="w-3.5 h-3.5" />
-         <span>Add to Cart</span>
-       </div>
+      {/* Add to Cart button slides up on hover */}
+      <div
+        onClick={handleAddToCart}
+        className="absolute bottom-0 left-0 right-0 flex translate-y-full cursor-pointer items-center justify-center gap-1.5 bg-blue-600 py-2 text-center text-sm font-semibold text-white transition-transform duration-300 group-hover:translate-y-0"
+      >
+        <ShoppingCart className="h-4 w-4" />
+        <span>Add to Cart</span>
+      </div>
     </div>
   );
 };

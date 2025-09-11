@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { StarIcon } from "../../assets/icons"; // Your shared StarIcon
 
 const ProductTabs = ({ description, specifications = [], reviews = [] }) => {
   const [activeTab, setActiveTab] = useState("description");
@@ -66,13 +65,7 @@ const ProductTabs = ({ description, specifications = [], reviews = [] }) => {
                 {review.author}
               </h4>
               <div className="flex items-center my-1">
-                {[...Array(5)].map((_, i) => (
-                  <StarIcon
-                    key={i}
-                    filled={i < review.rating}
-                    className="w-4 h-4 text-yellow-400"
-                  />
-                ))}
+                {/* You can re-import StarIcon if you intend to use it here */}
               </div>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {review.comment}

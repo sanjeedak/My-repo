@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from './layout/apiService';
 import { endpoints } from '../api/endpoints';
+import { API_BASE_URL } from '../api/config';
+import { transformProductData } from '../utils/transformProductData';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
-// Import Swiper styles
+// Styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
-// Swiper button and pagination styles
 const heroBannerStyles = `
   .hero-swiper .swiper-button-next,
   .hero-swiper .swiper-button-prev {
@@ -44,35 +45,69 @@ const heroBannerStyles = `
 `;
 
 const getImageUrl = (imagePath) => {
-  if (imagePath && imagePath.startsWith('http')) {
+  if (!imagePath) {
+    return 'https://placehold.co/1200x400?text=Promotion';
+  }
+  if (imagePath.startsWith('http')) {
     return imagePath;
   }
-  return 'https://placehold.co/1200x400?text=Promotion';
+  return `${API_BASE_URL}/${imagePath}`;
 };
 
 const HeroBanner = () => {
   const [banners, setBanners] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBanners = async () => {
+    const fetchData = async () => {
       try {
-        const data = await apiService(endpoints.banners);
-        setBanners(data.data.banners || []);
+        const [bannerData, productData] = await Promise.all([
+          apiService(endpoints.banners),
+          apiService(endpoints.products)
+        ]);
+
+        setBanners(bannerData.data.banners || []);
+
+        if (productData && productData.products) {
+          const transformed = productData.products.map(transformProductData);
+          setProducts(transformed);
+        }
+
       } catch (err) {
-        setError(`Failed to load banners: ${err.message}`);
+        setError(`Failed to load data: ${err.message}`);
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchBanners();
+    fetchData();
   }, []);
 
-  const handleSlideClick = (url) => {
-    if (url) {
+  const handleSlideClick = (banner) => {
+    if (banner.product_id) {
+      const productToLink = products.find(p => p.id === banner.product_id);
+      if (productToLink && productToLink.slug) {
+        navigate(`/product/${productToLink.slug}`);
+        return;
+      }
+    }
+
+    let url = banner.button_url;
+    if (!url) return;
+
+    if (url.startsWith('/products/')) {
+        const slug = url.substring('/products/'.length);
+        if (slug && !slug.includes('?')) {
+            url = `/category/${slug}`;
+        }
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
       navigate(url);
     }
   };
@@ -101,14 +136,14 @@ const HeroBanner = () => {
           {banners.map((banner, index) => (
             <SwiperSlide
               key={banner.id}
-              onClick={() => handleSlideClick(banner.button_url)}
-              style={{ cursor: banner.button_url ? 'pointer' : 'default' }}
+              onClick={() => handleSlideClick(banner)}
+              style={{ cursor: (banner.button_url || banner.product_id) ? 'pointer' : 'default' }}
               className="bg-gray-100"
             >
                <img
                 src={getImageUrl(banner.image)}
                 alt={`Promotion ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain md:object-cover"
                 loading={index === 0 ? 'eager' : 'lazy'}
                 fetchpriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"

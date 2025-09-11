@@ -12,15 +12,16 @@ const ChevronUpIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="
 
 const Footer = () => {
     const { t } = useTranslation();
-    const linkHoverClass = "hover:text-white transition-colors";
+    const linkHoverClass = "hover:text-white transition-colors duration-200";
+    const socialIconClass = "w-6 h-6 text-white transition-transform duration-200 hover:scale-110";
 
     return (
-        <footer className="mt-6 text-slate-300">
+        <footer className="mt-auto text-slate-300">
             {/* Main Footer Section */}
-            <div className="bg-[#203956] pt-6 px-4">
+            <div className="bg-[#203956] pt-10 px-4">
                 <div className="container mx-auto">
                     {/* Top Links Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-8">
                         {/* Brand & Downloads */}
                         <div className="space-y-4">
                             <img src="/img/logo_shopzeo.png" alt="Shopzeo Logo" className="h-8" />
@@ -37,33 +38,26 @@ const Footer = () => {
 
                         {/* Quick Links */}
                         <div>
-                            <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4">{t('quick_links')}</h3>
+                            <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4 border-b border-slate-700 pb-2">{t('quick_links')}</h3>
                             <ul className="space-y-2 text-sm">
                                 <li><Link to="/profile" className={linkHoverClass}>{t('profile_info')}</Link></li>
                                 <li><Link to="/deals" className={linkHoverClass}>{t('flash_deals')}</Link></li>
-                                <li><Link to="/products" className={linkHoverClass}>{t('featured_products')}</Link></li>
-                                <li><Link to="/best-selling" className={linkHoverClass}>{t('best_selling_product')}</Link></li>
-                                <li><Link to="/latest" className={linkHoverClass}>{t('latest_products')}</Link></li>
-                                <li><Link to="/top-rated" className={linkHoverClass}>{t('top_rated_product')}</Link></li>
                                 <li><Link to="/track-order" className={linkHoverClass}>{t('track_order')}</Link></li>
                             </ul>
                         </div>
 
                         {/* Other Links */}
                         <div>
-                            <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4">{t('other')}</h3>
+                            <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4 border-b border-slate-700 pb-2">{t('other')}</h3>
                             <ul className="space-y-2 text-sm">
                                 <li><Link to="/about" className={linkHoverClass}>{t('about_us')}</Link></li>
                                 <li><Link to="/terms" className={linkHoverClass}>{t('terms_and_conditions')}</Link></li>
                                 <li><Link to="/privacy" className={linkHoverClass}>{t('privacy_policy')}</Link></li>
-                                <li><Link to="/refund" className={linkHoverClass}>{t('refund_policy')}</Link></li>
-                                <li><Link to="/return" className={linkHoverClass}>{t('return_policy')}</Link></li>
-                                <li><Link to="/cancellation" className={linkHoverClass}>{t('cancellation_policy')}</Link></li>
                             </ul>
                         </div>
                         {/* Newsletter */}
                         <div>
-                            <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4">{t('newsletter')}</h3>
+                            <h3 className="text-white uppercase text-sm font-semibold tracking-wider mb-4 border-b border-slate-700 pb-2">{t('newsletter')}</h3>
                             <p className="text-sm mb-4">{t('subscribe_text')}</p>
                             <form onSubmit={(e) => e.preventDefault()} className="flex items-center">
                                 <input type="email" placeholder={t('your_email')} className="w-full bg-[#19314D] text-white px-4 py-2.5 border border-slate-600 rounded-l-md focus:outline-none placeholder:text-slate-400" />
@@ -75,14 +69,14 @@ const Footer = () => {
                     </div>
 
                     {/* Contact Bar */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-5 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-5 text-sm border-t border-slate-700">
                         {/* Start A Conversation */}
                         <div>
                             <h3 className="text-white font-semibold mb-2">Start A Conversation</h3>
                             <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-x-4 gap-y-2">
-                                <a href="tel:+917348832668" className="flex items-center gap-2 text-md"><PhoneIcon /> <span>+91 73488 32668</span></a>
-                                <a href="mailto:shopzeo@shopzeo.in" className="flex items-center gap-2 text-md"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
-                                <Link to="/support" className="flex items-center gap-2 text-md"><SupportIcon /> <span>Support ticket</span></Link>
+                                <a href="tel:+917348832668" className="flex items-center gap-2"><PhoneIcon /> <span>+91 73488 32668</span></a>
+                                <a href="mailto:shopzeo@shopzeo.in" className="flex items-center gap-2"><MailIcon /> <span>shopzeo@shopzeo.in</span></a>
+                                <Link to="/support" className="flex items-center gap-2"><SupportIcon /> <span>Support ticket</span></Link>
                             </div>
                         </div>
                         {/* Address */}
@@ -97,11 +91,11 @@ const Footer = () => {
                         <div>
                             <h3 className="text-white font-semibold mb-2">Social</h3>
                             <div className="flex items-center gap-5">
-                                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><FaLinkedin className="w-6 h-6 text-white" /></a>
-                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram className="w-6 h-6 text-white" /></a>
-                                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" aria-label="Pinterest"><FaPinterest className="w-6 h-6 text-white" /></a>
-                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><FaTwitter className="w-6 h-6 text-white" /></a>
-                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebook className="w-6 h-6 text-white" /></a>
+                                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><FaLinkedin className={socialIconClass} /></a>
+                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram className={socialIconClass} /></a>
+                                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" aria-label="Pinterest"><FaPinterest className={socialIconClass} /></a>
+                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><FaTwitter className={socialIconClass} /></a>
+                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebook className={socialIconClass} /></a>
                             </div>
                         </div>
                     </div>
@@ -111,11 +105,12 @@ const Footer = () => {
             {/* Copyright Bar */}
             <div className="bg-[#162E48] relative">
                 <div className="container mx-auto px-6 py-4 text-center text-sm">
-                    Copyright©Shopzeo
+                    Copyright © Shopzeo
                 </div>
                 <button
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="absolute right-4 -top-4 w-10 h-10 flex items-center justify-center rounded-full bg-[#3B76DD] text-white hover:bg-[#2563eb] transition-colors"
+                    aria-label="Scroll to top"
                 >
                     <ChevronUpIcon />
                 </button>

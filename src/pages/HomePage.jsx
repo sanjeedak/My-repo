@@ -24,9 +24,8 @@ const HomePage = () => {
 
       {/* Page content sections */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="space-y-16">
+        <div className="space-y-12">
           <FlashDeal />
-          <DeliveryInfo />
           <FeaturedProducts />
           <TopRatedProducts />
           <LatestProducts />
@@ -34,6 +33,7 @@ const HomePage = () => {
           <TopSellers />
           <CategoriesSection />
           <AppPromotion />
+          <DeliveryInfo />
           <InfoCards />
         </div>
       </div>
