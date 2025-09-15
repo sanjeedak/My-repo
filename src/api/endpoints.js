@@ -19,7 +19,10 @@ export const endpoints = {
   categories: '/api/categories',
 
   // Orders
-  orders: '/api/orders',
+   createCodOrder: '/orders', // यह COD के लिए है
+    getRazorpayKey: '/payments/razorpay/get-key',
+    createRazorpayOrder: '/payments/razorpay/create-order',
+    verifyRazorpayPayment: '/payments/razorpay/verify-payment',
 
   // User Authentication
   userLogin: '/api/user-auth/login',

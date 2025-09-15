@@ -80,10 +80,11 @@ const ProductsPage = () => {
         const brandSlug = searchParams.get('brand');
 
         if (categorySlug) {
-            filtered = filtered.filter(p => p.category && p.category.slug === categorySlug);
+            filtered = filtered.filter(p => p.category && p.category.slug && p.category.slug.startsWith(categorySlug));
         }
         if (brandSlug) {
-            filtered = filtered.filter(p => p.store && p.store.slug === brandSlug);
+            // Use startsWith for a more flexible match to handle slug inconsistencies
+            filtered = filtered.filter(p => p.store && p.store.slug && p.store.slug.startsWith(brandSlug));
         }
 
         if (filters.brands.length > 0) {

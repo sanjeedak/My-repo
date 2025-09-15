@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -273,43 +273,51 @@ export const TopRatedProducts = () => {
 
 
 // --- TOP SELLERS ---
-const SellerCard = ({ seller: store }) => (
-  <Link
-    to={`/products?brand=${store.slug}`}
-    className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
-  >
-    <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <img
-        src={
-          store.logo && store.logo.startsWith("http")
-            ? store.logo
-            : `${API_BASE_URL}/${store.logo}`
-        }
-        alt={store.name}
-        className="h-20 w-20 rounded-full object-cover border-4 border-white shadow-md"
-        onError={(e) => {
-          e.target.src = "https://placehold.co/80x80?text=Store";
-        }}
-      />
-    </div>
-    <div className="p-4 text-center flex-grow flex flex-col justify-between">
-      <div>
-        <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">
-          {store.name}
-        </h3>
-        <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
-          <StarIcon />
-          <span className="ml-1">
-            {parseFloat(store.rating || 0).toFixed(1)} Rating
-          </span>
+const SellerCard = ({ seller: store }) => {
+  const navigate = useNavigate();
+
+  const handleSellerClick = () => {
+    navigate(`/products?brand=${store.slug}`);
+  };
+
+  return (
+    <div
+      onClick={handleSellerClick}
+      className="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer"
+    >
+      <div className="h-24 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <img
+          src={
+            store.logo && store.logo.startsWith("http")
+              ? store.logo
+              : `${API_BASE_URL}/${store.logo}`
+          }
+          alt={store.name}
+          className="h-20 w-20 rounded-full object-cover border-4 border-white shadow-md"
+          onError={(e) => {
+            e.target.src = "https://placehold.co/80x80?text=Store";
+          }}
+        />
+      </div>
+      <div className="p-4 text-center flex-grow flex flex-col justify-between">
+        <div>
+          <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">
+            {store.name}
+          </h3>
+          <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
+            <StarIcon />
+            <span className="ml-1">
+              {parseFloat(store.rating || 0).toFixed(1)} Rating
+            </span>
+          </div>
+        </div>
+        <div className="mt-4 text-xs text-gray-400">
+          <span>{store.total_products || 0} Products</span>
         </div>
       </div>
-      <div className="mt-4 text-xs text-gray-400">
-        <span>{store.total_products || 0} Products</span>
-      </div>
     </div>
-  </Link>
-);
+  );
+};
 
 export const TopSellers = () => {
   const { t } = useTranslation();

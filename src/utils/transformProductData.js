@@ -1,7 +1,7 @@
 // src/utils/transformProductData.js
 
 /**
- * API se mile product data ko UI ke liye a se format karta hai.
+ * API se mile product data ko UI ke liye format karta hai.
  * @param {object} apiProduct - API se mila product object.
  * @returns {object} - UI ke liye formatted product object.
  */
@@ -14,18 +14,19 @@ export const transformProductData = (apiProduct) => {
     discountPercent = Math.round(((mrp - sellingPrice) / mrp) * 100);
   }
 
+  // Use the slug from the API if it exists, otherwise generate one.
   const slug = apiProduct.slug || (apiProduct.name ? apiProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : apiProduct.id);
 
-  // Add a slug to the category object for filtering
+  // Use the category object from the API directly.
   const categoryWithSlug = apiProduct.category ? {
     ...apiProduct.category,
-    slug: apiProduct.category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    slug: apiProduct.category.slug || apiProduct.category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   } : null;
 
-  // Add a slug to the store object for filtering
+  // Use the store object from the API directly.
   const storeWithSlug = apiProduct.store ? {
     ...apiProduct.store,
-    slug: apiProduct.store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    slug: apiProduct.store.slug || apiProduct.store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   } : null;
 
   const images = [];
