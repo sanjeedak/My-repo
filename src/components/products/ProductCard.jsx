@@ -36,7 +36,12 @@ const ProductCard = ({ product, onQuickView }) => {
   const handleAddToCart = (e) => {
     e.stopPropagation();
     if (product && product.id && product.name) {
-      addToCart(product);
+     const productWithStoreId = {
+      ...product,
+      store_id: product.store?.id 
+    };
+    // **FIX:** Yahan 'productWithStoreId' ko pass karein
+    addToCart(productWithStoreId); 
       toast.success(`${product.name} added to cart!`);
     } else {
       console.error("Invalid product data:", product);
