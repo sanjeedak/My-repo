@@ -1,19 +1,20 @@
-// src/pages/OfferPage.jsx
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../components/layout/apiService';
-import { endpoints } from '../api/endpoints'; // Import endpoints
+import { endpoints } from '../api/endpoints';
+import ProductCard from '../components/products/ProductCard';
+import Pagination from '../components/Pagination';
 
 const OfferPage = () => {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
 
   useEffect(() => {
-    const fetchOffers = async () => {
+    const fetchOffers = async (page) => {
+      setLoading(true);
       try {
-        // UPDATED: Replaced hardcoded string with endpoints object
-        const data = await apiService(`${endpoints.products}?on_sale=true&limit=8`); 
+        const data = await apiService(`${endpoints.products}?on_sale=true&page=${page}&limit=10`); 
         
-        // Your existing data transformation logic
         const formatted = data.products.map((item) => ({
           id: item.id,
           title: item.name,
@@ -25,6 +26,9 @@ const OfferPage = () => {
         }));
 
         setOffers(formatted);
+        if (data.data && data.data.pagination) {
+          setPagination(data.data.pagination);
+        }
       } catch (err) {
         console.error('Error fetching offers:', err);
       } finally {
@@ -32,25 +36,28 @@ const OfferPage = () => {
       }
     };
 
-    fetchOffers();
-  }, []);
+    fetchOffers(pagination.currentPage);
+  }, [pagination.currentPage]);
 
-  // Your original JSX design is fully preserved below
+  const handlePageChange = (page) => {
+    setPagination(prev => ({...prev, currentPage: page}));
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white ...">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white">
+      <div className="max-w-7xl mx-auto py-10 px-4">
         <h1 className="text-4xl font-extrabold text-pink-700 text-center mb-10">Today's Hot Offers</h1>
         {loading ? (
             <div className="text-center text-gray-500 text-lg">Loading offers...</div>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {offers.map((product) => (
-                    // All your original card styling is preserved
-                    <div key={product.id} className="bg-white border ...">
-                        {/* ... */}
-                    </div>
-                ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {offers.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                  ))}
+              </div>
+              <Pagination pagination={pagination} handlePageChange={handlePageChange} />
+            </>
         )}
       </div>
     </div>

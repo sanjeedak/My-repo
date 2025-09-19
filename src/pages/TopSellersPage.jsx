@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import ProductCard from '../components/products/ProductCard'; // Corrected path
-import { apiService } from '../components/layout/apiService'; // Corrected path
-import { endpoints } from '../api/endpoints'; // Import endpoints
+import ProductCard from '../components/products/ProductCard';
+import { apiService } from '../components/layout/apiService';
+import { endpoints } from '../api/endpoints';
+import Pagination from '../components/Pagination';
 
 const TopSellersPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
 
   useEffect(() => {
     const fetchTopSellers = async () => {
+      setLoading(true);
       try {
-        // UPDATED: Use the centralized endpoints object
-        const data = await apiService(endpoints.topSellers);
-        setProducts(data.products); // assuming response format: { success: true, products: [...] }
+        const data = await apiService(`${endpoints.topSellers}?page=${pagination.currentPage}&limit=10`);
+        setProducts(data.products);
+        if (data.data && data.data.pagination) {
+          setPagination(data.data.pagination);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -22,9 +27,13 @@ const TopSellersPage = () => {
     };
 
     fetchTopSellers();
-  }, []);
+  }, [pagination.currentPage]);
 
-  if (loading) return <p>Loading top sellers...</p>;
+  const handlePageChange = (page) => {
+    setPagination(prev => ({...prev, currentPage: page}));
+  };
+
+  if (loading && pagination.currentPage === 1) return <p>Loading top sellers...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
@@ -35,6 +44,7 @@ const TopSellersPage = () => {
             <ProductCard key={product.id} product={product} />
         ))}
         </div>
+        <Pagination pagination={pagination} handlePageChange={handlePageChange} />
     </div>
   );
 };

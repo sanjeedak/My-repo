@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 
 const CartPage = () => {
-  const { cartItems, clearCart, addToCart, removeFromCart } = useCart();
+  const { cartItems, clearCart, updateQuantity } = useCart();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -35,7 +35,7 @@ const CartPage = () => {
       </button>
 
       <h2 className="text-3xl font-bold mb-6">{t('your_cart')}</h2>
-      
+
       <div className="space-y-4">
         {cartItems.map((item) => (
           <div
@@ -56,27 +56,27 @@ const CartPage = () => {
             </div>
 
             <div className="flex items-center justify-between w-full sm:w-auto gap-4">
-                {/* Middle: Quantity Controls */}
-                <div className="flex items-center gap-2">
+              {/* Middle: Quantity Controls */}
+              <div className="flex items-center gap-2">
                 <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
                     className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
                 >
                     −
                 </button>
                 <span className="px-3 py-1 border rounded">{item.quantity}</span>
                 <button
-                    onClick={() => addToCart(item)} // ✅ FIX: Pass the item directly to increment quantity
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
                 >
                     +
                 </button>
-                </div>
+              </div>
 
-                {/* Right: Subtotal */}
-                <p className="font-semibold text-gray-800 w-24 text-right">
+              {/* Right: Subtotal */}
+              <p className="font-semibold text-gray-800 w-24 text-right">
                 ₹{(item.price * item.quantity).toFixed(2)}
-                </p>
+              </p>
             </div>
           </div>
         ))}

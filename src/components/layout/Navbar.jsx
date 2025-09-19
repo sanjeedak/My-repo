@@ -13,7 +13,7 @@ const DropdownMenu = ({
   buttonClassName,
   isScrollable = false,
   isLoading = false,
-  showImages = false, // <-- NEW PROP
+  showImages = false,
 }) => {
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef(null);
@@ -55,7 +55,6 @@ const DropdownMenu = ({
                   link.isBold ? "font-bold border-t mt-2 pt-3" : ""
                 }`}
               >
-                {/* Image or Fallback Character */}
                 {showImages && (
                   link.image ? (
                     <img
@@ -118,9 +117,9 @@ const Navbar = () => {
   const mainNavLinks = [{ to: '/', text: t('home') }];
 
   const offerLinks = [
-    { to: "/deals?type=flash", text: t('flash_deals') },
-    { to: "/products?featured=true", text: t('featured_products') },
-    { to: "/products?top_rated=true", text: t('top_rated') },
+    { to: "/products?section=flash_deal", text: t('flash_deals') },
+    { to: "/products?section=featured", text: t('featured_products') },
+    { to: "/products?section=top_rated", text: t('top_rated') },
   ];
 
   const brandLinks = [
@@ -142,7 +141,7 @@ const Navbar = () => {
         .map((cat) => ({
           to: `/category/${cat.slug}`,
           text: cat.name,
-          image: cat.image, // <-- category image from API
+          image: cat.image,
         }))
         .concat([{ to: "/categories", text: "View All", isBold: true }]);
 
@@ -156,7 +155,6 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-x-1 w-full">
-            {/* Category Dropdown with Images / Letters */}
             <DropdownMenu
               buttonClassName={categoriesButtonClass}
               buttonContent={
@@ -170,7 +168,7 @@ const Navbar = () => {
               dropdownWidth="w-72"
               isScrollable
               isLoading={loading}
-              showImages // <-- enable images / fallback chars
+              showImages
             />
             {mainNavLinks.map((link) => (
               <NavLink

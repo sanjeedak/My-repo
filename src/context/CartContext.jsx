@@ -10,6 +10,7 @@ export const CartProvider = ({ children }) => {
             const localData = localStorage.getItem('cartItems');
             return localData ? JSON.parse(localData) : [];
         } catch (error) {
+            console.error("Failed to parse cart items from localStorage", error);
             return [];
         }
     });
@@ -22,10 +23,12 @@ export const CartProvider = ({ children }) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(item => item.id === product.id);
             if (existingItem) {
+                // If item exists, just increment its quantity
                 return prevItems.map(item =>
                     item.id === product.id ? { ...item, quantity: item.quantity + (product.quantity || 1) } : item
                 );
             }
+            // Otherwise, add the new product to the cart
             return [...prevItems, { ...product, quantity: product.quantity || 1 }];
         });
     };
@@ -35,23 +38,22 @@ export const CartProvider = ({ children }) => {
     };
 
     const updateQuantity = (productId, newQuantity) => {
-        if (newQuantity < 1) {
-            removeFromCart(productId);
-            return;
-        }
-        setCartItems(prevItems =>
-            prevItems.map(item =>
+        setCartItems(prevItems => {
+            // If the new quantity is 0 or less, remove the item from the cart
+            if (newQuantity < 1) {
+                return prevItems.filter(item => item.id !== productId);
+            }
+            // Otherwise, update the quantity of the matching item
+            return prevItems.map(item =>
                 item.id === productId ? { ...item, quantity: newQuantity } : item
-            )
-        );
+            );
+        });
     };
 
     const clearCart = () => {
         setCartItems([]);
     };
-    
-    // --- Yahaan Badlav Kiya Gaya Hai ---
-    // totalAmount aur itemCount ko calculate karke context value mein add kiya gaya hai
+
     const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -61,7 +63,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
-        totalAmount, // totalAmount ab yahaan se provide hoga
+        totalAmount,
         itemCount,
     };
 
@@ -71,4 +73,3 @@ export const CartProvider = ({ children }) => {
         </CartContext.Provider>
     );
 };
-

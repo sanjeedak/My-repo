@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../components/layout/apiService';
-import SellerCard from '../components/SellerCard'; // Using the existing SellerCard component
-import { endpoints } from '../api/endpoints'; // Import endpoints
+import SellerCard from '../components/SellerCard';
+import { endpoints } from '../api/endpoints';
+import Pagination from '../components/Pagination'; // Pagination component import karein
 
 // A skeleton that matches the SellerCard design
 const SellerCardSkeleton = () => (
@@ -22,13 +23,16 @@ const VendorsPage = () => {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
 
   useEffect(() => {
     const fetchStores = async () => {
+        setLoading(true);
         try {
-            const data = await apiService(endpoints.stores); // CORRECTED
+            const data = await apiService(`${endpoints.stores}?page=${pagination.currentPage}&limit=10`);
             if (data.success && Array.isArray(data.data.stores)) {
                 setStores(data.data.stores);
+                setPagination(data.data.pagination);
             } else {
                 throw new Error('Could not retrieve store data.');
             }
@@ -40,7 +44,11 @@ const VendorsPage = () => {
         }
     };
     fetchStores();
-  }, []);
+  }, [pagination.currentPage]);
+
+  const handlePageChange = (page) => {
+    setPagination(prev => ({...prev, currentPage: page}));
+  };
 
   return (
     <div className="bg-slate-50 py-12 min-h-screen">
@@ -67,6 +75,7 @@ const VendorsPage = () => {
                     stores.map(store => <SellerCard key={store.id} seller={store} />)
                 )}
             </div>
+            <Pagination pagination={pagination} handlePageChange={handlePageChange} />
         </div>
     </div>
   );

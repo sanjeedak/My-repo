@@ -28,7 +28,8 @@ const CategoriesBar = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await apiService(endpoints.categories);
+        // Fetch categories with pagination
+        const response = await apiService(`${endpoints.categories}?page=1&limit=10`);
         
         const cats = response?.data?.categories || [];
         setCategories(cats);
@@ -48,14 +49,14 @@ const CategoriesBar = () => {
 
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(category);
-    }, 150); // Faster activation
+    }, 150);
   };
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveCategory(null);
-    }, 200); // Faster deactivation
+    }, 200);
   };
 
   const handlePanelMouseEnter = () => {

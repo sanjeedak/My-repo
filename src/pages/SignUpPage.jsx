@@ -134,7 +134,7 @@ const SignUpPage = () => {
 
       if (response.success) {
         login(response.data.user, response.data.token);
-        navigate('/');
+        navigate('/profile');
       } else {
         throw new Error(response.message || 'Signup failed. Please try again.');
       }

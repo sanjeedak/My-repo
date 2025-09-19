@@ -1,5 +1,6 @@
 import React from 'react';
 import { StarIcon } from '../../assets/icons';
+import  appConfigs  from '../../config/appConfigs'; // Import new config
 
 const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
     
@@ -17,6 +18,16 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
     const handlePriceChange = (e) => {
         setFilters(prev => ({ ...prev, maxPrice: e.target.value, currentPage: 1 }));
     };
+    
+    const clearFilters = () => {
+        setFilters({ 
+            maxPrice: appConfigs.defaultMaxPrice,
+            brands: [],
+            minRating: 0,
+            sortBy: 'created_at',
+            order: 'desc',
+        });
+    }
 
     return (
         <aside className="space-y-6">
@@ -27,7 +38,7 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
                     <input
                         type="range"
                         min="0"
-                        max="4000"
+                        max={appConfigs.defaultMaxPrice} // Set max from config
                         step="100"
                         value={filters.maxPrice}
                         onChange={handlePriceChange}
@@ -74,7 +85,7 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
                 </div>
             </div>
              <button
-                onClick={() => setFilters({ maxPrice: 4000, brands: [], minRating: 0, sortBy: 'created_at', order: 'desc' })}
+                onClick={clearFilters}
                 className="w-full text-center text-sm font-semibold text-brand-blue hover:underline mt-4"
             >
                 Clear All Filters

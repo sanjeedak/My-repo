@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { API_BASE_URL } from '../api/config';
-import { endpoints } from '../api/endpoints'; // Import endpoints
+import { endpoints } from '../api/endpoints';
+import Pagination from '../components/Pagination'; // Pagination component import karein
 
 // Helper function to get the correct image URL for categories
 const getCategoryImageUrl = (imagePath, categoryName) => {
@@ -31,16 +32,16 @@ const CategoriesPage = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
 
     useEffect(() => {
         const fetchCategories = async () => {
+            setLoading(true);
             try {
-                // UPDATED: Use endpoints object
-                const response = await apiService(endpoints.categories);
+                const response = await apiService(`${endpoints.categories}?page=${pagination.currentPage}&limit=10`);
                 if (response.success && Array.isArray(response.data?.categories)) {
-                    // Filter for top-level categories only
-                    const topLevelCategories = response.data.categories.filter(cat => cat.parent_id === null);
-                    setCategories(topLevelCategories);
+                    setCategories(response.data.categories);
+                    setPagination(response.data.pagination);
                 } else {
                     throw new Error('Could not retrieve category data.');
                 }
@@ -52,7 +53,11 @@ const CategoriesPage = () => {
             }
         };
         fetchCategories();
-    }, []);
+    }, [pagination.currentPage]);
+
+    const handlePageChange = (page) => {
+      setPagination(prev => ({...prev, currentPage: page}));
+    };
 
     return (
         <div className="bg-slate-50 py-12 min-h-screen">
@@ -106,6 +111,7 @@ const CategoriesPage = () => {
                         </div>
                     )}
                 </div>
+                <Pagination pagination={pagination} handlePageChange={handlePageChange} />
             </div>
         </div>
     );

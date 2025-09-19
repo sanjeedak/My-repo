@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom"; // Link import karein
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { apiService } from "../components/layout/apiService";
 import { transformProductData } from "../utils/transformProductData";
@@ -9,7 +9,7 @@ import { endpoints } from "../api/endpoints";
 import ProductImageGallery from "../components/products/ProductImageGallery";
 import SellerInfo from "../components/products/SellerInfo";
 import ProductTabs from "../components/products/ProductTab";
-import { Plus, Minus, ShoppingCart, ChevronRight } from 'lucide-react'; // ChevronRight import karein
+import { Plus, Minus, ShoppingCart, ChevronRight } from 'lucide-react';
 
 const ProductDetailsPage = () => {
     const { t } = useTranslation();
@@ -28,30 +28,35 @@ const ProductDetailsPage = () => {
             setLoading(true);
             setError('');
             if (!slug) {
-                setError('No product specified.');
+                setError('कोई प्रोडक्ट निर्दिष्ट नहीं है।');
                 setLoading(false);
                 return;
             }
 
             try {
-                // Ek hi API call mein saare products fetch karein
-                const data = await apiService(endpoints.products);
+                // पहले slug से प्रोडक्ट लाने की कोशिश करें
+                let data = await apiService(endpoints.productDetails(slug));
 
-                if (data && data.products) {
-                    const transformedProducts = (data.products).map(transformProductData);
-                    const foundProduct = transformedProducts.find(p => p.slug === slug);
+                // यदि slug से कोई प्रोडक्ट नहीं मिला, तो नाम से खोजने का प्रयास करें
+                if (!data || !data.product) {
+                    const productName = slug.replace(/-/g, ' ');
+                    const searchData = await apiService(`${endpoints.products}?q=${encodeURIComponent(productName)}&limit=1`);
 
-                    if (foundProduct) {
-                        setProduct(foundProduct);
-                    } else {
-                        setError('Product not found.');
+                    if (searchData && searchData.products && searchData.products.length > 0) {
+                        data = { product: searchData.products[0] };
                     }
+                }
+
+                if (data && data.product) {
+                    setProduct(transformProductData(data.product));
                 } else {
-                    setError('Product data is missing or in an incorrect format.');
+                    setError('प्रोडक्ट नहीं मिला।');
+                    setProduct(null);
                 }
             } catch (err) {
-                console.error("Failed to fetch product details:", err);
-                setError('Could not fetch product details. Please try again later.');
+                console.error("प्रोडक्ट डिटेल्स लाने में असफल:", err);
+                setError('प्रोडक्ट डिटेल्स लाने में कोई त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।');
+                setProduct(null);
             } finally {
                 setLoading(false);
             }
@@ -64,7 +69,6 @@ const ProductDetailsPage = () => {
         setQuantity(prev => {
             const newQuantity = prev + amount;
             if (newQuantity < 1) return 1;
-            // Stock check (agar product mein stock hai to)
             if (product.stock && newQuantity > product.stock) return product.stock;
             return newQuantity;
         });
@@ -73,7 +77,7 @@ const ProductDetailsPage = () => {
     const handleAddToCart = () => {
         if (product) {
             addToCart({ ...product, quantity });
-            setAddToCartMessage(`${quantity} × "${product.name}" added to cart!`);
+            setAddToCartMessage(`${quantity} × "${product.name}" cart में जोड़ा गया!`);
             setTimeout(() => setAddToCartMessage(''), 3000);
         }
     };
@@ -94,7 +98,7 @@ const ProductDetailsPage = () => {
     }
 
     if (!product) {
-        return <div className="text-center py-20">Product not found.</div>;
+        return <div className="text-center py-20">प्रोडक्ट नहीं मिला।</div>;
     }
 
     const imageUrls = product.images.map(img =>
@@ -104,9 +108,9 @@ const ProductDetailsPage = () => {
     return (
         <div className="bg-gray-50">
             <div className="container mx-auto px-4 py-8 max-w-7xl">
-                {/* Breadcrumbs */}
+                {/* ब्रेडक्रंब्स */}
                 <nav className="flex items-center text-sm text-gray-500 mb-4">
-                    <Link to="/" className="hover:text-blue-600">Home</Link>
+                    <Link to="/" className="hover:text-blue-600">होम</Link>
                     <ChevronRight size={16} className="mx-1" />
                     {product.category && (
                         <>
@@ -118,12 +122,12 @@ const ProductDetailsPage = () => {
                 </nav>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Product Image Gallery */}
+                    {/* प्रोडक्ट इमेज गैलरी */}
                     <div>
                         <ProductImageGallery images={imageUrls} productName={product.name} />
                     </div>
 
-                    {/* Product Info */}
+                    {/* प्रोडक्ट जानकारी */}
                     <div className="bg-white p-6 rounded-lg shadow-sm">
                         <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
                         <div className="flex items-baseline gap-3 mt-2">
@@ -140,7 +144,7 @@ const ProductDetailsPage = () => {
                         )}
 
                         <p className="mt-4 text-gray-600 leading-relaxed text-sm">
-                            {product.description || "No description available for this product."}
+                            {product.description || "इस प्रोडक्ट के लिए कोई विवरण उपलब्ध नहीं है।"}
                         </p>
 
                         <div className="mt-6 border-t pt-6">

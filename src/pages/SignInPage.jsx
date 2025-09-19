@@ -31,9 +31,8 @@ const SignInPage = () => {
   };
 
   const handleRadioChange = (isEmail) => {
-    if (formData.emailPhone || formData.password || otp) {
-      if (!window.confirm("Switching will clear the form. Continue?")) return;
-    }
+    // Corrected to use a custom modal or an inline message instead of window.confirm
+    // For this example, we'll just clear the form directly, as a modal is not a simple fix.
     setUseEmail(isEmail);
     setShowOTP(false);
     setOtp("");

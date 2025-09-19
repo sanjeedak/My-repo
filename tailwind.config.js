@@ -7,14 +7,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'brand-blue': '#0071DC', // The primary blue color from the 6valley example
+        'brand-blue': '#0071DC',
       },
       fontFamily: {
-        sans: ['Poppins', ...defaultTheme.fontFamily.sans],
+        // Yahan 'Poppins' ko 'Inter' se badla gaya hai
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
     },
   },
   plugins: [
-    require('@tailwindcss/forms'), // This line enables the forms plugin
+    require('@tailwindcss/forms'),
   ],
 }

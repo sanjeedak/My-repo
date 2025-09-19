@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { apiService } from '../components/layout/apiService'; // Assuming you have this service
+import { apiService } from '../components/layout/apiService';
+import { endpoints } from '../api/endpoints'; // endpoints ko import karein
 
 const TrackOrderPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,12 +18,12 @@ const TrackOrderPage = () => {
     setOrderDetails(null);
 
     try {
-      // --- IMPORTANT: Replace with your actual API endpoint for fetching an order ---
-      const data = await apiService(`/orders/${idToFetch}`);
+      // UPDATED: Sahi endpoint function ka istemal kiya gaya hai
+      const data = await apiService(endpoints.getOrderByNumber(idToFetch));
       
       if (data && data.success) {
-        // Assuming the API returns order details in data.data
-        setOrderDetails(data.data); 
+        // API response ke structure ke hisaab se data.data.order use karein
+        setOrderDetails(data.data.order); 
       } else {
         throw new Error(data.message || 'Order not found.');
       }
@@ -34,14 +35,12 @@ const TrackOrderPage = () => {
     }
   };
 
-  // Automatically fetch details if an ID is in the URL
   useEffect(() => {
     const orderIdFromUrl = searchParams.get('id');
     if (orderIdFromUrl) {
       fetchOrderDetails(orderIdFromUrl);
     }
   }, [searchParams]);
-
 
   const handleTrackOrder = (e) => {
     e.preventDefault();
@@ -86,13 +85,13 @@ const TrackOrderPage = () => {
             <div className="border-t pt-6">
               <h3 className="text-2xl font-bold mb-4 text-slate-700">Order Details</h3>
               <div className="space-y-3 text-gray-600">
-                <p><strong>Order ID:</strong> {orderDetails.id}</p>
+                <p><strong>Order ID:</strong> {orderDetails.orderNumber}</p>
                 <p><strong>Status:</strong> <span className="font-semibold text-green-600">{orderDetails.status}</span></p>
-                <p><strong>Estimated Delivery:</strong> {orderDetails.estimatedDelivery}</p>
+                <p><strong>Estimated Delivery:</strong> {orderDetails.estimatedDelivery || 'Not available'}</p>
                 
                 <h4 className="font-bold text-slate-700 pt-4">Items:</h4>
                 <ul className="list-disc list-inside pl-2">
-                  {orderDetails.items.map((item, index) => (
+                  {orderDetails.items && orderDetails.items.map((item, index) => (
                     <li key={index}>
                       {item.name} (x{item.quantity})
                     </li>

@@ -19,10 +19,8 @@ export const endpoints = {
   categories: '/api/categories',
 
   // Orders
-   createCodOrder: '/orders', // यह COD के लिए है
-    getRazorpayKey: '/payments/razorpay/get-key',
-    createRazorpayOrder: '/payments/razorpay/create-order',
-    verifyRazorpayPayment: '/payments/razorpay/verify-payment',
+  orders: '/api/orders',
+  // checkStock: '/api/orders/stock', 
 
   // User Authentication
   userLogin: '/api/user-auth/login',
@@ -37,4 +35,10 @@ export const endpoints = {
   vendorLogin: '/api/auth/vendor/login',
   vendorSignup: '/api/auth/vendor/signup',
   vendorForgotPassword: '/api/auth/vendor/forgot-password',
+
+  // Payment
+  createRazorpayOrder: '/api/payments/razorpay/create-order',
+  verifyRazorpayPayment: '/api/payments/razorpay/verify-payment',
+    // checkPaymentStatus: '/api/payments/status',
+    
 };

@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { InputField } from './VendorSignUpPage';
-import { Lock, LogOut, Camera, Save } from 'lucide-react';
+import { InputField } from './VendorSignUpPage'; // Assuming this is a shared component
+import { Lock, LogOut, Camera, Save, ShoppingCart, MapPin, CreditCard, Edit, X, User } from 'lucide-react';
 
 const ProfilePage = () => {
     const { user, login, logout } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    // State to toggle between viewing and editing profile
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -19,6 +22,15 @@ const ProfilePage = () => {
         profileImageUrl: '',
     });
 
+    // Dummy order data - You can replace this with an API call
+    const [orders] = useState([
+        { id: '12345', date: '2023-10-26', status: 'Delivered', total: '₹1,250' },
+        { id: '67890', date: '2023-10-28', status: 'Shipped', total: '₹890' },
+    ]);
+
+    const [activeSection, setActiveSection] = useState('profile');
+
+    // Load user data into form state when component mounts or user changes
     useEffect(() => {
         if (user) {
             setFormData({
@@ -61,6 +73,7 @@ const ProfilePage = () => {
         return newErrors;
     };
 
+    // Handle form submission when in edit mode
     const handleSubmit = (e) => {
         e.preventDefault();
         const validationErrors = validate();
@@ -69,16 +82,12 @@ const ProfilePage = () => {
             return;
         }
         
-        console.log("Updated user data:", formData);
         const updatedUser = {
             ...user,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            phone: formData.phone,
-            vendorImage: formData.profileImageUrl,
+            ...formData,
         };
-        login(updatedUser);
+        login(updatedUser); // Update user data in context and local storage
+        setIsEditMode(false); // Switch back to view mode after saving
         alert("Profile saved successfully!");
     };
     
@@ -98,11 +107,101 @@ const ProfilePage = () => {
         return 'https://placehold.co/128x128?text=User';
     };
 
+    // Renders content based on the active section (Profile, Orders, etc.)
+    const renderSection = () => {
+        switch (activeSection) {
+            case 'profile':
+                return isEditMode ? (
+                    // EDIT MODE: Show a form with input fields
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                         <h3 className="text-2xl font-bold text-gray-800">Edit Personal Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <InputField name="first_name" id="first_name" label={t('first_name')} type="text" value={formData.first_name} onChange={handleChange} error={errors.first_name} />
+                            <InputField name="last_name" id="last_name" label={t('last_name')} type="text" value={formData.last_name} onChange={handleChange} error={errors.last_name} />
+                        </div>
+                        <InputField name="email" id="email" label={t('email')} type="email" value={formData.email} onChange={handleChange} error={errors.email} />
+                        <InputField
+                            name="phone"
+                            id="phone"
+                            label={t('phone_number')}
+                            type="tel"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            error={errors.phone}
+                        />
+                        
+                        <div className="flex justify-end pt-4 gap-4">
+                            <button type="button" onClick={() => setIsEditMode(false)} className="flex items-center gap-2 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                                <X className="h-5 w-5" /> Cancel
+                            </button>
+                            <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
+                                <Save className="h-5 w-5" /> {t('save_changes')}
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    // VIEW MODE: Show user details as text
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                             <h3 className="text-2xl font-bold text-gray-800">Personal Information</h3>
+                             <button onClick={() => setIsEditMode(true)} className="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 transition-colors">
+                                <Edit className="h-4 w-4" /> Edit Profile
+                            </button>
+                        </div>
+                        <div className="p-4 border rounded-lg bg-slate-50 space-y-3">
+                            <p><strong>First Name:</strong> {formData.first_name || 'N/A'}</p>
+                            <p><strong>Last Name:</strong> {formData.last_name || 'N/A'}</p>
+                            <p><strong>Email:</strong> {formData.email || 'N/A'}</p>
+                            <p><strong>Phone:</strong> {formData.phone || 'N/A'}</p>
+                        </div>
+                    </div>
+                );
+            case 'orders':
+                return (
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h3>
+                        <div className="space-y-4">
+                            {orders.length > 0 ? orders.map(order => (
+                                <div key={order.id} className="bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-gray-800">Order ID: #{order.id}</p>
+                                        <p className="text-sm text-gray-500">Date: {order.date}</p>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className={`text-sm font-semibold ${order.status === 'Delivered' ? 'text-green-600' : 'text-yellow-600'}`}>{order.status}</p>
+                                        <p className="font-semibold text-gray-800">{order.total}</p>
+                                    </div>
+                                    <Link to={`/track-order?id=${order.id}`} className="bg-blue-500 text-white text-sm font-bold py-2 px-4 rounded hover:bg-blue-600 transition-colors self-start sm:self-center">
+                                        Track Order
+                                    </Link>
+                                </div>
+                            )) : <p>You have no orders yet.</p>}
+                        </div>
+                    </div>
+                );
+            case 'addresses':
+                return (
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6">My Addresses</h3>
+                        <p className="text-gray-500">Manage your shipping and billing addresses. (Feature coming soon)</p>
+                    </div>
+                );
+            case 'payment':
+                return (
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6">Payment Methods</h3>
+                        <p className="text-gray-500">Manage your saved cards and payment options. (Feature coming soon)</p>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="bg-slate-50 min-h-screen py-12">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
                     {/* Left Column: User Card & Actions */}
                     <div className="lg:col-span-4 space-y-8">
                         <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
@@ -131,52 +230,40 @@ const ProfilePage = () => {
                             <p className="text-gray-500 mt-1">{formData.email}</p>
                         </div>
                         <div className="bg-white p-6 rounded-2xl shadow-lg">
-                             <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">{t('account_actions')}</h3>
-                             <div className="space-y-3">
+                             <div className="space-y-2">
+                                 <button onClick={() => setActiveSection('profile')} className={`w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 transition-colors ${activeSection === 'profile' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>
+                                     <User className="h-5 w-5" /> My Profile
+                                 </button>
+                                 <button onClick={() => setActiveSection('orders')} className={`w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 transition-colors ${activeSection === 'orders' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>
+                                     <ShoppingCart className="h-5 w-5" /> My Orders
+                                 </button>
+                                 <button onClick={() => setActiveSection('addresses')} className={`w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 transition-colors ${activeSection === 'addresses' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>
+                                     <MapPin className="h-5 w-5" /> My Addresses
+                                 </button>
+                                 <button onClick={() => setActiveSection('payment')} className={`w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 transition-colors ${activeSection === 'payment' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>
+                                     <CreditCard className="h-5 w-5" /> Payment Methods
+                                 </button>
+                                <hr className="my-2"/>
                                  <button 
                                     onClick={() => navigate('/reset-password')}
-                                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                                    className="w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                                 >
-                                    <Lock className="h-5 w-5 text-gray-500" /> {t('reset_password')}
+                                    <Lock className="h-5 w-5" /> {t('reset_password')}
                                 </button>
                                 <button 
                                     onClick={handleLogout}
-                                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                                    className="w-full text-left flex items-center gap-3 py-3 px-4 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                                 >
-                                    <LogOut className="h-5 w-5 text-gray-500" /> {t('logout')}
+                                    <LogOut className="h-5 w-5" /> {t('logout')}
                                 </button>
                              </div>
                         </div>
                     </div>
 
-                    {/* Right Column: Edit Form */}
+                    {/* Right Column: Content Area */}
                     <div className="lg:col-span-8">
-                        <div className="bg-white p-8 rounded-2xl shadow-lg">
-                             <h3 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-slate-100">{t('edit_profile')}</h3>
-                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <InputField name="first_name" id="first_name" label={t('first_name')} type="text" value={formData.first_name} onChange={handleChange} error={errors.first_name} />
-                                    <InputField name="last_name" id="last_name" label={t('last_name')} type="text" value={formData.last_name} onChange={handleChange} error={errors.last_name} />
-                                </div>
-                                <InputField name="email" id="email" label={t('email')} type="email" value={formData.email} onChange={handleChange} error={errors.email} />
-                                <InputField
-                                    name="phone"
-                                    id="phone"
-                                    label={t('phone_number')}
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    error={errors.phone}
-                                    disabled={true}
-                                    placeholder={formData.phone ? "" : "N/A"}
-                                />
-                                
-                                <div className="flex justify-end pt-4">
-                                    <button type="submit" className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
-                                        <Save className="h-5 w-5" /> {t('save_changes')}
-                                    </button>
-                                </div>
-                            </form>
+                        <div className="bg-white p-8 rounded-2xl shadow-lg min-h-[400px]">
+                            {renderSection()}
                         </div>
                     </div>
                 </div>
