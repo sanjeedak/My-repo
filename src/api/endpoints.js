@@ -2,7 +2,7 @@
 export const endpoints = {
   // Products
   products: '/api/products',
-  productDetails: (slug) => `/api/products/${slug}`, // Add this new endpoint
+  productDetails: (id) => `/api/products/${id}`,
   productSearch: '/api/products/search',
   topSellers: '/api/products/top-sellers',
 
@@ -20,7 +20,6 @@ export const endpoints = {
 
   // Orders
   orders: '/api/orders',
-  // checkStock: '/api/orders/stock', 
 
   // User Authentication
   userLogin: '/api/user-auth/login',
@@ -36,9 +35,7 @@ export const endpoints = {
   vendorSignup: '/api/auth/vendor/signup',
   vendorForgotPassword: '/api/auth/vendor/forgot-password',
 
-  // Payment
-  createRazorpayOrder: '/api/payments/razorpay/create-order',
-  verifyRazorpayPayment: '/api/payments/razorpay/verify-payment',
-    // checkPaymentStatus: '/api/payments/status',
-    
+
+  createRazorpayOrder: '/api/payments/create-order', 
+  verifyRazorpayPayment: '/api/payments/verify-payment', 
 };

@@ -71,15 +71,33 @@ export const CartIcon = ({ className = "h-6 w-6" }) => (
 );
 
 // 🇮🇳 India Flag
-export const IndiaFlagIcon = ({ className = "w-5 h-5 rounded-sm" }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
-    <rect width="900" height="600" fill="#f93" />
-    <rect width="900" height="400" fill="#fff" />
-    <rect width="900" height="200" fill="#128807" />
-    <g transform="translate(450 300)">
-      <circle r="90" fill="#fff" />
-      <circle r="70" fill="#000080" />
-      <circle r="70" fill="none" stroke="#fff" strokeWidth="20" />
+export const IndiaFlagIcon = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 900 600"
+    {...props}
+  >
+    {/* Saffron rectangle (top) */}
+    <rect width="900" height="200" y="0" fill="#FF9933" />
+    
+    {/* White rectangle (middle) */}
+    <rect width="900" height="200" y="200" fill="#FFFFFF" />
+    
+    {/* Green rectangle (bottom) */}
+    <rect width="900" height="200" y="400" fill="#138808" />
+    
+    {/* Ashoka Chakra (center) */}
+    <g transform="translate(450,300)">
+      <circle r="80" fill="#000080" />
+      <circle r="70" fill="#FFFFFF" />
+      <circle r="20" fill="#000080" />
+      <g>
+        {[...Array(24)].map((_, i) => (
+          <g key={i} transform={`rotate(${i * 15})`}>
+            <path d="M0-70V-80H5V-70A65 65 0 0 0 0-70z" fill="#000080" />
+          </g>
+        ))}
+      </g>
     </g>
   </svg>
 );

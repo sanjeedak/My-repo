@@ -21,6 +21,7 @@ const FullPageSpinner = () => (
 // Lazy-loaded Page Components
 const HomePage = lazy(() => import('./pages/HomePage'));
 const BrandPage = lazy(() => import('./pages/BrandPage'));
+const VendorsPage = lazy(() => import('./pages/VendorsPage'));
 const OffersPage = lazy(() => import('./pages/OffersPage'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const ProductDetailsPage = lazy(() => import('./pages/ProductDetailsPage'));
@@ -71,6 +72,7 @@ function App() {
                   <Route path="/" element={<MainLayout />}>
                     <Route index element={<HomePage />} />
                     <Route path="brands" element={<BrandPage />} />
+                    <Route path="vendors" element={<VendorsPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="deals" element={<OffersPage />} />
                     <Route path="cart" element={<CartPage />} />
@@ -97,7 +99,7 @@ function App() {
                     <Route path="terms" element={<TermsPage />} />
                     <Route path="refund" element={<RefundPolicyPage />} />
                     <Route path="category/:slug" element={<ProductsPage />} />
-                    <Route path="product/:slug" element={<ProductDetailsPage />} />
+                    <Route path="product/:id" element={<ProductDetailsPage />} />
                     <Route path="search" element={<ProductsPage />} />
                     <Route path="signin" element={<SignInPage />} />
                     <Route path="signup" element={<SignUpPage />} />
