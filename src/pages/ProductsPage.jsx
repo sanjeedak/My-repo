@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/products/ProductCard';
 import FilterSidebar from '../components/products/FilterSidebar';
@@ -10,16 +10,24 @@ import { transformProductData } from '../utils/transformProductData';
 import { Search } from 'lucide-react';
 import InfoCards from '../components/layout/InfoCards';
 import { endpoints } from '../api/endpoints';
-import appConfigs from '../config/appConfigs'
+import appConfigs from '../config/appConfigs';
 
 const ProductsPage = () => {
+    // --- HOOKS INITIALIZATION ---
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { slug: categorySlugFromPath } = useParams();
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+
+    // --- COMPONENT STATE ---
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [availableBrands, setAvailableBrands] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
     const [filters, setFilters] = useState({
         maxPrice: appConfigs.maxPrice,
         brands: [],
@@ -28,107 +36,125 @@ const ProductsPage = () => {
         order: 'desc',
     });
 
-    const location = useLocation();
-    const { slug: categorySlugFromPath } = useParams();
-    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-
     const itemsPerPage = appConfigs.itemsPerPage;
 
+    // --- DERIVED STATE & MEMOIZED VALUES ---
     const pageTitle = useMemo(() => {
+        const searchQuery = searchParams.get('q');
+        if (searchQuery) return `${t('search_results_for')} "${searchQuery}"`;
+        
         const section = searchParams.get('section');
-        const brandSlug = searchParams.get('brand');
-        const categorySlug = categorySlugFromPath || searchParams.get('category');
-
         if (section === 'featured') return t('featured_products');
         if (section === 'flash_deal') return t('flash_deals');
         if (section === 'top_sellers') return t('top_sellers');
-        if (categorySlug) return `Products in ${categorySlug.replace(/-/g, ' ')}`;
-        if (brandSlug) return `Products from ${brandSlug.replace(/-/g, ' ')}`;
-        return 'All Products';
+        
+        const categorySlug = categorySlugFromPath || searchParams.get('category');
+        if (categorySlug) return `${t('products_in')} ${categorySlug.replace(/-/g, ' ')}`;
+        
+        const brandSlug = searchParams.get('brand');
+        if (brandSlug) return `${t('products_from')} ${brandSlug.replace(/-/g, ' ')}`;
+        
+        return t('all_products');
     }, [searchParams, categorySlugFromPath, t]);
 
+    // --- DATA FETCHING ---
     useEffect(() => {
-        apiService(endpoints.brands).then(brandData => {
-            if (brandData.success && Array.isArray(brandData.data?.brands)) {
-                setAvailableBrands(brandData.data.brands);
-            }
-        }).catch(err => console.error("Failed to fetch brands:", err));
+        apiService(endpoints.brands)
+            .then(brandData => {
+                if (brandData.success && Array.isArray(brandData.data?.brands)) {
+                    setAvailableBrands(brandData.data.brands);
+                }
+            })
+            .catch(err => console.error("Failed to fetch brands:", err));
     }, []);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            setError('');
-            try {
-                const queryParams = new URLSearchParams();
-                queryParams.set('page', paginationInfo.currentPage);
-                queryParams.set('limit', itemsPerPage);
-                queryParams.set('sortBy', filters.sortBy);
-                queryParams.set('order', filters.order);
+    const fetchProducts = useCallback(async (pageToFetch) => {
+        setLoading(true);
+        setError('');
+        try {
+            const queryParams = new URLSearchParams({
+                page: pageToFetch,
+                limit: itemsPerPage,
+                sortBy: filters.sortBy,
+                order: filters.order,
+                maxPrice: filters.maxPrice,
+                minRating: filters.minRating,
+            });
 
-                // Dynamically add filters from URL and state
-                if (categorySlugFromPath) {
-                    queryParams.set('category', categorySlugFromPath);
-                }
-                const brandParam = searchParams.get('brand');
-                if (brandParam) {
-                    queryParams.set('brand', brandParam);
-                }
-                const sectionParam = searchParams.get('section');
-                if (sectionParam) {
-                    queryParams.set('section', sectionParam);
-                }
-                const searchQuery = searchParams.get('q');
-                if (searchQuery) {
-                    queryParams.set('q', searchQuery);
-                }
-                if (filters.maxPrice) {
-                    queryParams.set('maxPrice', filters.maxPrice);
-                }
-                if (filters.minRating) {
-                    queryParams.set('minRating', filters.minRating);
-                }
-                if (filters.brands.length > 0) {
-                    queryParams.set('brands', filters.brands.join(','));
-                }
-
-                const data = await apiService(`${endpoints.products}?${queryParams.toString()}`);
-                const productList = data?.products || data?.data?.products || [];
-                const transformed = productList.map(transformProductData);
-
-                setProducts(transformed);
-                setPaginationInfo({
-                    currentPage: data?.pagination?.currentPage || 1,
-                    totalPages: data?.pagination?.totalPages || 1,
-                    totalItems: data?.pagination?.totalItems || 0,
-                });
-                if (transformed.length === 0) {
-                     setError(t('no_products_found'));
-                } else {
-                     setError('');
-                }
-
-            } catch (err) {
-                console.error("ProductsPage API error:", err);
-                setError('Could not fetch products. Please try again later.');
-                setProducts([]);
-            } finally {
-                setLoading(false);
+            if (filters.brands.length > 0) {
+                queryParams.set('brands', filters.brands.join(','));
             }
-        };
 
-        fetchProducts();
-    }, [filters, paginationInfo.currentPage, categorySlugFromPath, searchParams, itemsPerPage, t]);
+            const categorySlug = categorySlugFromPath || searchParams.get('category');
+            if (categorySlug) queryParams.set('category', categorySlug);
 
-    const handlePageChange = (page) => {
-        if (page > 0 && page <= paginationInfo.totalPages) {
-            setPaginationInfo(prev => ({ ...prev, currentPage: page }));
+            const brandSlug = searchParams.get('brand');
+            if (brandSlug) queryParams.set('brand', brandSlug);
+
+            const section = searchParams.get('section');
+            if (section) queryParams.set('section', section);
+
+            const searchQuery = searchParams.get('q');
+            if (searchQuery) queryParams.set('q', searchQuery);
+
+            const data = await apiService(`${endpoints.products}?${queryParams.toString()}`);
+            const productList = data?.products || data?.data?.products || [];
+            const transformed = productList.map(transformProductData);
+
+            setProducts(transformed);
+            setPaginationInfo({
+                currentPage: data?.pagination?.currentPage || 1,
+                totalPages: data?.pagination?.totalPages || 1,
+                totalItems: data?.pagination?.totalItems || 0,
+            });
+
+            if (transformed.length === 0) {
+                setError(t('no_products_found'));
+            }
+        } catch (err) {
+            console.error("ProductsPage API error:", err);
+            setError('Could not fetch products. Please try again later.');
+            setProducts([]);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [filters, itemsPerPage, categorySlugFromPath, searchParams, t]);
 
     useEffect(() => {
-        setPaginationInfo(prev => ({ ...prev, currentPage: 1 }));
-    }, [filters, categorySlugFromPath, searchParams]);
+        const currentPage = parseInt(searchParams.get('page') || '1', 10);
+        fetchProducts(currentPage);
+    }, [fetchProducts, searchParams]);
+
+    // --- EVENT HANDLERS ---
+    const handlePageChange = (page) => {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('page', page);
+        navigate(`${location.pathname}?${newSearchParams.toString()}`);
+    };
+    
+    const handleSearch = (e) => {
+        e.preventDefault();
+        const newSearchParams = new URLSearchParams(searchParams);
+        if (searchTerm.trim()) {
+            newSearchParams.set('q', searchTerm.trim());
+        } else {
+            newSearchParams.delete('q');
+        }
+        newSearchParams.set('page', '1');
+        navigate(`/products?${newSearchParams.toString()}`);
+    };
+    
+    // ============== YAHAN BADLAV KIYA GAYA HAI ==============
+    useEffect(() => {
+        const newSearchParams = new URLSearchParams(searchParams);
+        const currentPage = newSearchParams.get('page');
+
+        if (currentPage !== '1') {
+           newSearchParams.set('page', '1');
+        }
+    // Dependency array ko theek kar diya gaya hai
+    }, [filters, categorySlugFromPath, searchParams, location.search, navigate]);
+    // ==========================================================
 
     return (
         <>
@@ -136,13 +162,21 @@ const ProductsPage = () => {
                 <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 capitalize">{pageTitle}</h2>
-                        <p className="text-sm text-gray-500">{paginationInfo?.totalItems || 0} {t('items_found')}</p>
+                        <p className="text-sm text-gray-500">{paginationInfo.totalItems} {t('items_found')}</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <input type="text" placeholder={t('search_placeholder')} className="border-gray-300 rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48 focus:ring-brand-blue focus:border-brand-blue"/>
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        </div>
+                        <form onSubmit={handleSearch} className="relative">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder={t('search_placeholder')}
+                                className="border-gray-300 rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48 focus:ring-brand-blue focus:border-brand-blue"
+                            />
+                            <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400">
+                                <Search className="w-full h-full" />
+                            </button>
+                        </form>
                         <select
                             value={`${filters.sortBy}-${filters.order}`}
                             onChange={(e) => {
@@ -187,7 +221,7 @@ const ProductsPage = () => {
                             </div>
                         ) : (
                             <div className="col-span-full text-center py-16">
-                                <h2 className="text-xl font-semibold text-gray-700">{error}</h2>
+                                <h2 className="text-xl font-semibold text-gray-700">{error || t('no_products_found')}</h2>
                                 <p className="text-gray-500 mt-2">{t('adjust_filters_prompt')}</p>
                             </div>
                         )}

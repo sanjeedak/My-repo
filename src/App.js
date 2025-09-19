@@ -90,7 +90,7 @@ function App() {
                     <Route path="faq" element={<FAQPage />} />
                     <Route path="blog" element={<BlogPage />} />
                     <Route path="order-success" element={<OrderSuccessPage />} />
-                    <Route path="track-order" element={<TrackOrderPage />} />
+                    <Route path="track-order/:orderNumber" element={<TrackOrderPage />} />
                     <Route path="cancellation" element={<CancellationPolicyPage />} />
                     <Route path="return" element={<ReturnPolicyPage />} />
                     <Route path="privacy" element={<PrivacyPolicyPage />} />
