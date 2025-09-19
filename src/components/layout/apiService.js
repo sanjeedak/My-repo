@@ -18,41 +18,41 @@ export const apiService = async (endpoints, options = {}) => {
     },
   };
 
-  // Automatically add Authorization header if token exists
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+    mergedOptions.headers['Authorization'] = `Bearer ${token}`;
   }
-  
-  // Handle request body
-  if (options.body) {
-    // For file uploads, let the browser set the Content-Type
-    if (options.body instanceof FormData) {
-      delete config.headers['Content-Type']; // Browser will set this with boundary
-      config.body = options.body;
-    } else {
-      // For all other requests, stringify the body and set Content-Type
-      config.body = JSON.stringify(options.body);
-      config.headers['Content-Type'] = 'application/json';
-    }
+
+  // Handle request body logic
+  const method = (mergedOptions.method || 'GET').toUpperCase();
+
+  // ***** THE FIX IS HERE *****
+  // Agar request POST/PUT/PATCH hai aur usmein body nahi hai, to ek empty body jod dein.
+  // Yeh "Content-Length: 0" wali samasya ko theek karta hai.
+  if (['POST', 'PUT', 'PATCH'].includes(method) && !mergedOptions.body) {
+    mergedOptions.body = {};
+  }
+
+  // Body ko tabhi stringify karein jab woh ek object ho.
+  if (mergedOptions.body && typeof mergedOptions.body !== 'string') {
+    mergedOptions.body = JSON.stringify(mergedOptions.body);
   }
 
   try {
-    const response = await fetch(url, config);
+    const response = await fetch(url, mergedOptions);
 
-    // Handle non-OK responses
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ 
         message: `Request failed with status: ${response.status}` 
       }));
       throw new Error(errorData.message || 'An unknown API error occurred');
     }
-
-    // Handle empty responses (like 204 No Content)
+    
     if (response.status === 204) {
       return { success: true, data: null };
     }
 
-    return await response.json();
+    const text = await response.text();
+    return text ? JSON.parse(text) : null;
 
   } catch (error) {
     console.error(`API service error for endpoint "${endpoints}":`, error);
