@@ -21,7 +21,7 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
     
     const clearFilters = () => {
         setFilters({ 
-            maxPrice: appConfigs.defaultMaxPrice,
+            maxPrice: appConfigs.maxPrice,
             brands: [],
             minRating: 0,
             sortBy: 'created_at',
@@ -38,7 +38,7 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
                     <input
                         type="range"
                         min="0"
-                        max={appConfigs.defaultMaxPrice} // Set max from config
+                        max={appConfigs.maxPrice} // Set max from config
                         step="100"
                         value={filters.maxPrice}
                         onChange={handlePriceChange}

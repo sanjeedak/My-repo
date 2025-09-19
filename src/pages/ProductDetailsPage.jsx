@@ -4,184 +4,199 @@ import { useTranslation } from 'react-i18next';
 import { apiService } from "../components/layout/apiService";
 import { transformProductData } from "../utils/transformProductData";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import { API_BASE_URL } from "../api/config";
 import { endpoints } from "../api/endpoints";
 import ProductImageGallery from "../components/products/ProductImageGallery";
 import SellerInfo from "../components/products/SellerInfo";
 import ProductTabs from "../components/products/ProductTab";
-import { Plus, Minus, ShoppingCart, ChevronRight } from 'lucide-react';
+import { 
+    Plus, Minus, ShoppingCart, ChevronRight, CheckCircle, 
+    ShieldCheck, Heart, ListChecks, Truck, RefreshCw, XCircle
+} from 'lucide-react';
 
 const ProductDetailsPage = () => {
     const { t } = useTranslation();
-    const { slug } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const { addToWishlist } = useWishlist();
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [quantity, setQuantity] = useState(1);
-    const [addToCartMessage, setAddToCartMessage] = useState('');
+    const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
         const fetchProductDetails = async () => {
             setLoading(true);
             setError('');
-            if (!slug) {
-                setError('कोई प्रोडक्ट निर्दिष्ट नहीं है।');
-                setLoading(false);
-                return;
-            }
-
             try {
-                // पहले slug से प्रोडक्ट लाने की कोशिश करें
-                let data = await apiService(endpoints.productDetails(slug));
-
-                // यदि slug से कोई प्रोडक्ट नहीं मिला, तो नाम से खोजने का प्रयास करें
-                if (!data || !data.product) {
-                    const productName = slug.replace(/-/g, ' ');
-                    const searchData = await apiService(`${endpoints.products}?q=${encodeURIComponent(productName)}&limit=1`);
-
-                    if (searchData && searchData.products && searchData.products.length > 0) {
-                        data = { product: searchData.products[0] };
-                    }
-                }
-
-                if (data && data.product) {
-                    setProduct(transformProductData(data.product));
+                const productData = await apiService(endpoints.productDetails(id));
+                if (productData && productData.product) {
+                    setProduct(transformProductData(productData.product));
                 } else {
-                    setError('प्रोडक्ट नहीं मिला।');
-                    setProduct(null);
+                    setError('Product not found.');
                 }
             } catch (err) {
-                console.error("प्रोडक्ट डिटेल्स लाने में असफल:", err);
-                setError('प्रोडक्ट डिटेल्स लाने में कोई त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।');
-                setProduct(null);
+                setError('An error occurred. Please try again later.');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchProductDetails();
-    }, [slug]);
+    }, [id]);
 
     const handleQuantityChange = (amount) => {
         setQuantity(prev => {
             const newQuantity = prev + amount;
             if (newQuantity < 1) return 1;
-            if (product.stock && newQuantity > product.stock) return product.stock;
+            if (product && product.stock && newQuantity > product.stock) return product.stock;
             return newQuantity;
         });
     };
-
+    
+    // Updated function with a stock check
     const handleAddToCart = () => {
-        if (product) {
+        if (product && product.stock > 0) {
             addToCart({ ...product, quantity });
-            setAddToCartMessage(`${quantity} × "${product.name}" cart में जोड़ा गया!`);
-            setTimeout(() => setAddToCartMessage(''), 3000);
+            setShowToast({ message: 'Added to cart!', success: true });
+        } else {
+            setShowToast({ message: 'This item is out of stock.', success: false });
+        }
+        setTimeout(() => setShowToast(false), 3000);
+    };
+    
+    const handleAddToWishlist = () => {
+        if (product) {
+            addToWishlist(product);
+            setShowToast({ message: 'Added to your wishlist!', success: true });
+            setTimeout(() => setShowToast(false), 3000);
         }
     };
 
+    // Updated function with a stock check
     const handleBuyNow = () => {
-        if (product) {
+        if (product && product.stock > 0) {
             addToCart({ ...product, quantity });
             navigate("/checkout");
+        } else {
+            setShowToast({ message: 'Cannot proceed. This item is out of stock.', success: false });
+            setTimeout(() => setShowToast(false), 3000);
         }
     };
 
-    if (loading) {
-        return <div className="text-center py-20">Loading...</div>;
-    }
+    if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    if (error) return <div className="text-center py-20 px-4 text-red-600 bg-red-50 p-6">{error}</div>;
+    if (!product) return <div className="text-center py-20 text-gray-600">Product not found.</div>;
 
-    if (error) {
-        return <div className="text-center py-20 text-red-500">{error}</div>;
-    }
-
-    if (!product) {
-        return <div className="text-center py-20">प्रोडक्ट नहीं मिला।</div>;
-    }
-
-    const imageUrls = product.images.map(img =>
-        img && img.startsWith("http") ? img : `${API_BASE_URL}/${img}`
-    );
+    const imageUrls = product.images.map(img => img.startsWith("http") ? img : `${API_BASE_URL}/${img}`);
 
     return (
-        <div className="bg-gray-50">
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
-                {/* ब्रेडक्रंब्स */}
-                <nav className="flex items-center text-sm text-gray-500 mb-4">
-                    <Link to="/" className="hover:text-blue-600">होम</Link>
-                    <ChevronRight size={16} className="mx-1" />
-                    {product.category && (
-                        <>
-                            <Link to={`/category/${product.category.slug}`} className="hover:text-blue-600">{product.category.name}</Link>
-                            <ChevronRight size={16} className="mx-1" />
-                        </>
-                    )}
-                    <span className="font-medium text-gray-700 truncate">{product.name}</span>
+        <div className="bg-gray-100">
+            <div className="container mx-auto px-4 py-10 max-w-7xl">
+                {/* Breadcrumbs */}
+                <nav className="flex items-center text-sm text-gray-500 mb-6">
+                    <Link to="/" className="hover:text-gray-700">{t('home')}</Link>
+                    <ChevronRight size={16} className="mx-2" />
+                    <Link to="/products" className="hover:text-gray-700">{t('products')}</Link>
+                    <ChevronRight size={16} className="mx-2" />
+                    <span className="text-gray-900 font-semibold truncate max-w-xs">{product.name}</span>
                 </nav>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* प्रोडक्ट इमेज गैलरी */}
-                    <div>
-                        <ProductImageGallery images={imageUrls} productName={product.name} />
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    {/* --- Image Gallery --- */}
+                    <ProductImageGallery images={imageUrls} productName={product.name} />
 
-                    {/* प्रोडक्ट जानकारी */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
-                        <div className="flex items-baseline gap-3 mt-2">
-                            <p className="text-blue-600 text-3xl font-bold">₹{product.price}</p>
-                            {product.discount > 0 && (
-                                <p className="text-gray-500 line-through text-lg">₹{product.originalPrice}</p>
+                    {/* --- Product Information --- */}
+                    <div className="bg-white p-6 rounded-lg shadow-sm flex flex-col space-y-4">
+                        <div className="flex justify-between items-start">
+                            <h1 className="text-2xl font-bold text-gray-800">{product.name}</h1>
+                            {/* Wishlist Button */}
+                            <button onClick={handleAddToWishlist} className="p-2 rounded-full text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
+                                <Heart size={22} />
+                            </button>
+                        </div>
+                        
+                        {/* Price & Stock */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-baseline gap-3">
+                                <p className="text-3xl font-bold text-blue-600">₹{product.price.toLocaleString('en-IN')}</p>
+                                {product.discount > 0 && <p className="text-md text-gray-400 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</p>}
+                            </div>
+                            {product.stock > 0 ? (
+                                <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">In Stock</span>
+                            ) : (
+                                <span className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">Out of Stock</span>
                             )}
                         </div>
 
-                        {addToCartMessage && (
-                            <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md text-center transition-opacity duration-300">
-                                {addToCartMessage}
+                        {/* Key Features */}
+                        <div className="border-t pt-4">
+                             <h3 className="flex items-center gap-2 text-md font-semibold text-gray-700 mb-2">
+                                <ListChecks size={20}/> Key Features
+                             </h3>
+                             <ul className="space-y-1.5 text-sm text-gray-600 list-disc list-inside">
+                                 <li>High-quality durable material</li>
+                                 <li>1 Year Manufacturer Warranty</li>
+                                 <li>Eco-friendly packaging</li>
+                                 <li>Available in 3 different colors</li>
+                             </ul>
+                        </div>
+                        
+                        {/* Action Area */}
+                        <div className="border-t pt-4 space-y-4">
+                            <div className="flex items-center gap-6">
+                                <label className="text-sm font-medium text-gray-700">Quantity:</label>
+                                <div className="flex items-center border rounded-md">
+                                    <button onClick={() => handleQuantityChange(-1)} className="p-2.5 text-gray-500 hover:bg-gray-50"><Minus size={14}/></button>
+                                    <span className="px-5 font-semibold text-gray-800">{quantity}</span>
+                                    <button onClick={() => handleQuantityChange(1)} disabled={quantity >= product.stock} className="p-2.5 text-gray-500 hover:bg-gray-50 disabled:opacity-40"><Plus size={14}/></button>
+                                </div>
                             </div>
-                        )}
-
-                        <p className="mt-4 text-gray-600 leading-relaxed text-sm">
-                            {product.description || "इस प्रोडक्ट के लिए कोई विवरण उपलब्ध नहीं है।"}
-                        </p>
-
-                        <div className="mt-6 border-t pt-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('quantity')}</label>
-                            <div className="flex items-center border border-gray-300 rounded-md w-fit">
-                                <button onClick={() => handleQuantityChange(-1)} className="p-3 hover:bg-gray-100 rounded-l-md"><Minus size={16}/></button>
-                                <span className="px-6 font-semibold text-md">{quantity}</span>
-                                <button onClick={() => handleQuantityChange(1)} className="p-3 hover:bg-gray-100 rounded-r-md"><Plus size={16}/></button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.stock === 0}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-400"
+                                >
+                                    <ShoppingCart size={18} /> {t('add_to_cart')}
+                                </button>
+                                <button
+                                    onClick={handleBuyNow}
+                                    disabled={product.stock === 0}
+                                    className="flex-1 bg-green-600 text-white px-5 py-3 rounded-lg font-semibold transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:bg-gray-400"
+                                >
+                                    {t('buy_now')}
+                                </button>
                             </div>
                         </div>
 
-                        <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                            <button
-                                onClick={handleAddToCart}
-                                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold transition-colors shadow-sm"
-                            >
-                                <ShoppingCart size={20} /> {t('add_to_cart')}
-                            </button>
-                            <button
-                                onClick={handleBuyNow}
-                                className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors shadow-sm"
-                            >
-                                {t('buy_now')}
-                            </button>
+                        {/* Trust Badges */}
+                        <div className="border-t pt-4 flex items-center justify-around text-xs text-gray-500">
+                           <div className="flex items-center gap-2"> <ShieldCheck size={16}/> Secure Payments </div>
+                           <div className="flex items-center gap-2"> <Truck size={16}/> Fast Delivery </div>
+                           <div className="flex items-center gap-2"> <RefreshCw size={16}/> Easy Returns </div>
                         </div>
-
+                        
                         <SellerInfo seller={product.store} />
                     </div>
                 </div>
+                
+                {/* Details Tabs */}
                 <div className="mt-12">
-                    <ProductTabs
-                        description={product.description}
-                        specifications={product.specifications}
-                        reviews={[]}
-                    />
+                    <ProductTabs description={product.description} specifications={product.specifications} reviews={[]} />
                 </div>
             </div>
+
+            {/* Floating Toast Notification */}
+            {showToast && (
+                <div className={`fixed bottom-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in-out transition-colors ${showToast.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                    {showToast.success ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    <p className="text-sm font-medium">{showToast.message}</p>
+                </div>
+            )}
         </div>
     );
 };

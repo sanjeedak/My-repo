@@ -2,7 +2,7 @@
 export const endpoints = {
   // Products
   products: '/api/products',
-  productDetails: (slug) => `/api/products/${slug}`, // Add this new endpoint
+  productDetails: (id) => `/api/products/${id}`,
   productSearch: '/api/products/search',
   topSellers: '/api/products/top-sellers',
 
@@ -20,7 +20,6 @@ export const endpoints = {
 
   // Orders
   orders: '/api/orders',
-  // checkStock: '/api/orders/stock', 
 
   getOrderByNumber: (orderNumber) => `/api/track/${orderNumber}`,
 

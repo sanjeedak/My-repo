@@ -119,6 +119,20 @@ const ProductsPage = () => {
             setLoading(false);
         }
     }, [filters, itemsPerPage, categorySlugFromPath, searchParams, t]);
+    
+    const brandSlug = searchParams.get('brand');
+    const categorySlug = categorySlugFromPath || searchParams.get('category');
+    
+    useEffect(() => {
+        setFilters({
+            maxPrice: appConfigs.maxPrice,
+            brands: [],
+            minRating: 0,
+            sortBy: 'created_at',
+            order: 'desc',
+        });
+        setSearchTerm(searchParams.get('q') || '');
+    }, [brandSlug, categorySlug, searchParams]);
 
     useEffect(() => {
         const currentPage = parseInt(searchParams.get('page') || '1', 10);
@@ -144,17 +158,13 @@ const ProductsPage = () => {
         navigate(`/products?${newSearchParams.toString()}`);
     };
     
-    // ============== YAHAN BADLAV KIYA GAYA HAI ==============
     useEffect(() => {
-        const newSearchParams = new URLSearchParams(searchParams);
-        const currentPage = newSearchParams.get('page');
-
-        if (currentPage !== '1') {
-           newSearchParams.set('page', '1');
+        const newSearchParams = new URLSearchParams(location.search);
+        if (newSearchParams.get('page') !== '1') {
+            newSearchParams.set('page', '1');
+            navigate(`${location.pathname}?${newSearchParams.toString()}`);
         }
-    // Dependency array ko theek kar diya gaya hai
-    }, [filters, categorySlugFromPath, searchParams, location.search, navigate]);
-    // ==========================================================
+    }, [filters, location.pathname, location.search, navigate]);
 
     return (
         <>

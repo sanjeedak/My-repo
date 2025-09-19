@@ -12,9 +12,7 @@ const ProductCard = ({ product, onQuickView }) => {
   const { addToCart } = useCart();
 
   const handleNavigateDetails = () => {
-    if (product?.slug) {
-      navigate(`/product/${product.slug}`);
-    } else if (product?.id) {
+    if (product?.id) {
       navigate(`/product/${product.id}`);
     }
   };

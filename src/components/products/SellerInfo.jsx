@@ -7,8 +7,8 @@ const SellerInfo = ({ seller }) => {
     if (!seller) return null;
 
     const rating = parseFloat(seller.rating || 0).toFixed(1);
-    // Store ke products page ka sahi link banayein
-    const storeProductsLink = `/products?brand=${seller.slug}`;
+    // Corrected the link to use a template literal string
+    const storeProductsLink = `/products?brand=${seller.id}`;
 
     return (
         <div className="bg-slate-100 border border-slate-200 rounded-lg p-4 mt-6">
