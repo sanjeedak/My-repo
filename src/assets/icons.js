@@ -74,12 +74,26 @@ export const CartIcon = ({ className = "h-6 w-6" }) => (
 export const IndiaFlagIcon = ({ className = "w-5 h-5 rounded-sm" }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
     <rect width="900" height="600" fill="#f93" />
-    <rect width="900" height="400" fill="#fff" />
-    <rect width="900" height="200" fill="#128807" />
+    <rect y="200" width="900" height="200" fill="#fff" />
+    <rect y="400" width="900" height="200" fill="#128807" />
     <g transform="translate(450 300)">
-      <circle r="90" fill="#fff" />
-      <circle r="70" fill="#000080" />
-      <circle r="70" fill="none" stroke="#fff" strokeWidth="20" />
+      <circle r="60" fill="#fff" />
+      <circle r="50" fill="none" stroke="#000080" strokeWidth="6" />
+      {/* Ashoka Chakra */}
+      <g>
+        {Array.from({ length: 24 }).map((_, i) => (
+          <line
+            key={i}
+            x1="0"
+            y1="0"
+            x2={50 * Math.sin((i * Math.PI) / 12)}
+            y2={-50 * Math.cos((i * Math.PI) / 12)}
+            stroke="#000080"
+            strokeWidth="2"
+          />
+        ))}
+        <circle r="8" fill="#000080" />
+      </g>
     </g>
   </svg>
 );

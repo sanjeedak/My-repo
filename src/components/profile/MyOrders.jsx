@@ -16,7 +16,7 @@ const MyOrders = () => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await apiService(endpoints.getMyOrders, {
+        const response = await apiService(endpoints.o, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -28,7 +28,7 @@ export const CartProvider = ({ children }) => {
             : item
         );
       } else {
-        return [...prevItems, { ...product, quantity }];
+        return [...prevItems, { ...product, quantity ,store_id: product.store?.id || product.store_id}];
       }
     });
   };

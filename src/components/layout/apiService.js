@@ -1,60 +1,61 @@
 import { API_BASE_URL } from '../../api/config';
 
-export const apiService = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+export const apiService = async (endpoints, options = {}) => {
+  console.log(`API Service called for endpoint: ${endpoints}`);
+  if (!endpoints) {
+    throw new Error('API endpoint is required');
+  } 
+  const url = `${API_BASE_URL}${endpoints}`;
+  
+  // Get token from localStorage
   const token = localStorage.getItem('token');
 
-  const defaultOptions = {
+  const config = {
+    method: options.method || 'GET',
     headers: {
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
-    },
-  };
-
-  const mergedOptions = {
-    ...defaultOptions,
-    ...options,
-    headers: {
-      ...defaultOptions.headers,
       ...options.headers,
     },
   };
 
-  if (token && !endpoint.includes('/signup') && !endpoint.includes('/login')) {
-    mergedOptions.headers['Authorization'] = `Bearer ${token}`;
+  // Automatically add Authorization header if token exists
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
   }
-
-  // Handle file uploads separately
-  if (options.body instanceof FormData) {
-    // For FormData, let the browser set the Content-Type header
-    delete mergedOptions.headers['Content-Type'];
-  } else if (mergedOptions.body) {
-    mergedOptions.body = JSON.stringify(mergedOptions.body);
+  
+  // Handle request body
+  if (options.body) {
+    // For file uploads, let the browser set the Content-Type
+    if (options.body instanceof FormData) {
+      delete config.headers['Content-Type']; // Browser will set this with boundary
+      config.body = options.body;
+    } else {
+      // For all other requests, stringify the body and set Content-Type
+      config.body = JSON.stringify(options.body);
+      config.headers['Content-Type'] = 'application/json';
+    }
   }
 
   try {
-    const response = await fetch(url, mergedOptions);
+    const response = await fetch(url, config);
 
-    // --- FIX START ---
-    // Handle 404 specifically by returning null instead of throwing an error.
-    if (response.status === 404) {
-      return null;
-    }
-
+    // Handle non-OK responses
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: response.statusText }));
+      const errorData = await response.json().catch(() => ({ 
+        message: `Request failed with status: ${response.status}` 
+      }));
       throw new Error(errorData.message || 'An unknown API error occurred');
     }
-    // --- FIX END ---
-    
-    // Handle responses that might not have a body (e.g., 204 No Content)
+
+    // Handle empty responses (like 204 No Content)
     if (response.status === 204) {
-        return null;
+      return { success: true, data: null };
     }
 
     return await response.json();
+
   } catch (error) {
-    console.error(`API service error for endpoint "${endpoint}":`, error);
+    console.error(`API service error for endpoint "${endpoints}":`, error);
     throw error;
   }
 };

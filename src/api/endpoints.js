@@ -22,6 +22,8 @@ export const endpoints = {
   orders: '/api/orders',
   // checkStock: '/api/orders/stock', 
 
+  getOrderByNumber: (orderNumber) => `/api/track/${orderNumber}`,
+
   // User Authentication
   userLogin: '/api/user-auth/login',
   userSignup: '/api/user-auth/signup',
@@ -37,8 +39,8 @@ export const endpoints = {
   vendorForgotPassword: '/api/auth/vendor/forgot-password',
 
   // Payment
-  createRazorpayOrder: '/api/payments/razorpay/create-order',
-  verifyRazorpayPayment: '/api/payments/razorpay/verify-payment',
+  createRazorpayOrder: '/api/payments/create-order',
+  verifyRazorpayPayment: '/api/payments/verify-payment',
     // checkPaymentStatus: '/api/payments/status',
     
 };
