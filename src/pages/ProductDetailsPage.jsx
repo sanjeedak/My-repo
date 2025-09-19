@@ -60,7 +60,14 @@ const ProductDetailsPage = () => {
     // Updated function with a stock check
     const handleAddToCart = () => {
         if (product && product.stock > 0) {
-            addToCart({ ...product, quantity });
+            const productWithStoreId = {
+      ...product,
+      quantity,
+      store_id: product.store?.id 
+    };
+    // **FIX:** Yahan 'productWithStoreId' ko pass karein
+    addToCart(productWithStoreId); 
+            // addToCart({ ...product, quantity });
             setShowToast({ message: 'Added to cart!', success: true });
         } else {
             setShowToast({ message: 'This item is out of stock.', success: false });
