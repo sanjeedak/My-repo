@@ -36,7 +36,7 @@ const ProductsPage = () => {
         order: 'desc',
     });
 
-    const itemsPerPage = appConfigs.itemsPerPage;
+    const itemsPerPage = 100;
 
     // --- DERIVED STATE & MEMOIZED VALUES ---
     const pageTitle = useMemo(() => {
@@ -77,7 +77,7 @@ const ProductsPage = () => {
                 limit: itemsPerPage,
                 sortBy: filters.sortBy,
                 order: filters.order,
-                maxPrice: filters.maxPrice,
+                maxPrice:10000,
                 minRating: filters.minRating,
             });
 
@@ -105,7 +105,7 @@ const ProductsPage = () => {
             setPaginationInfo({
                 currentPage: data?.pagination?.currentPage || 1,
                 totalPages: data?.pagination?.totalPages || 1,
-                totalItems: data?.pagination?.totalItems || 0,
+                totalItems: data?.pagination?.total || 0,
             });
 
             if (transformed.length === 0) {

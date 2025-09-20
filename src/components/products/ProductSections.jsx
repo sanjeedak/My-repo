@@ -274,13 +274,13 @@ export const TopRatedProducts = () => {
 // --- TOP SELLERS ---
 export const SellerCard = ({ seller: store }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
 
   const handleSellerClick = () => {
     navigate(`/products?brand=${store.slug}`);
   };
 
-  const productCount = store.total_products || 0;
+  // const productCount = store.total_products || 0;
 
   return (
     <div
@@ -315,9 +315,9 @@ export const SellerCard = ({ seller: store }) => {
         </div>
         <div className="mt-4 text-xs text-gray-400">
           {/* Updated to display the product count */}
-          <span>
+          {/* <span>
             {productCount} {t("products")}
-          </span>
+          </span> */}
         </div>
       </div>
     </div>

@@ -37,9 +37,9 @@ const CheckoutPage = () => {
     });
 
     const [shippingLocation, setShippingLocation] = useState({ lat: 17.385, lng: 78.4867 });
-    const [billingLocation, setBillingLocation] = useState({ lat: 17.385, lng: 78.4867 });
+    const [, setBillingLocation] = useState({ lat: 17.385, lng: 78.4867 });
     const [isShippingGeocoding, setIsShippingGeocoding] = useState(false);
-    const [isBillingGeocoding, setIsBillingGeocoding] = useState(false);
+    const [isBillingGeocoding] = useState(false);
     const [sameAsShipping, setSameAsShipping] = useState(true);
     const [errors, setErrors] = useState({});
     const [paymentMethod, setPaymentMethod] = useState("cod");
@@ -96,7 +96,6 @@ const CheckoutPage = () => {
     const handleShippingChange = (e) => setShippingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     const handleBillingChange = (e) => setBillingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     const handleShippingAddressSelect = (address) => setShippingForm((prev) => ({ ...prev, street: address.address, ...address }));
-    const handleBillingAddressSelect = (address) => setBillingForm((prev) => ({ ...prev, street: address.address, ...address }));
     const handleSameAsShippingChange = (e) => setSameAsShipping(e.target.checked);
 
     const createAddressPayload = (form) => ({
