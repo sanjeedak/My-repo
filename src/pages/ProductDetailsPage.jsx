@@ -63,9 +63,15 @@ const ProductDetailsPage = () => {
     };
     
     const handleAddToCart = () => {
-      
-        if (product && product.quantity > 0) {
-            addToCart({ ...product, quantity });
+        if (product && product.stock > 0) {
+            const productWithStoreId = {
+      ...product,
+      quantity,
+      store_id: product.store?.id 
+    };
+    // **FIX:** Yahan 'productWithStoreId' ko pass karein
+    addToCart(productWithStoreId); 
+            // addToCart({ ...product, quantity });
             setShowToast({ message: 'Added to cart!', success: true });
         } else {
             setShowToast({ message: 'This item is out of stock.', success: false });

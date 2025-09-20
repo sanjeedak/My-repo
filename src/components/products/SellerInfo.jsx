@@ -5,15 +5,13 @@ import { Link } from 'react-router-dom';
 import { StarIcon } from '../../assets/icons';
 
 const SellerInfo = ({ seller }) => {
-    // Agar seller ki detail nahi hai, to kuch na dikhayein
+   
     if (!seller) {
         return null;
     }
 
     const rating = parseFloat(seller.rating || 0).toFixed(1);
-    
-    // FIX: Link ab backend ke productController.js ke anusaar banega.
-    // Hum 'brand_slug' parameter aur seller ke 'slug' ka istemal karenge.
+ 
     const storeProductsLink = `/products?brand_slug=${seller.slug}`;
 
     return (
@@ -21,7 +19,7 @@ const SellerInfo = ({ seller }) => {
             <h3 className="font-bold text-slate-800 mb-3">Sold by:</h3>
             <div className="flex items-center space-x-4">
                 <img
-                    // API se poora URL aa raha hai, isliye ismein badlav ki zaroorat nahi hai
+               
                     src={seller.logo || 'https://placehold.co/64x64?text=Store'}
                     alt={`${seller.name} logo`}
                     className="w-16 h-16 rounded-full object-cover border"

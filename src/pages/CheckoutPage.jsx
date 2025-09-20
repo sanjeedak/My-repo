@@ -379,18 +379,8 @@ const CheckoutPage = () => {
                                         error={errors.billing_pincode}
                                     />
                                 </div>
-                                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">
-                                    {t("confirm billing location")}
-                                    {isBillingGeocoding && <span className="text-sm text-gray-500"> (Fetching address...)</span>}
-                                </h3>
-                                <MapSection
-                                    key="billing-map"
-                                    initialCenter={billingLocation || shippingLocation}
-                                    onLocationChange={setBillingLocation}
-                                    onAddressSelect={handleBillingAddressSelect}
-                                    onGeocodingStart={() => setIsBillingGeocoding(true)}
-                                    onGeocodingEnd={() => setIsBillingGeocoding(false)}
-                                />
+                                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">{t("confirm_billing_location")} {isBillingGeocoding && <span className="text-sm text-gray-500">{t("fetching_address")}</span>}</h3>
+                                {/* <MapSection key="billing-map" initialCenter={billingLocation || shippingLocation} onLocationChange={setBillingLocation} onAddressSelect={handleBillingAddressSelect} onGeocodingStart={() => setIsBillingGeocoding(true)} onGeocodingEnd={() => setIsBillingGeocoding(false)}/> */}
                             </div>
                         )}
                     </div>

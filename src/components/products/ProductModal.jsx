@@ -17,14 +17,26 @@ const ProductModal = ({ product, onClose }) => {
 
   const handleBuyNow = (e) => {
     e.stopPropagation();
-    addToCart(product);
+    const productWithStoreId = {
+      ...product,
+      store_id: product.store?.id 
+    };
+    // **FIX:** Yahan 'productWithStoreId' ko pass karein
+    addToCart(productWithStoreId); 
+    // addToCart(product);
     onClose();
     navigate("/checkout");
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    addToCart(product);
+    const productWithStoreId = {
+      ...product,
+      store_id: product.store?.id 
+    };
+    // **FIX:** Yahan 'productWithStoreId' ko pass karein
+    addToCart(productWithStoreId); 
+    // addToCart(product);
     onClose();
   };
 
