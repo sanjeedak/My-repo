@@ -1,3 +1,5 @@
+// src/components/CategoriesBar.js
+
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { apiService } from "./layout/apiService";
@@ -11,7 +13,7 @@ const getImageUrl = (imagePath, categoryName) => {
     return imagePath;
   }
   if (imagePath) {
-    return `${API_BASE_URL}/${imagePath}`;
+    return `${API_BASE_URL}${imagePath}`;
   }
   const firstWord = categoryName.split(' ')[0];
   return `https://placehold.co/40x40/EBF4FF/7F9CF5?text=${encodeURIComponent(firstWord.charAt(0))}`;
@@ -28,15 +30,19 @@ const CategoriesBar = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        // Fetch categories with pagination
-        const response = await apiService(`${endpoints.categories}?page=1&limit=10`);
-        
+        const response = await apiService(`${endpoints.categories}?page=1&limit=100`);
         const cats = response?.data?.categories || [];
-        setCategories(cats);
+        
+        if (Array.isArray(cats)) {
+          setCategories(cats);
+        } else {
+          console.warn("API did not return an array for categories. Response:", response);
+          setCategories([]);
+        }
         setError(null);
       } catch (err) {
-        console.error("Failed to fetch categories:", err);
-        setError("Failed to load categories.");
+        console.error("API call failed:", err);
+        setError("Categories load nahi ho paayin. Server se connection check karein.");
       } finally {
         setLoading(false);
       }
@@ -46,17 +52,12 @@ const CategoriesBar = () => {
 
   const handleMouseEnter = (category) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-
-    hoverTimeoutRef.current = setTimeout(() => {
-      setActiveCategory(category);
-    }, 150);
+    hoverTimeoutRef.current = setTimeout(() => setActiveCategory(category), 150);
   };
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => {
-      setActiveCategory(null);
-    }, 200);
+    hoverTimeoutRef.current = setTimeout(() => setActiveCategory(null), 200);
   };
 
   const handlePanelMouseEnter = () => {
@@ -65,22 +66,24 @@ const CategoriesBar = () => {
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500 bg-white border border-gray-200 rounded-lg shadow-sm h-[380px]">
-        {error}
+      <div className="p-4 text-center text-red-500 ...">
+        <p className="font-semibold">Error</p>
+        <p>{error}</p>
       </div>
     );
   }
-
+  
   return (
     <div 
       onMouseLeave={handleMouseLeave} 
-      className="flex bg-white border border-gray-200 rounded-lg shadow-sm h-[380px] w-full relative"
+      className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm h-[380px] w-full relative"
     >
-      <ul className="divide-y divide-gray-100 w-full overflow-y-auto scrollbar-hide">
+      {/* FIX #1: Smooth scroll aur custom scrollbar ke liye classes add ki gayi hain */}
+      <ul className="flex-grow divide-y divide-gray-100 w-full overflow-y-auto smooth-scroll custom-scrollbar">
         {loading ? (
           Array.from({ length: 8 }).map((_, index) => (
-            <li key={index} className="p-4">
-              <div className="flex items-center gap-3 animate-pulse">
+            <li key={index} className="p-4 animate-pulse">
+              <div className="flex items-center gap-3">
                 <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
                 <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
               </div>
@@ -94,7 +97,7 @@ const CategoriesBar = () => {
               className={`transition-colors duration-200 ${activeCategory?.id === category.id ? 'bg-blue-50' : ''}`}
             >
               <Link
-                to={`/category/${category.slug}`}
+                to={`/products?category=${category.slug}`}
                 className="flex justify-between items-center w-full text-sm text-gray-700 text-left px-4 py-2.5 "
               >
                 <span className="flex items-center gap-3">
@@ -113,6 +116,16 @@ const CategoriesBar = () => {
           ))
         )}
       </ul>
+
+      {/* FIX #2: "View All Categories" ka link neeche add kiya gaya hai */}
+      <div className="flex-shrink-0 border-t border-gray-200">
+        <Link
+          to="/categories" // Yeh URL aapke "All Categories" page ka hona chahiye
+          className="block w-full text-center text-sm font-semibold text-blue-600 py-3 hover:bg-gray-50"
+        >
+          View All Categories
+        </Link>
+      </div>
 
       <div
         onMouseEnter={handlePanelMouseEnter}

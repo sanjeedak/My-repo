@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react"; // useContext ko import rakha hai
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { apiService } from "../components/layout/apiService";
 import { endpoints } from "../api/endpoints";
-import MapSection from "../components/MapSection"; // MapSection ab istemal hoga
+import MapSection from "../components/MapSection";
+import InputField from "../components/forms/InputField"; // Now using reusable InputField
 import { validateEmailPhone } from "../utils/sanatize";
 
 const CheckoutPage = () => {
@@ -51,7 +52,7 @@ const CheckoutPage = () => {
         script.async = true;
         script.onload = () => setRazorpayLoaded(true);
         script.onerror = () => {
-            setErrors({ api: t("razorpay_sdk_not_loaded") });
+            setErrors({ api: t("razorpay sdk not loaded") });
             setRazorpayLoaded(false);
         };
         document.body.appendChild(script);
@@ -113,10 +114,10 @@ const CheckoutPage = () => {
         e.preventDefault();
         setErrors({});
 
-        if (!user || !token) return setErrors({ api: t("please_login") });
+        if (!user || !token) return setErrors({ api: t("Please Login") });
         if (!validateForm()) return;
-        if (cartItems.length === 0) return setErrors({ api: t("cart_empty") });
-        if (paymentMethod === "razorpay" && !razorpayLoaded) return setErrors({ api: t("razorpay_sdk_not_loaded") });
+        if (cartItems.length === 0) return setErrors({ api: t("Your cart is empty ") });
+        if (paymentMethod === "razorpay" && !razorpayLoaded) return setErrors({ api: t("Razorpay SDK not loaded") });
 
         setIsSubmitting(true);
 
@@ -146,7 +147,7 @@ const CheckoutPage = () => {
             });
 
             if (!createdOrdersResponse?.success || !createdOrdersResponse.orders?.length) {
-                throw new Error(createdOrdersResponse.message || t("order_creation_failed"));
+                throw new Error(createdOrdersResponse.message || t("order creation failed"));
             }
 
             const createdOrders = createdOrdersResponse.orders;
@@ -161,12 +162,11 @@ const CheckoutPage = () => {
                 });
 
                 if (!razorpayOrderResponse.success) {
-                    throw new Error(razorpayOrderResponse.message || t("razorpay_order_failed"));
+                    throw new Error(razorpayOrderResponse.message || t("razorpay order failed"));
                 }
                 
                 const { razorpayOrderId, amount, currency } = razorpayOrderResponse.data;
-                // const { data: { key: razorpayKeyId } } = await apiService(endpoints.getRazorpayKey, { headers: authHeaders });
-              const  razorpayKeyId = "rzp_test_RIFtktuDIBbnjG"; // Replace with your actual Razorpay Key ID
+                const razorpayKeyId = "rzp_test_RIFtktuDIBbnjG";
                 if (!razorpayKeyId) {
                     console.error("CRITICAL: Razorpay Key ID not found from backend.");
                     setErrors({ api: "Payment gateway is not configured correctly." });
@@ -199,10 +199,10 @@ const CheckoutPage = () => {
                                 clearCart();
                                 navigate("/order-success", { state: { orderNumbers } });
                             } else {
-                                setErrors({ api: verificationResponse.message || t("payment_verification_failed") });
+                                setErrors({ api: verificationResponse.message || t("payment verification failed") });
                             }
                         } catch (error) {
-                            setErrors({ api: error.message || t("payment_verification_failed") });
+                            setErrors({ api: error.message || t("payment verification failed") });
                         }
                     },
                     prefill: { 
@@ -213,7 +213,7 @@ const CheckoutPage = () => {
                     theme: { color: "#3399cc" },
                     modal: {
                         ondismiss: () => {
-                            setErrors({ api: t("payment_cancelled") });
+                            setErrors({ api: t("payment cancelled") });
                             setIsSubmitting(false);
                         },
                     },
@@ -228,7 +228,7 @@ const CheckoutPage = () => {
             }
         } catch (error) {
             console.error("Checkout page error:", error);
-            setErrors({ api: error.message || t("unexpected_error") });
+            setErrors({ api: error.message || t("unexpected error") });
         } finally {
             if (paymentMethod !== 'razorpay') {
                setIsSubmitting(false);
@@ -240,10 +240,10 @@ const CheckoutPage = () => {
         return (
             <div className="container mx-auto px-4 py-10 text-center">
                 <h2 className="text-2xl font-bold mb-4">{t("please_login")}</h2>
-                <p className="text-gray-600 mb-6">{t("login_prompt")}</p>
+                <p className="text-gray-600 mb-6">Please log in to continue with your checkout.</p>
                 <div className="flex justify-center gap-4">
                     <button onClick={() => navigate("/signin", { state: { from: location } })} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">{t("login")}</button>
-                    <button onClick={() => navigate("/signup")} className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300">{t("register")}</button>
+                    <button onClick={() => navigate("/signup")} className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300">Sign Up</button>
                 </div>
             </div>
         );
@@ -266,24 +266,62 @@ const CheckoutPage = () => {
                     <div>
                         <h2 className="text-2xl font-bold mb-4">{t("shipping_address")}</h2>
                         <div className="space-y-4">
-                            <input type="text" name="name" placeholder={t("full_name")} value={shippingForm.name} onChange={handleShippingChange} className={`w-full border px-4 py-2 rounded ${errors.shipping_name ? "border-red-500" : "border-gray-300"}`}/>
-                            {errors.shipping_name && <p className="text-red-500 text-xs">{errors.shipping_name}</p>}
-                            <input type="tel" name="phone" placeholder={t("phone_number")} value={shippingForm.phone} onChange={handleShippingChange} className={`w-full border px-4 py-2 rounded ${errors.shipping_phone ? "border-red-500" : "border-gray-300"}`}/>
-                            {errors.shipping_phone && <p className="text-red-500 text-xs">{errors.shipping_phone}</p>}
-                            <textarea name="street" placeholder={t("full_address")} value={shippingForm.street} onChange={handleShippingChange} className={`w-full border px-4 py-2 rounded ${errors.shipping_address ? "border-red-500" : "border-gray-300"}`}/>
-                            {errors.shipping_address && <p className="text-red-500 text-xs">{errors.shipping_address}</p>}
+                            <InputField 
+                                id="shipping-name" 
+                                name="name"
+                                placeholder={t("full_name")}
+                                value={shippingForm.name} 
+                                onChange={handleShippingChange} 
+                                error={errors.shipping_name}
+                            />
+                            <InputField
+                                id="shipping-phone"
+                                name="phone"
+                                placeholder={t("Phone Number")}
+                                type="tel"
+                                value={shippingForm.phone}
+                                onChange={handleShippingChange}
+                                error={errors.shipping_phone}
+                            />
+                            <InputField
+                                id="shipping-street"
+                                name="street"
+                                label="Full Address"
+                                placeholder={t("Full Address")}
+                                type="textarea"
+                                value={shippingForm.street}
+                                onChange={handleShippingChange}
+                                error={errors.shipping_address}
+                            />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <input type="text" name="city" placeholder={t("city")} value={shippingForm.city} onChange={handleShippingChange} className={`w-full border px-4 py-2 rounded ${errors.shipping_city ? "border-red-500" : "border-gray-300"}`}/>
-                                    {errors.shipping_city && <p className="text-red-500 text-xs">{errors.shipping_city}</p>}
-                                </div>
-                                <div>
-                                    <input type="text" name="pincode" placeholder={t("pincode")} value={shippingForm.pincode} onChange={handleShippingChange} className={`w-full border px-4 py-2 rounded ${errors.shipping_pincode ? "border-red-500" : "border-gray-300"}`}/>
-                                    {errors.shipping_pincode && <p className="text-red-500 text-xs">{errors.shipping_pincode}</p>}
-                                </div>
+                                <InputField
+                                    id="shipping-city"
+                                    name="city"
+                                    placeholder={t("city")}
+                                    value={shippingForm.city}
+                                    onChange={handleShippingChange}
+                                    error={errors.shipping_city}
+                                />
+                                <InputField
+                                    id="shipping-pincode"
+                                    name="pincode"
+                                    placeholder={t("postal_code")}
+                                    value={shippingForm.pincode}
+                                    onChange={handleShippingChange}
+                                    error={errors.shipping_pincode}
+                                />
                             </div>
-                            <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">{t("confirm_shipping_location")} {isShippingGeocoding && <span className="text-sm text-gray-500">{t("fetching_address")}</span>}</h3>
-                            <MapSection key="shipping-map" onLocationChange={setShippingLocation} onAddressSelect={handleShippingAddressSelect} onGeocodingStart={() => setIsShippingGeocoding(true)} onGeocodingEnd={() => setIsShippingGeocoding(false)}/>
+                            <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">
+                                {t("confirm shipping location")}
+                                {isShippingGeocoding && <span className="text-sm text-gray-500"> (Fetching address...)</span>}
+                            </h3>
+                            <MapSection
+                                key="shipping-map"
+                                onLocationChange={setShippingLocation}
+                                onAddressSelect={handleShippingAddressSelect}
+                                onGeocodingStart={() => setIsShippingGeocoding(true)}
+                                onGeocodingEnd={() => setIsShippingGeocoding(false)}
+                            />
                         </div>
                     </div>
 
@@ -296,24 +334,63 @@ const CheckoutPage = () => {
                         </div>
                         {!sameAsShipping && (
                             <div className="space-y-4">
-                                <input type="text" name="name" placeholder={t("full_name")} value={billingForm.name} onChange={handleBillingChange} className={`w-full border px-4 py-2 rounded ${errors.billing_name ? "border-red-500" : "border-gray-300"}`}/>
-                                {errors.billing_name && <p className="text-red-500 text-xs">{errors.billing_name}</p>}
-                                <input type="tel" name="phone" placeholder={t("phone_number")} value={billingForm.phone} onChange={handleBillingChange} className={`w-full border px-4 py-2 rounded ${errors.billing_phone ? "border-red-500" : "border-gray-300"}`}/>
-                                {errors.billing_phone && <p className="text-red-500 text-xs">{errors.billing_phone}</p>}
-                                <textarea name="street" placeholder={t("full_address")} value={billingForm.street} onChange={handleBillingChange} className={`w-full border px-4 py-2 rounded ${errors.billing_address ? "border-red-500" : "border-gray-300"}`}/>
-                                {errors.billing_address && <p className="text-red-500 text-xs">{errors.billing_address}</p>}
+                                <InputField 
+                                    id="billing-name" 
+                                    name="name"
+                                    placeholder={t("full_name")}
+                                    value={billingForm.name} 
+                                    onChange={handleBillingChange} 
+                                    error={errors.billing_name}
+                                />
+                                <InputField
+                                    id="billing-phone"
+                                    name="phone"
+                                    placeholder={t("phone_number")}
+                                    type="tel"
+                                    value={billingForm.phone}
+                                    onChange={handleBillingChange}
+                                    error={errors.billing_phone}
+                                />
+                                <InputField
+                                    id="billing-street"
+                                    name="street"
+                                    label="Full Address"
+                                    placeholder={t("full_address")}
+                                    type="text"
+                                    value={billingForm.street}
+                                    onChange={handleBillingChange}
+                                    error={errors.billing_address}
+                                />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <input type="text" name="city" placeholder={t("city")} value={billingForm.city} onChange={handleBillingChange} className={`w-full border px-4 py-2 rounded ${errors.billing_city ? "border-red-500" : "border-gray-300"}`}/>
-                                        {errors.billing_city && <p className="text-red-500 text-xs">{errors.billing_city}</p>}
-                                    </div>
-                                    <div>
-                                        <input type="text" name="pincode" placeholder={t("pincode")} value={billingForm.pincode} onChange={handleBillingChange} className={`w-full border px-4 py-2 rounded ${errors.billing_pincode ? "border-red-500" : "border-gray-300"}`}/>
-                                        {errors.billing_pincode && <p className="text-red-500 text-xs">{errors.billing_pincode}</p>}
-                                    </div>
+                                    <InputField
+                                        id="billing-city"
+                                        name="city"
+                                        placeholder={t("city")}
+                                        value={billingForm.city}
+                                        onChange={handleBillingChange}
+                                        error={errors.billing_city}
+                                    />
+                                    <InputField
+                                        id="billing-pincode"
+                                        name="pincode"
+                                        placeholder={t("postal_code")}
+                                        value={billingForm.pincode}
+                                        onChange={handleBillingChange}
+                                        error={errors.billing_pincode}
+                                    />
                                 </div>
-                                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">{t("confirm_billing_location")} {isBillingGeocoding && <span className="text-sm text-gray-500">{t("fetching_address")}</span>}</h3>
-                                <MapSection key="billing-map" initialCenter={billingLocation || shippingLocation} onLocationChange={setBillingLocation} onAddressSelect={handleBillingAddressSelect} onGeocodingStart={() => setIsBillingGeocoding(true)} onGeocodingEnd={() => setIsBillingGeocoding(false)}/>
+                                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">
+                                    {t("confirm billing location")}
+                                    {isBillingGeocoding && <span className="text-sm text-gray-500"> (Fetching address...)</span>}
+                                </h3>
+                                <MapSection
+                                    key="billing-map"
+                                    initialCenter={billingLocation || shippingLocation}
+                                    onLocationChange={setBillingLocation}
+                                    onAddressSelect={handleBillingAddressSelect}
+                                    onGeocodingStart={() => setIsBillingGeocoding(true)}
+                                    onGeocodingEnd={() => setIsBillingGeocoding(false)}
+                                />
                             </div>
                         )}
                     </div>
@@ -323,12 +400,12 @@ const CheckoutPage = () => {
                         <h2 className="text-2xl font-bold mb-4">{t("payment_method")}</h2>
                         <div className="space-y-4">
                             <label className="flex items-center"><input type="radio" name="paymentMethod" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="h-4 w-4 text-blue-600 border-gray-300"/><span className="ml-2">{t("cod")}</span></label>
-                            <label className="flex items-center"><input type="radio" name="paymentMethod" value="razorpay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} className="h-4 w-4 text-blue-600 border-gray-300"/><span className="ml-2">{t("razorpay")}</span></label>
+                            <label className="flex items-center"><input type="radio" name="paymentMethod" value="razorpay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} className="h-4 w-4 text-blue-600 border-gray-300"/><span className="ml-2">Razorpay</span></label>
                         </div>
                     </div>
                     {errors.api && <p className="text-red-500 text-sm mt-4">{errors.api}</p>}
                     <button type="submit" disabled={isSubmitting} className={`w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}>
-                        {isSubmitting ? t("placing_order") : t("place_order")}
+                        {isSubmitting ? "Placing Order..." : t("place_order")}
                     </button>
                 </form>
             </div>
@@ -344,7 +421,7 @@ const CheckoutPage = () => {
                 ))}
                 <div className="mt-6 space-y-2">
                     <div className="flex justify-between"><span className="text-gray-600">{t("subtotal")}</span><span>₹{(totalAmount || 0).toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600">{t("tax")}</span><span>₹{(totalAmount * 0.18).toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600">Tax (18%)</span><span>₹{(totalAmount * 0.18).toFixed(2)}</span></div>
                     <div className="flex justify-between"><span className="text-gray-600">{t("shipping")}</span><span>₹{50.0.toFixed(2)}</span></div>
                 </div>
                 <div className="flex justify-between items-center mt-6 border-t pt-4">

@@ -1,21 +1,28 @@
+// src/components/products/SellerInfo.js
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { StarIcon } from '../../assets/icons';
-import { API_BASE_URL } from '../../api/config';
 
 const SellerInfo = ({ seller }) => {
-    if (!seller) return null;
+    // Agar seller ki detail nahi hai, to kuch na dikhayein
+    if (!seller) {
+        return null;
+    }
 
     const rating = parseFloat(seller.rating || 0).toFixed(1);
-    // Corrected the link to use a template literal string
-    const storeProductsLink = `/products?brand=${seller.id}`;
+    
+    // FIX: Link ab backend ke productController.js ke anusaar banega.
+    // Hum 'brand_slug' parameter aur seller ke 'slug' ka istemal karenge.
+    const storeProductsLink = `/products?brand_slug=${seller.slug}`;
 
     return (
         <div className="bg-slate-100 border border-slate-200 rounded-lg p-4 mt-6">
             <h3 className="font-bold text-slate-800 mb-3">Sold by:</h3>
             <div className="flex items-center space-x-4">
                 <img
-                    src={`${API_BASE_URL}/${seller.logo}`}
+                    // API se poora URL aa raha hai, isliye ismein badlav ki zaroorat nahi hai
+                    src={seller.logo || 'https://placehold.co/64x64?text=Store'}
                     alt={`${seller.name} logo`}
                     className="w-16 h-16 rounded-full object-cover border"
                     onError={(e) => { e.target.src = 'https://placehold.co/64x64?text=Store'; }}

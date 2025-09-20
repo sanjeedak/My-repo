@@ -27,6 +27,32 @@
 .App-link {
   color: #61dafb;
 }
+/* src/index.css (ya aapki main CSS file) */
+
+/* ... (aapka baaki ka CSS code) ... */
+
+/* Smooth scrolling ke liye */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar jo behtar dikhega */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 
 @keyframes App-logo-spin {
   from {

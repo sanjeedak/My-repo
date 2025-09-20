@@ -17,6 +17,7 @@ export const endpoints = {
 
   // Categories
   categories: '/api/categories',
+ 
 
   // Orders
   orders: '/api/orders',

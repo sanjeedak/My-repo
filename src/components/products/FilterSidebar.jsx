@@ -1,6 +1,6 @@
 import React from 'react';
 import { StarIcon } from '../../assets/icons';
-import  appConfigs  from '../../config/appConfigs'; // Import new config
+import  appConfigs  from '../../config/appConfigs'; 
 
 const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
     
@@ -38,7 +38,7 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
                     <input
                         type="range"
                         min="0"
-                        max={appConfigs.maxPrice} // Set max from config
+                        max={appConfigs.maxPrice} 
                         step="100"
                         value={filters.maxPrice}
                         onChange={handlePriceChange}
