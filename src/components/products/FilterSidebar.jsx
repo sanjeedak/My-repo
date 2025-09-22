@@ -29,6 +29,8 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
         });
     }
 
+    const currentMaxPrice = filters.maxPrice ?? appConfigs.maxPrice;
+
     return (
         <aside className="space-y-6">
             <h3 className="text-lg font-bold border-b pb-2">Filter By</h3>
@@ -40,13 +42,13 @@ const FilterSidebar = ({ filters, setFilters, availableBrands = [] }) => {
                         min="0"
                         max={appConfigs.maxPrice} 
                         step="100"
-                        value={filters.maxPrice}
+                        value={currentMaxPrice}
                         onChange={handlePriceChange}
                     />
                 </div>
                 <div className="flex justify-between text-sm text-gray-500 mt-2">
                     <span>₹0</span>
-                    <span>₹{Number(filters.maxPrice).toLocaleString()}</span>
+                    <span>₹{Number(currentMaxPrice).toLocaleString()}</span>
                 </div>
             </div>
 

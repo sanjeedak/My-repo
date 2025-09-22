@@ -4,12 +4,13 @@ import { API_BASE_URL } from '../api/config';
 import { StarIcon } from '../assets/icons';
 
 const SellerCard = ({ seller }) => {
+     const storeLink = `/store/${seller.id}`;
     // Create a URL-friendly slug from the seller's name if one doesn't exist
-    const sellerSlug = seller.slug || (seller.name ? seller.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : seller.id);
+    // const sellerSlug = seller.slug || (seller.name ? seller.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : seller.id);
 
     return (
         <Link
-            to={`/products?brand=${sellerSlug}`}
+            to={storeLink}
             className="group relative block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 active:scale-95 active:shadow-inner"
         >
             <div className="p-6">

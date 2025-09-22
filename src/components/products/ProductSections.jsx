@@ -276,8 +276,11 @@ export const SellerCard = ({ seller: store }) => {
   const navigate = useNavigate();
   // const { t } = useTranslation();
 
-  const handleSellerClick = () => {
-    navigate(`/products?brand=${store.slug}`);
+  // const handleSellerClick = () => {
+  //   navigate(`/products?brand=${store.slug}`);
+  // };
+   const handleSellerClick = () => {
+    navigate(`/store/${store.id}`);
   };
 
   // const productCount = store.total_products || 0;
