@@ -51,10 +51,8 @@ const ProductsPage = () => {
 
         const categorySlug = categorySlugFromPath || searchParams.get('category');
         if (categorySlug) return `${t('products_in')} ${categorySlug.replace(/-/g, ' ')}`;
-
         const brandSlug = searchParams.get('brand');
         if (brandSlug) return `${t('products_from')} ${brandSlug.replace(/-/g, ' ')}`;
-
         return t('All Products');
     }, [searchParams, categorySlugFromPath, t]);
 

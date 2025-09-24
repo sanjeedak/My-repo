@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useEffect } from 'react';
+import React, { useCallback, memo } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useMap } from '../context/MapProvider';
 
@@ -32,15 +32,6 @@ const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocod
     borderRadius: '0.5rem'
   };
 
-  const [markerPosition, setMarkerPosition] = useState(initialCenter || { lat: 17.3850, lng: 78.4867 });
-
-  useEffect(() => {
-    if (initialCenter) {
-        setMarkerPosition(initialCenter);
-    }
-  }, [initialCenter]);
-
-
   const getAddressFromLatLng = useCallback(async (lat, lng) => {
     if (!isLoaded || !window.google || !window.google.maps.Geocoder) {
       console.error("Google Maps API not loaded yet.");
@@ -51,7 +42,7 @@ const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocod
     const geocoder = new window.google.maps.Geocoder();
     try {
         const { results } = await geocoder.geocode({ location: { lat, lng } });
-        if (results[0]) {
+        if (results && results[0]) {
             const addressComponents = results[0].address_components;
             const getAddressComponent = (type) =>
               addressComponents.find(c => c.types.includes(type))?.long_name || '';
@@ -73,12 +64,11 @@ const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocod
     }
   }, [isLoaded, onAddressSelect, onGeocodingStart, onGeocodingEnd]);
 
-  const handleMapClick = useCallback((event) => {
+  const handleMarkerDragEnd = useCallback((event) => {
     const newPosition = {
       lat: event.latLng.lat(),
       lng: event.latLng.lng(),
     };
-    setMarkerPosition(newPosition);
     if (onLocationChange) {
       onLocationChange(newPosition);
     }
@@ -89,21 +79,28 @@ const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocod
     return <LoadingSpinner />;
   }
 
+  // Ensure initialCenter is a valid object before rendering the map
+  const centerPosition = initialCenter && typeof initialCenter.lat === 'number' && typeof initialCenter.lng === 'number' 
+    ? initialCenter 
+    : { lat: 20.5937, lng: 78.9629 }; // Default to center of India if prop is invalid
+
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={markerPosition}
-        zoom={12}
-        onClick={handleMapClick}
+        center={centerPosition}
+        zoom={15}
         options={{
           disableDefaultUI: true,
           zoomControl: true
         }}
       >
-        <Marker position={markerPosition} draggable={true} onDragEnd={handleMapClick} />
+        <Marker 
+            position={centerPosition} 
+            draggable={true} 
+            onDragEnd={handleMarkerDragEnd} 
+        />
       </GoogleMap>
   );
 };
 
 export default memo(MapSection);
-
