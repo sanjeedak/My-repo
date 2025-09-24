@@ -17,7 +17,7 @@ const CheckoutPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
-    const { isLoaded } = useMap();
+    useMap();
 
     const [shippingForm, setShippingForm] = useState({
         name: user ? `${user?.first_name || ''} ${user?.last_name || ''}`.trim() : "",
@@ -39,6 +39,7 @@ const CheckoutPage = () => {
         pincode: "",
     });
 
+    // Default to Hyderabad, will be updated by user's location
     const [shippingLocation, setShippingLocation] = useState({ lat: 17.385, lng: 78.4867 });
     const [billingLocation, setBillingLocation] = useState({ lat: 17.385, lng: 78.4867 });
     const [isShippingGeocoding, setIsShippingGeocoding] = useState(false);
@@ -48,6 +49,23 @@ const CheckoutPage = () => {
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+    // --- NEW CODE to get user's current location ---
+    useEffect(() => {
+        // Check if geolocation is supported by the browser
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setShippingLocation({ lat: latitude, lng: longitude });
+                },
+                (error) => {
+                    console.error("Error getting user location:", error);
+                    // Keep the default location if user denies permission or an error occurs
+                }
+            );
+        }
+    }, []); // Empty array ensures this runs only once on component mount
 
     useEffect(() => {
         const script = document.createElement("script");
@@ -97,10 +115,12 @@ const CheckoutPage = () => {
     };
     
     const handlePlaceSelect = (place, formType) => {
+          console.log('AddressAutocomplete - place selected:', place);
         if (!place.geometry) {
             console.error("Autocomplete's returned place contains no geometry");
             return;
         }
+        
 
         const location = place.geometry.location;
         const newCoords = { lat: location.lat(), lng: location.lng() };
@@ -118,10 +138,10 @@ const CheckoutPage = () => {
 
         if (formType === 'shipping') {
             setShippingForm(prev => ({ ...prev, ...updatedForm }));
-            setShippingLocation(newCoords);
+          setShippingLocation(newCoords);
         } else {
             setBillingForm(prev => ({ ...prev, ...updatedForm }));
-            setBillingLocation(newCoords);
+              setBillingLocation(newCoords); 
         }
     };
 
@@ -349,7 +369,7 @@ const CheckoutPage = () => {
                                 {isShippingGeocoding && <span className="text-sm text-gray-500">(Fetching address...)</span>}
                             </h3>
                             <MapSection
-                                key="shipping-map"
+                               key={`shipping-${shippingLocation.lat}-${shippingLocation.lng}`}
                                 initialCenter={shippingLocation}
                                 onLocationChange={setShippingLocation}
                                 onAddressSelect={handleShippingAddressSelect}

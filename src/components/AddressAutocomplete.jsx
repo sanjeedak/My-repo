@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useMap } from '../context/MapProvider';
-import InputField from './forms/InputField'; // We'll still use our styled InputField
+import InputField from './forms/InputField';
 
 const AddressAutocomplete = ({ label, value, onChange, onPlaceSelect, error, placeholder }) => {
   const { isLoaded } = useMap();
@@ -19,12 +19,25 @@ const AddressAutocomplete = ({ label, value, onChange, onPlaceSelect, error, pla
 
       autoCompleteRef.current.addListener('place_changed', () => {
         const place = autoCompleteRef.current.getPlace();
+        
+        // Update the input value with the selected address
+        if (place.formatted_address) {
+          // Create a synthetic event to update the form value
+          const syntheticEvent = {
+            target: {
+              name: 'street',
+              value: place.formatted_address
+            }
+          };
+          onChange(syntheticEvent); // This updates the form state
+        }
+        
         if (onPlaceSelect) {
           onPlaceSelect(place);
         }
       });
     }
-  }, [isLoaded, onPlaceSelect]);
+  }, [isLoaded, onPlaceSelect, onChange]);
 
   return (
     <InputField
@@ -35,7 +48,7 @@ const AddressAutocomplete = ({ label, value, onChange, onPlaceSelect, error, pla
       onChange={onChange}
       error={error}
       placeholder={placeholder}
-      ref={inputRef} // Pass the ref to the underlying input
+      ref={inputRef}
     />
   );
 };

@@ -119,14 +119,4 @@ a, button {
   This overrides Tailwind's base/preflight styles which can interfere 
   with the map marker images.
 */
-.gm-style img {
-  max-width: none !important;
-  height: auto !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: block !important;
 }
-}
-
