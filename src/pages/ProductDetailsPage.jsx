@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
@@ -27,17 +26,15 @@ const ProductDetailsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [quantity, setQuantity] = useState(1);
-    const [showToast, setShowToast] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', success: false });
 
     useEffect(() => {
         const fetchProductDetails = async () => {
             setLoading(true);
             setError('');
             try {
-               
                 const response = await apiService(endpoints.productDetails(id));
                 if (response && response.product) {
-               
                     setProduct(transformProductData(response.product));
                 } else {
                     setError('Product not found.');
@@ -56,45 +53,71 @@ const ProductDetailsPage = () => {
         setQuantity(prev => {
             const newQuantity = prev + amount;
             if (newQuantity < 1) return 1;
-          
             if (product && product.quantity && newQuantity > product.quantity) return product.quantity;
             return newQuantity;
         });
     };
     
     const handleAddToCart = () => {
-        if (product && product.stock > 0) {
+        if (product && product.quantity > 0) {
             const productWithStoreId = {
-      ...product,
-      quantity,
-      store_id: product.store?.id 
-    };
-    // **FIX:** Yahan 'productWithStoreId' ko pass karein
-    addToCart(productWithStoreId); 
-            // addToCart({ ...product, quantity });
-            setShowToast({ message: 'Added to cart!', success: true });
+                ...product,
+                quantity,
+                store_id: product.store?.id 
+            };
+            try {
+                addToCart(productWithStoreId);
+                setToast({ 
+                    show: true, 
+                    message: t('Added to cart'), 
+                    success: true 
+                });
+            } catch (err) {
+                console.error("Error adding to cart:", err);
+                setToast({ 
+                    show: true, 
+                    message: t('Cart add error'), 
+                    success: false 
+                });
+            }
         } else {
-            setShowToast({ message: 'This item is out of stock.', success: false });
+            setToast({ 
+                show: true, 
+                message: t('Out of stock'), 
+                success: false 
+            });
         }
-        setTimeout(() => setShowToast(false), 3000);
+        setTimeout(() => setToast({ show: false, message: '', success: false }), 3000);
     };
     
     const handleAddToWishlist = () => {
         if (product) {
             addToWishlist(product);
-            setShowToast({ message: 'Added to your wishlist!', success: true });
-            setTimeout(() => setShowToast(false), 3000);
+            setToast({ 
+                show: true, 
+                message: t('Added to wishlist'), 
+                success: true 
+            });
+            setTimeout(() => setToast({ show: false, message: '', success: false }), 3000);
         }
     };
 
     const handleBuyNow = () => {
-       
         if (product && product.quantity > 0) {
-            addToCart({ ...product, quantity });
+            const productWithStoreId = {
+                ...product,
+                quantity,
+                store_id: product.store?.id 
+            };
+            addToCart(productWithStoreId);
             navigate("/checkout");
         } else {
-            setShowToast({ message: 'Cannot proceed. This item is out of stock.', success: false });
-            setTimeout(() => setShowToast(false), 3000);
+            setToast({ 
+                show: true, 
+                message: t('Out of stock'), 
+                success: false 
+            });
+            setTimeout(() => setToast({ show: false, message: '', success: false }), 3000);
         }
     };
 
@@ -131,7 +154,6 @@ const ProductDetailsPage = () => {
                                 <p className="text-3xl font-bold text-blue-600">₹{product.price.toLocaleString('en-IN')}</p>
                                 {product.discount > 0 && <p className="text-md text-gray-400 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</p>}
                             </div>
-                            {/* FIX: `product.stock` ki jagah `product.quantity` se check karein */}
                             {product.quantity > 0 ? (
                                 <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">In Stock</span>
                             ) : (
@@ -155,26 +177,23 @@ const ProductDetailsPage = () => {
                                 <div className="flex items-center border rounded-md">
                                     <button onClick={() => handleQuantityChange(-1)} className="p-2.5 text-gray-500 hover:bg-gray-50"><Minus size={14}/></button>
                                     <span className="px-5 font-semibold text-gray-800">{quantity}</span>
-                                 
                                     <button onClick={() => handleQuantityChange(1)} disabled={quantity >= product.quantity} className="p-2.5 text-gray-500 hover:bg-gray-50 disabled:opacity-40"><Plus size={14}/></button>
                                 </div>
                             </div>
                             <div className="flex gap-3">
                                 <button
                                     onClick={handleAddToCart}
-                                  
                                     disabled={product.quantity === 0}
                                     className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold transition hover:bg-blue-700 disabled:bg-gray-400"
                                 >
-                                    <ShoppingCart size={18} /> {t('add_to_cart')}
+                                    <ShoppingCart size={18} /> {t('Add to cart')}
                                 </button>
                                 <button
                                     onClick={handleBuyNow}
-                                    
                                     disabled={product.quantity === 0}
                                     className="flex-1 bg-green-600 text-white px-5 py-3 rounded-lg font-semibold transition hover:bg-green-700 disabled:bg-gray-400"
                                 >
-                                    {t('buy_now')}
+                                    {t('Buy now')}
                                 </button>
                             </div>
                         </div>
@@ -185,7 +204,6 @@ const ProductDetailsPage = () => {
                            <div className="flex items-center gap-2"> <RefreshCw size={16}/> Easy Returns </div>
                         </div>
                         
-                 
                         <SellerInfo seller={product.store} />
                     </div>
                 </div>
@@ -195,10 +213,10 @@ const ProductDetailsPage = () => {
                 </div>
             </div>
 
-            {showToast && (
-                <div className={`fixed bottom-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg ...`}>
-                    {showToast.success ? <CheckCircle size={18} /> : <XCircle size={18} />}
-                    <p className="text-sm font-medium">{showToast.message}</p>
+            {toast.show && (
+                <div className={`fixed bottom-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg ${toast.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                    {toast.success ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    <p className="text-sm font-medium">{toast.message}</p>
                 </div>
             )}
         </div>

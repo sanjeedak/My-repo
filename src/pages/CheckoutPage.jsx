@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { apiService } from "../components/layout/apiService";
 import { endpoints } from "../api/endpoints";
 import MapSection from "../components/MapSection";
-import InputField from "../components/forms/InputField"; // Now using reusable InputField
+import InputField from "../components/forms/InputField"; 
 import { validateEmailPhone } from "../utils/sanatize";
 
 const CheckoutPage = () => {
@@ -73,20 +73,20 @@ const CheckoutPage = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!shippingForm.name.trim()) newErrors.shipping_name = t("full_name_required");
+        if (!shippingForm.name.trim()) newErrors.shipping_name = t("Fullname is required");
         const shippingPhoneError = validateEmailPhone(shippingForm.phone, false);
         if (shippingPhoneError) newErrors.shipping_phone = shippingPhoneError;
-        if (!shippingForm.street.trim()) newErrors.shipping_address = t("address_required");
-        if (!shippingForm.city.trim()) newErrors.shipping_city = t("city_required");
-        if (!/^\d{6}$/.test(shippingForm.pincode)) newErrors.shipping_pincode = t("pincode_invalid");
+        if (!shippingForm.street.trim()) newErrors.shipping_address = t("Address is required");
+        if (!shippingForm.city.trim()) newErrors.shipping_city = t("City is required");
+        if (!/^\d{6}$/.test(shippingForm.pincode)) newErrors.shipping_pincode = t("Invalid pincode");
 
         if (!sameAsShipping) {
-            if (!billingForm.name.trim()) newErrors.billing_name = t("full_name_required");
+            if (!billingForm.name.trim()) newErrors.billing_name = t("Full name is required");
             const billingPhoneError = validateEmailPhone(billingForm.phone, false);
             if (billingPhoneError) newErrors.billing_phone = billingPhoneError;
-            if (!billingForm.street.trim()) newErrors.billing_address = t("address_required");
-            if (!billingForm.city.trim()) newErrors.billing_city = t("city_required");
-            if (!/^\d{6}$/.test(billingForm.pincode)) newErrors.billing_pincode = t("pincode_invalid");
+            if (!billingForm.street.trim()) newErrors.billing_address = t("Address required");
+            if (!billingForm.city.trim()) newErrors.billing_city = t("City is required");
+            if (!/^\d{6}$/.test(billingForm.pincode)) newErrors.billing_pincode = t("Invalid pincode");
         }
 
         setErrors(newErrors);
@@ -238,7 +238,7 @@ const CheckoutPage = () => {
     if (!user) {
         return (
             <div className="container mx-auto px-4 py-10 text-center">
-                <h2 className="text-2xl font-bold mb-4">{t("please_login")}</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("Please login")}</h2>
                 <p className="text-gray-600 mb-6">Please log in to continue with your checkout.</p>
                 <div className="flex justify-center gap-4">
                     <button onClick={() => navigate("/signin", { state: { from: location } })} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">{t("login")}</button>
@@ -263,12 +263,12 @@ const CheckoutPage = () => {
                 <form onSubmit={handlePlaceOrder} className="space-y-6">
                     {/* Shipping Form */}
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">{t("shipping_address")}</h2>
+                        <h2 className="text-2xl font-bold mb-4">{t("Shipping address")}</h2>
                         <div className="space-y-4">
                             <InputField 
                                 id="shipping-name" 
                                 name="name"
-                                placeholder={t("full_name")}
+                                placeholder={t("Full name")}
                                 value={shippingForm.name} 
                                 onChange={handleShippingChange} 
                                 error={errors.shipping_name}
@@ -304,7 +304,7 @@ const CheckoutPage = () => {
                                 <InputField
                                     id="shipping-pincode"
                                     name="pincode"
-                                    placeholder={t("postal_code")}
+                                    placeholder={t("Postal code")}
                                     value={shippingForm.pincode}
                                     onChange={handleShippingChange}
                                     error={errors.shipping_pincode}
@@ -326,17 +326,17 @@ const CheckoutPage = () => {
 
                     {/* Billing Form */}
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">{t("billing_address")}</h2>
+                        <h2 className="text-2xl font-bold mb-4">{t("Billing address")}</h2>
                         <div className="flex items-center mb-4">
                             <input type="checkbox" id="sameAsShipping" checked={sameAsShipping} onChange={handleSameAsShippingChange} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"/>
-                            <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-gray-900">{t("same_as_shipping")}</label>
+                            <label htmlFor="sameAsShipping" className="ml-2 block text-sm text-gray-900">{t("Same as shipping")}</label>
                         </div>
                         {!sameAsShipping && (
                             <div className="space-y-4">
                                 <InputField 
                                     id="billing-name" 
                                     name="name"
-                                    placeholder={t("full_name")}
+                                    placeholder={t("Full name")}
                                     value={billingForm.name} 
                                     onChange={handleBillingChange} 
                                     error={errors.billing_name}
@@ -344,7 +344,7 @@ const CheckoutPage = () => {
                                 <InputField
                                     id="billing-phone"
                                     name="phone"
-                                    placeholder={t("phone_number")}
+                                    placeholder={t("Phone number")}
                                     type="tel"
                                     value={billingForm.phone}
                                     onChange={handleBillingChange}
@@ -354,7 +354,7 @@ const CheckoutPage = () => {
                                     id="billing-street"
                                     name="street"
                                     label="Full Address"
-                                    placeholder={t("full_address")}
+                                    placeholder={t("Full address")}
                                     type="text"
                                     value={billingForm.street}
                                     onChange={handleBillingChange}
@@ -372,13 +372,13 @@ const CheckoutPage = () => {
                                     <InputField
                                         id="billing-pincode"
                                         name="pincode"
-                                        placeholder={t("postal_code")}
+                                        placeholder={t("Postal code")}
                                         value={billingForm.pincode}
                                         onChange={handleBillingChange}
                                         error={errors.billing_pincode}
                                     />
                                 </div>
-                                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">{t("confirm_billing_location")} {isBillingGeocoding && <span className="text-sm text-gray-500">{t("fetching_address")}</span>}</h3>
+                                <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">{t("Confirm billing location")} {isBillingGeocoding && <span className="text-sm text-gray-500">{t("fetching_address")}</span>}</h3>
                                 {/* <MapSection key="billing-map" initialCenter={billingLocation || shippingLocation} onLocationChange={setBillingLocation} onAddressSelect={handleBillingAddressSelect} onGeocodingStart={() => setIsBillingGeocoding(true)} onGeocodingEnd={() => setIsBillingGeocoding(false)}/> */}
                             </div>
                         )}
@@ -386,7 +386,7 @@ const CheckoutPage = () => {
 
                     {/* Payment Method */}
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">{t("payment_method")}</h2>
+                        <h2 className="text-2xl font-bold mb-4">{t("Payment_method")}</h2>
                         <div className="space-y-4">
                             <label className="flex items-center"><input type="radio" name="paymentMethod" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="h-4 w-4 text-blue-600 border-gray-300"/><span className="ml-2">{t("cod")}</span></label>
                             <label className="flex items-center"><input type="radio" name="paymentMethod" value="razorpay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} className="h-4 w-4 text-blue-600 border-gray-300"/><span className="ml-2">Razorpay</span></label>
@@ -394,7 +394,7 @@ const CheckoutPage = () => {
                     </div>
                     {errors.api && <p className="text-red-500 text-sm mt-4">{errors.api}</p>}
                     <button type="submit" disabled={isSubmitting} className={`w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}>
-                        {isSubmitting ? "Placing Order..." : t("place_order")}
+                        {isSubmitting ? "Placing Order..." : t("Place order")}
                     </button>
                 </form>
             </div>
@@ -414,7 +414,7 @@ const CheckoutPage = () => {
                     <div className="flex justify-between"><span className="text-gray-600">{t("shipping")}</span><span>₹{50.0.toFixed(2)}</span></div>
                 </div>
                 <div className="flex justify-between items-center mt-6 border-t pt-4">
-                    <span className="text-xl font-bold">{t("total")}</span>
+                    <span className="text-xl font-bold">{t("Total")}</span>
                     <span className="text-xl font-bold text-blue-600">₹{(totalAmount + (totalAmount * 0.18) + 50.0).toFixed(2)}</span>
                 </div>
             </div>
