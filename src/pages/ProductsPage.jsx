@@ -17,7 +17,8 @@ const ProductsPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
-    const { slug: categorySlugFromPath } = useParams();
+    // const { slug: categorySlugFromPath } = useParams();
+    const { slug: categorySlugFromPath, storeId } = useParams();
     const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
     // --- COMPONENT STATE ---
@@ -42,19 +43,17 @@ const ProductsPage = () => {
     const pageTitle = useMemo(() => {
         const searchQuery = searchParams.get('q');
         if (searchQuery) return `${t('search_results_for')} "${searchQuery}"`;
-        
+
         const section = searchParams.get('section');
         if (section === 'featured') return t('featured_products');
         if (section === 'flash_deal') return t('flash_deals');
         if (section === 'top_sellers') return t('top_sellers');
-        
+
         const categorySlug = categorySlugFromPath || searchParams.get('category');
         if (categorySlug) return `${t('products_in')} ${categorySlug.replace(/-/g, ' ')}`;
-        
         const brandSlug = searchParams.get('brand');
         if (brandSlug) return `${t('products_from')} ${brandSlug.replace(/-/g, ' ')}`;
-        
-        return t('all_products');
+        return t('All Products');
     }, [searchParams, categorySlugFromPath, t]);
 
     // --- DATA FETCHING ---
@@ -72,15 +71,20 @@ const ProductsPage = () => {
         setLoading(true);
         setError('');
         try {
+            let endpointUrl;
             const queryParams = new URLSearchParams({
                 page: pageToFetch,
                 limit: itemsPerPage,
                 sortBy: filters.sortBy,
                 order: filters.order,
-                maxPrice:10000,
+                maxPrice: 10000,
                 minRating: filters.minRating,
             });
-
+            if (storeId) {
+                endpointUrl = endpoints.productsByStore(storeId);
+            } else {
+                endpointUrl = endpoints.products;
+            }
             if (filters.brands.length > 0) {
                 queryParams.set('brands', filters.brands.join(','));
             }
@@ -97,7 +101,7 @@ const ProductsPage = () => {
             const searchQuery = searchParams.get('q');
             if (searchQuery) queryParams.set('q', searchQuery);
 
-            const data = await apiService(`${endpoints.products}?${queryParams.toString()}`);
+            const data = await apiService(`${endpointUrl}?${queryParams.toString()}`);
             const productList = data?.products || data?.data?.products || [];
             const transformed = productList.map(transformProductData);
 
@@ -118,11 +122,11 @@ const ProductsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [filters, itemsPerPage, categorySlugFromPath, searchParams, t]);
-    
+    }, [filters, itemsPerPage, categorySlugFromPath, searchParams, t,storeId]);
+
     const brandSlug = searchParams.get('brand');
     const categorySlug = categorySlugFromPath || searchParams.get('category');
-    
+
     useEffect(() => {
         setFilters({
             maxPrice: appConfigs.maxPrice,
@@ -145,7 +149,7 @@ const ProductsPage = () => {
         newSearchParams.set('page', page);
         navigate(`${location.pathname}?${newSearchParams.toString()}`);
     };
-    
+
     const handleSearch = (e) => {
         e.preventDefault();
         const newSearchParams = new URLSearchParams(searchParams);
@@ -157,7 +161,7 @@ const ProductsPage = () => {
         newSearchParams.set('page', '1');
         navigate(`/products?${newSearchParams.toString()}`);
     };
-    
+
     useEffect(() => {
         const newSearchParams = new URLSearchParams(location.search);
         if (newSearchParams.get('page') !== '1') {

@@ -6,8 +6,10 @@ import { useAuth } from "../context/AuthContext";
 import { apiService } from "../components/layout/apiService";
 import { endpoints } from "../api/endpoints";
 import MapSection from "../components/MapSection";
-import InputField from "../components/forms/InputField"; 
+import InputField from "../components/forms/InputField";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 import { validateEmailPhone } from "../utils/sanatize";
+import { useMap } from "../context/MapProvider";
 
 const CheckoutPage = () => {
     const { cartItems, totalAmount, clearCart } = useCart();
@@ -15,6 +17,7 @@ const CheckoutPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
+    useMap();
 
     const [shippingForm, setShippingForm] = useState({
         name: user ? `${user?.first_name || ''} ${user?.last_name || ''}`.trim() : "",
@@ -36,15 +39,33 @@ const CheckoutPage = () => {
         pincode: "",
     });
 
+    // Default to Hyderabad, will be updated by user's location
     const [shippingLocation, setShippingLocation] = useState({ lat: 17.385, lng: 78.4867 });
-    const [, setBillingLocation] = useState({ lat: 17.385, lng: 78.4867 });
+    const [billingLocation, setBillingLocation] = useState({ lat: 17.385, lng: 78.4867 });
     const [isShippingGeocoding, setIsShippingGeocoding] = useState(false);
-    const [isBillingGeocoding] = useState(false);
+    const [isBillingGeocoding, setIsBillingGeocoding] = useState(false);
     const [sameAsShipping, setSameAsShipping] = useState(true);
     const [errors, setErrors] = useState({});
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+    // --- NEW CODE to get user's current location ---
+    useEffect(() => {
+        // Check if geolocation is supported by the browser
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setShippingLocation({ lat: latitude, lng: longitude });
+                },
+                (error) => {
+                    console.error("Error getting user location:", error);
+                    // Keep the default location if user denies permission or an error occurs
+                }
+            );
+        }
+    }, []); // Empty array ensures this runs only once on component mount
 
     useEffect(() => {
         const script = document.createElement("script");
@@ -92,10 +113,42 @@ const CheckoutPage = () => {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+    
+    const handlePlaceSelect = (place, formType) => {
+          console.log('AddressAutocomplete - place selected:', place);
+        if (!place.geometry) {
+            console.error("Autocomplete's returned place contains no geometry");
+            return;
+        }
+        
+
+        const location = place.geometry.location;
+        const newCoords = { lat: location.lat(), lng: location.lng() };
+
+        const addressComponents = place.address_components;
+        const getComponent = (type) => addressComponents.find(c => c.types.includes(type))?.long_name || '';
+
+        const updatedForm = {
+            street: place.formatted_address,
+            city: getComponent('locality') || '',
+            state: getComponent('administrative_area_level_1') || '',
+            pincode: getComponent('postal_code') || '',
+            country: getComponent('country') || 'India',
+        };
+
+        if (formType === 'shipping') {
+            setShippingForm(prev => ({ ...prev, ...updatedForm }));
+          setShippingLocation(newCoords);
+        } else {
+            setBillingForm(prev => ({ ...prev, ...updatedForm }));
+              setBillingLocation(newCoords); 
+        }
+    };
 
     const handleShippingChange = (e) => setShippingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     const handleBillingChange = (e) => setBillingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     const handleShippingAddressSelect = (address) => setShippingForm((prev) => ({ ...prev, street: address.address, ...address }));
+    const handleBillingAddressSelect = (address) => setBillingForm((prev) => ({ ...prev, street: address.address, ...address }));
     const handleSameAsShippingChange = (e) => setSameAsShipping(e.target.checked);
 
     const createAddressPayload = (form) => ({
@@ -234,7 +287,6 @@ const CheckoutPage = () => {
             }
         }
     };
-
     if (!user) {
         return (
             <div className="container mx-auto px-4 py-10 text-center">
@@ -276,26 +328,26 @@ const CheckoutPage = () => {
                             <InputField
                                 id="shipping-phone"
                                 name="phone"
-                                placeholder={t("Phone Number")}
+                                label="Phone Number"
+                                placeholder={t("phone_number")}
                                 type="tel"
                                 value={shippingForm.phone}
                                 onChange={handleShippingChange}
                                 error={errors.shipping_phone}
                             />
-                            <InputField
-                                id="shipping-street"
-                                name="street"
+                           <AddressAutocomplete
                                 label="Full Address"
-                                placeholder={t("Full Address")}
-                                type="textarea"
                                 value={shippingForm.street}
                                 onChange={handleShippingChange}
+                                onPlaceSelect={(place) => handlePlaceSelect(place, 'shipping')}
                                 error={errors.shipping_address}
+                                placeholder="Start typing your address..."
                             />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <InputField
                                     id="shipping-city"
                                     name="city"
+                                    label="City"
                                     placeholder={t("city")}
                                     value={shippingForm.city}
                                     onChange={handleShippingChange}
@@ -311,11 +363,12 @@ const CheckoutPage = () => {
                                 />
                             </div>
                             <h3 className="text-xl font-semibold pt-4 flex items-center gap-2">
-                                {t("confirm shipping location")}
-                                {isShippingGeocoding && <span className="text-sm text-gray-500"> (Fetching address...)</span>}
+                                Confirm Shipping Location
+                                {isShippingGeocoding && <span className="text-sm text-gray-500">(Fetching address...)</span>}
                             </h3>
                             <MapSection
-                                key="shipping-map"
+                               key={`shipping-${shippingLocation.lat}-${shippingLocation.lng}`}
+                                initialCenter={shippingLocation}
                                 onLocationChange={setShippingLocation}
                                 onAddressSelect={handleShippingAddressSelect}
                                 onGeocodingStart={() => setIsShippingGeocoding(true)}
@@ -350,20 +403,21 @@ const CheckoutPage = () => {
                                     onChange={handleBillingChange}
                                     error={errors.billing_phone}
                                 />
-                                <InputField
-                                    id="billing-street"
-                                    name="street"
+                                <AddressAutocomplete
                                     label="Full Address"
                                     placeholder={t("Full address")}
                                     type="text"
                                     value={billingForm.street}
                                     onChange={handleBillingChange}
+                                    onPlaceSelect={(place) => handlePlaceSelect(place, 'billing')}
                                     error={errors.billing_address}
+                                    placeholder="Start typing your address..."
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <InputField
                                         id="billing-city"
                                         name="city"
+                                        label="City"
                                         placeholder={t("city")}
                                         value={billingForm.city}
                                         onChange={handleBillingChange}

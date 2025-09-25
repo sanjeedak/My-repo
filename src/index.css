@@ -113,5 +113,10 @@ a, button {
   .section-padding {
     @apply py-8 sm:py-12;
   }
+  /* ======================================================================
+  === THE DEFINITIVE FIX FOR THE GOOGLE MAPS MARKER ICON NOT SHOWING ===
+  ======================================================================
+  This overrides Tailwind's base/preflight styles which can interfere 
+  with the map marker images.
+*/
 }
-

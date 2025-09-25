@@ -37,6 +37,8 @@ const FilterSidebar = ({ filters, setFilters, availableStores = [] }) => {
         });
     };
 
+    const currentMaxPrice = filters.maxPrice ?? appConfigs.maxPrice;
+
     return (
         <aside className="space-y-6 w-full">
             <h3 className="text-lg font-bold border-b pb-2 text-gray-800">Filter By</h3>
