@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../components/layout/apiService';
@@ -8,6 +8,7 @@ import { endpoints } from '../api/endpoints';
 const TrackOrderPage = () => {
   const { orderNumber } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { token } = useAuth();
 
@@ -15,12 +16,13 @@ const TrackOrderPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!orderNumber) {
         setLoading(false);
-        setError(t('No order number provided'));
+        setError(t('noOrderNumberProvided'));
         return;
       }
       try {
@@ -31,11 +33,11 @@ const TrackOrderPage = () => {
         if (response.success && response.data) {
           setOrder(response.data);
         } else {
-          throw new Error(response.message || t('Could not find order details'));
+          throw new Error(response.message || t('couldNotFindOrderDetails'));
         }
       } catch (err) {
         console.error('Fetch order error:', err);
-        setError(err.message || t('Could not find order details'));
+        setError(err.message || t('couldNotFindOrderDetails'));
       } finally {
         setLoading(false);
       }
@@ -65,22 +67,33 @@ const TrackOrderPage = () => {
     }
   }, [order?.shippingAddress]);
 
+  // Parse billingAddress (if available)
+  const billingAddress = useMemo(() => {
+    if (!order?.billingAddress) return null;
+    try {
+      return JSON.parse(order.billingAddress);
+    } catch (e) {
+      console.error('Failed to parse billing address:', e);
+      return null;
+    }
+  }, [order?.billingAddress]);
+
   // Cancel Order
   const handleCancelOrder = async () => {
     if (!order || cancelLoading) return;
     if (!token) {
-      setError(t('Please login to cancel'));
+      setError(t('pleaseLoginToCancel'));
       return;
     }
     if (!['pending', 'confirmed'].includes(order.status)) {
-      setError(t('order cannot be cancelled'));
+      setError(t('orderCannotBeCancelled'));
       return;
     }
     setCancelLoading(true);
     try {
       console.log('Attempting to cancel order:', order.id, 'Endpoint:', endpoints.cancelOrder(order.id));
       const response = await apiService(endpoints.cancelOrder(order.id), {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -88,13 +101,15 @@ const TrackOrderPage = () => {
       });
       console.log('Cancel order response:', response);
       if (response.success) {
-        setOrder((prev) => ({ ...prev, status: 'Cancelled' }));
+        navigate('/order-cancelled', {
+          state: { orderNumber, message: t('orderCancelledSuccess') },
+        });
       } else {
-        throw new Error(response.message || t('Failed to cancel order'));
+        throw new Error(response.message || t('failedToCancelOrder'));
       }
     } catch (err) {
       console.error('Cancel order error:', err);
-      setError(err.message || t('failed to cancel order'));
+      setError(err.message || t('failedToCancelOrder'));
     } finally {
       setCancelLoading(false);
     }
@@ -103,45 +118,152 @@ const TrackOrderPage = () => {
   // Generate Invoice
   const generateInvoice = async () => {
     if (!order) return;
+    setInvoiceLoading(true);
     try {
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
       script.async = true;
       document.body.appendChild(script);
-      script.onload = () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text(`Invoice for Order #${order.orderNumber}`, 20, 20);
-        doc.setFontSize(12);
-        doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 20, 30);
-        doc.text(`Total: ₹${parseFloat(order.totalAmount).toFixed(2)}`, 20, 40);
-        if (shippingAddress) {
-          doc.text('Shipping Address:', 20, 50);
-          doc.text(`${shippingAddress.firstName} ${shippingAddress.lastName}`, 20, 60);
-          doc.text(shippingAddress.addressLine1, 20, 70);
-          doc.text(`${shippingAddress.city} - ${shippingAddress.postalCode}`, 20, 80);
-          doc.text(shippingAddress.country, 20, 90);
+      script.onload = async () => {
+        try {
+          const autoTableScript = document.createElement('script');
+          autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js';
+          autoTableScript.async = true;
+          document.body.appendChild(autoTableScript);
+          autoTableScript.onload = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: 'a4',
+            });
+
+            // Company Branding
+            doc.setFont('helvetica');
+            doc.setFontSize(20);
+            doc.setTextColor(0, 0, 0);
+            doc.text('ShopZeo', 20, 20);
+            doc.setFontSize(10);
+            doc.text('123 Commerce Street, Bangalore, India', 20, 28);
+            doc.text('Email: support@shopzeo.com | Phone: +91-123-456-7890', 20, 34);
+
+            // Invoice Header
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Invoice #${order.orderNumber}`, 140, 20, { align: 'right' });
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 140, 28, { align: 'right' });
+            doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-IN')}`, 140, 34, { align: 'right' });
+
+            // Addresses
+            let yOffset = 40;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Billing Address:', 20, yOffset);
+            doc.setFont('helvetica', 'normal');
+            yOffset += 6;
+            if (billingAddress) {
+              doc.text(`${billingAddress.firstName || ''} ${billingAddress.lastName || ''}`.trim(), 20, yOffset);
+              yOffset += 6;
+              doc.text(billingAddress.addressLine1 || '', 20, yOffset);
+              yOffset += 6;
+              doc.text(`${billingAddress.city || ''} - ${billingAddress.postalCode || ''}`.trim(), 20, yOffset);
+              yOffset += 6;
+              doc.text(billingAddress.country || '', 20, yOffset);
+              yOffset += 6;
+              doc.text(`Phone: ${billingAddress.phone || ''}`, 20, yOffset);
+            } else {
+              doc.text('Same as shipping address', 20, yOffset);
+              yOffset += 6;
+            }
+            yOffset += 6;
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('Shipping Address:', 20, yOffset);
+            doc.setFont('helvetica', 'normal');
+            yOffset += 6;
+            if (shippingAddress) {
+              doc.text(`${shippingAddress.firstName || ''} ${shippingAddress.lastName || ''}`.trim(), 20, yOffset);
+              yOffset += 6;
+              doc.text(shippingAddress.addressLine1 || '', 20, yOffset);
+              yOffset += 6;
+              doc.text(`${shippingAddress.city || ''} - ${shippingAddress.postalCode || ''}`.trim(), 20, yOffset);
+              yOffset += 6;
+              doc.text(shippingAddress.country || '', 20, yOffset);
+              yOffset += 6;
+              doc.text(`Phone: ${shippingAddress.phone || ''}`, 20, yOffset);
+            } else {
+              doc.text('Not available', 20, yOffset);
+            }
+            yOffset += 10;
+
+            // Items Table
+            doc.autoTable({
+              startY: yOffset,
+              head: [['Item', 'Quantity', 'Unit Price', 'Total']],
+              body: (order.items || []).map((item) => [
+                item.productName || 'Unknown Product',
+                item.quantity || 0,
+                `₹${parseFloat(item.unitPrice || item.totalPrice / (item.quantity || 1)).toFixed(2)}`,
+                `₹${parseFloat(item.totalPrice || 0).toFixed(2)}`,
+              ]),
+              styles: { fontSize: 10, cellPadding: 3, halign: 'left', valign: 'middle' },
+              headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontSize: 12, halign: 'center' },
+              alternateRowStyles: { fillColor: [245, 245, 245] },
+              margin: { left: 20, right: 20 },
+              didDrawPage: (data) => {
+                if (data.pageNumber < doc.internal.getNumberOfPages()) {
+                  yOffset = 20;
+                }
+              },
+            });
+            yOffset = doc.lastAutoTable.finalY + 10;
+
+            // Payment Summary
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Payment Summary:', 20, yOffset);
+            doc.setFont('helvetica', 'normal');
+            yOffset += 6;
+            doc.text(`Subtotal: ₹${parseFloat(order.subtotal || 0).toFixed(2)}`, 20, yOffset);
+            yOffset += 6;
+            doc.text(`Shipping: ₹${parseFloat(order.shippingAmount || 0).toFixed(2)}`, 20, yOffset);
+            yOffset += 6;
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Total: ₹${parseFloat(order.totalAmount || 0).toFixed(2)}`, 20, yOffset);
+            yOffset += 10;
+
+            // Footer
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'italic');
+            doc.text('Thank you for shopping with ShopZeo!', 20, yOffset);
+            yOffset += 6;
+            doc.text('For support, contact: support@shopzeo.com', 20, yOffset);
+
+            // Add page numbers
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+              doc.setPage(i);
+              doc.text(`Page ${i} of ${pageCount}`, 200, 290, { align: 'right' });
+            }
+
+            doc.save(`invoice_${order.orderNumber}.pdf`);
+            document.body.removeChild(autoTableScript);
+            document.body.removeChild(script);
+          };
+          autoTableScript.onerror = () => setError(t('failedToLoadAutotable'));
+        } catch (err) {
+          console.error('Invoice generation error (autoTable):', err);
+          setError(t('errorGeneratingInvoice') + ': ' + err.message);
         }
-        doc.text('Items:', 20, 100);
-        let y = 110;
-        order.items.forEach((item) => {
-          doc.text(
-            `${item.productName} x ${item.quantity} - ₹${parseFloat(item.totalPrice).toFixed(2)}`,
-            20,
-            y
-          );
-          y += 10;
-        });
-        doc.save(`invoice_${order.orderNumber}.pdf`);
-        document.body.removeChild(script);
       };
-      script.onerror = () => {
-        setError(t('Failed to load jspdf'));
-      };
+      script.onerror = () => setError(t('failedToLoadJspdf'));
     } catch (err) {
-      console.error('Invoice generation error:', err);
-      setError(t('error generating invoice') + ': ' + err.message);
+      console.error('Invoice generation error (jsPDF):', err);
+      setError(t('errorGeneratingInvoice') + ': ' + err.message);
+    } finally {
+      setInvoiceLoading(false);
     }
   };
 
@@ -149,10 +271,10 @@ const TrackOrderPage = () => {
     <div className="bg-gray-100 min-h-screen py-10">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          {t('track your order')}
+          {t('trackYourOrder')}
         </h1>
 
-        {loading && <p className="text-center text-lg">{t('Loading order details')}</p>}
+        {loading && <p className="text-center text-lg">{t('loadingOrderDetails')}</p>}
         {error && <p className="text-center text-red-500 text-lg">{error}</p>}
 
         {order && (
@@ -177,7 +299,7 @@ const TrackOrderPage = () => {
               </div>
             </div>
 
-            {/* Status Tracker Timeline */}
+            {/* Status Timeline */}
             <div className="mb-10">
               <div className="flex items-center justify-between">
                 {statuses.map((status, index) => (
@@ -289,14 +411,17 @@ const TrackOrderPage = () => {
                     cancelLoading ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 >
-                  {cancelLoading ? t('cancelling') : t('Cancel order')}
+                  {cancelLoading ? t('cancelling') : t('cancelOrder')}
                 </button>
               )}
               <button
                 onClick={generateInvoice}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+                disabled={invoiceLoading}
+                className={`bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 ${
+                  invoiceLoading ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
-                {t('Download invoice')}
+                {invoiceLoading ? t('generatingInvoice') : t('downloadInvoice')}
               </button>
             </div>
           </div>
@@ -307,7 +432,7 @@ const TrackOrderPage = () => {
             to="/products"
             className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105"
           >
-            {t('Continue shopping')}
+            {t('continueShopping')}
           </Link>
         </div>
       </div>

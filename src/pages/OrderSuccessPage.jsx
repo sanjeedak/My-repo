@@ -11,7 +11,7 @@ const OrderSuccessPage = () => {
     <div className="container mx-auto px-4 py-20 text-center">
       <div className="bg-white p-10 rounded-lg shadow-lg max-w-2xl mx-auto">
         <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-3xl font-bold text-green-600 mb-4">{t('order_placed_successfully')}</h1>
+        <h1 className="text-3xl font-bold text-green-600 mb-4">{t('Order placed successfully')}</h1>
         <p className="text-gray-700 mb-2">{t('thank_you_for_shopping')}</p>
 
         {orderNumbers && orderNumbers.length > 0 && (
@@ -32,13 +32,13 @@ const OrderSuccessPage = () => {
             to="/profile#orders"
             className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors"
           >
-            {t('view_orders')}
+            {t('View orders')}
           </Link>
           <Link
             to="/products"
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold transition-colors"
           >
-            {t('continue_shopping')}
+            {t('Continue shopping')}
           </Link>
         </div>
       </div>

@@ -57,16 +57,88 @@ const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocod
     }
   }, [initialCenter]);
 
-  const getAddressFromLatLng = useCallback(async () => {
-    // ... same as before ...
+  const getAddressFromLatLng = useCallback(async (lat, lng) => {
+    if (!isLoaded || !window.google || !window.google.maps) {
+      console.error('Google Maps API not loaded');
+      onAddressSelect?.({ address: '', city: '', state: '', pincode: '', country: 'India' });
+      return;
+    }
+
+    const geocoder = new window.google.maps.Geocoder();
+    const latlng = { lat, lng };
+
+    try {
+      onGeocodingStart?.();
+      const response = await geocoder.geocode({ location: latlng });
+      if (response.results[0]) {
+        const place = response.results[0];
+        const addressComponents = place.address_components;
+        const getComponent = (type) => addressComponents.find((c) => c.types.includes(type))?.long_name || '';
+
+        const address = {
+          address: place.formatted_address,
+          city: getComponent('locality') || getComponent('administrative_area_level_2') || '',
+          state: getComponent('administrative_area_level_1') || '',
+          pincode: getComponent('postal_code') || '',
+          country: getComponent('country') || 'India',
+        };
+
+        console.log('📍 Fetched address:', address);
+        onAddressSelect?.(address);
+      } else {
+        console.warn('No address found for coordinates:', latlng);
+        onAddressSelect?.({ address: '', city: '', state: '', pincode: '', country: 'India' });
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      onAddressSelect?.({ address: '', city: '', state: '', pincode: '', country: 'India' });
+    } finally {
+      onGeocodingEnd?.();
+    }
   }, [isLoaded, onAddressSelect, onGeocodingStart, onGeocodingEnd]);
 
-  const handleMarkerDragEnd = useCallback(() => {
-    // ... same as before ...
+  const handleMarkerDragEnd = useCallback((event) => {
+    if (!event.latLng) {
+      console.error('No coordinates found in marker drag event');
+      return;
+    }
+
+    const newPosition = {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
+    };
+
+    console.log('📍 Marker dragged to:', newPosition);
+    setMapState((prev) => ({
+      ...prev,
+      center: newPosition,
+      markerPosition: newPosition,
+    }));
+
+    onLocationChange?.(newPosition);
+    getAddressFromLatLng(newPosition.lat, newPosition.lng);
   }, [onLocationChange, getAddressFromLatLng]);
 
-  const handleMapClick = useCallback(() => {
-    // ... same as before ...
+  const handleMapClick = useCallback((event) => {
+    if (!event.latLng) {
+      console.error('No coordinates found in map click event');
+      return;
+    }
+
+    const newPosition = {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
+    };
+
+    console.log('📍 Map clicked at:', newPosition);
+    setMapState((prev) => ({
+      ...prev,
+      center: newPosition,
+      markerPosition: newPosition,
+    }));
+
+    onLocationChange?.(newPosition);
+    getAddressFromLatLng(newPosition.lat, newPosition.lng);
   }, [onLocationChange, getAddressFromLatLng]);
 
   const onMapLoad = useCallback((map) => {
@@ -128,15 +200,13 @@ const MapSection = ({ onLocationChange, onAddressSelect, initialCenter, onGeocod
         onLoad={onMapLoad}
       >
         {mapState.markerPosition && (
-         <Marker 
-    key={`marker-${mapState.markerPosition.lat}-${mapState.markerPosition.lng}`}
-    position={mapState.markerPosition}
-    draggable={true} 
-    onDragEnd={handleMarkerDragEnd}
-    onLoad={onMarkerLoad}
-    // Custom icon हटा दें - default marker use करें
-    // icon={undefined} // ये line comment out कर दें
-/>
+          <Marker 
+            key={`marker-${mapState.markerPosition.lat}-${mapState.markerPosition.lng}`}
+            position={mapState.markerPosition}
+            draggable={true} 
+            onDragEnd={handleMarkerDragEnd}
+            onLoad={onMarkerLoad}
+          />
         )}
       </GoogleMap>
     </div>

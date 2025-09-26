@@ -85,6 +85,7 @@ const FAQPage = lazy(() => import('./pages/FAQPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
 const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage'));
+const OrderCancelledPage = lazy(() => import('./pages/OrderCancelledPage'));
 const CancellationPolicyPage = lazy(() => import('./pages/CancellationPolicyPage'));
 const ReturnPolicyPage = lazy(() => import('./pages/ReturnPolicyPage'));
 const TermsPage = lazy(() => import('./pages/TermPage'));
@@ -171,7 +172,15 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
-                      <Route path="track-order/:orderNumber" element={<TrackOrderPage />} />
+                      <Route
+                        path="track-order/:orderNumber"
+                        element={
+                          <ProtectedRoute>
+                            <TrackOrderPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="order-cancelled" element={<OrderCancelledPage />} />
                       <Route path="cancellation" element={<CancellationPolicyPage />} />
                       <Route path="return" element={<ReturnPolicyPage />} />
                       <Route path="privacy" element={<PrivacyPolicyPage />} />
