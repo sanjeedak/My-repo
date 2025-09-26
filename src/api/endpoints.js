@@ -24,6 +24,7 @@ export const endpoints = {
   orders: '/api/orders',
 
   getOrderByNumber: (orderNumber) => `/api/track/${orderNumber}`,
+   cancelOrder: (orderId) => `/api/orders/${orderId}/cancel`,
 
   // User Authentication
   userLogin: '/api/user-auth/login',
