@@ -217,6 +217,7 @@ const CheckoutPage = () => {
         const { razorpayOrderId, amount: razorpayAmount, currency } = razorpayOrderResponse.data;
         //   const razorpayKeyId = "rzp_test_RLoyIDyWkucq2a";
         const razorpayKeyId = process.env.REACT_APP_RAZORPAY_KEY_ID;
+        console.log("Razorpay Key ID:", razorpayKeyId);
 
         if (!razorpayKeyId) {
           setErrors((prev) => ({ ...prev, api: t("Razorpay configuration missing. Please contact support.") }));
