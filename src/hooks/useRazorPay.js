@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 export const useRazorpay = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // If script already exists
@@ -15,9 +16,13 @@ export const useRazorpay = () => {
     script.id = "razorpay-script";
     script.async = true;
 
-    script.onload = () => setIsLoaded(true);
+    script.onload = () => {
+      setIsLoaded(true);
+      setError(null);
+    };
     script.onerror = () => {
       console.error("Failed to load Razorpay SDK");
+      setError("Failed to load Razorpay SDK");
       setIsLoaded(false);
     };
 
@@ -28,5 +33,5 @@ export const useRazorpay = () => {
     };
   }, []);
 
-  return isLoaded;
+  return { isLoaded, error };
 };

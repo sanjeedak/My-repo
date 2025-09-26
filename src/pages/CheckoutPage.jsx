@@ -10,7 +10,7 @@ import InputField from "../components/forms/InputField";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import { validateEmailPhone } from "../utils/sanatize";
 import { useMap } from "../context/MapProvider";
-import { useRazorpay } from  "../hooks/useRazorPay";
+import { useRazorpay } from "../hooks/useRazorPay";
 
 const CheckoutPage = () => {
   const { cartItems, totalAmount, clearCart } = useCart();
@@ -20,7 +20,7 @@ const CheckoutPage = () => {
   const { t } = useTranslation();
   useMap();
 
-  const razorpayLoaded = useRazorpay();
+  const { isLoaded: razorpayLoaded, error: razorpayError } = useRazorpay();
 
   const DEFAULT_LOCATION = { lat: 17.385, lng: 78.4867 };
 
@@ -74,6 +74,12 @@ const CheckoutPage = () => {
     }
   }, [shippingForm, shippingLocation, sameAsShipping]);
 
+  useEffect(() => {
+    if (razorpayError) {
+      setErrors((prev) => ({ ...prev, api: t("Failed to load Razorpay SDK. Please try again later.") }));
+    }
+  }, [razorpayError, t]);
+
   const validateForm = () => {
     const newErrors = {};
     if (!shippingForm.name.trim()) newErrors.shipping_name = t("Fullname is required");
@@ -102,7 +108,7 @@ const CheckoutPage = () => {
     const location = place.geometry.location;
     const newCoords = { lat: location.lat(), lng: location.lng() };
     const addressComponents = place.address_components;
-    const getComponent = (type) => addressComponents.find(c => c.types.includes(type))?.long_name || '';
+    const getComponent = (type) => addressComponents.find((c) => c.types.includes(type))?.long_name || "";
 
     const updatedForm = {
       street: place.formatted_address,
@@ -113,16 +119,16 @@ const CheckoutPage = () => {
     };
 
     if (formType === "shipping") {
-      setShippingForm(prev => ({ ...prev, ...updatedForm }));
+      setShippingForm((prev) => ({ ...prev, ...updatedForm }));
       setShippingLocation(newCoords);
     } else {
-      setBillingForm(prev => ({ ...prev, ...updatedForm }));
+      setBillingForm((prev) => ({ ...prev, ...updatedForm }));
       setBillingLocation(newCoords);
     }
   };
 
-  const handleShippingChange = (e) => setShippingForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  const handleBillingChange = (e) => setBillingForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleShippingChange = (e) => setShippingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleBillingChange = (e) => setBillingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSameAsShippingChange = (e) => {
     setSameAsShipping(e.target.checked);
@@ -155,7 +161,9 @@ const CheckoutPage = () => {
 
     if (!validateForm()) return;
     if (cartItems.length === 0) return setErrors({ api: t("Your cart is empty") });
-    if (paymentMethod === "razorpay" && !razorpayLoaded) return setErrors({ api: t("Razorpay SDK not loaded") });
+    if (paymentMethod === "razorpay" && !razorpayLoaded) {
+      return setErrors({ api: t("Razorpay SDK not loaded. Please try again later.") });
+    }
 
     setIsSubmitting(true);
 
@@ -165,7 +173,7 @@ const CheckoutPage = () => {
     };
 
     const orderData = {
-      items: cartItems.map(item => ({
+      items: cartItems.map((item) => ({
         product_id: item.id,
         quantity: item.quantity,
         store_id: item.store_id,
@@ -192,34 +200,36 @@ const CheckoutPage = () => {
       const primaryOrderId = createdOrders[0].id;
 
       if (paymentMethod === "razorpay") {
+        const amount = Math.round((totalAmount + totalAmount * 0.18 + 50) * 100); // Amount in paisa
         const razorpayOrderResponse = await apiService(`${endpoints.createRazorpayOrder}/${primaryOrderId}`, {
           method: "POST",
           headers: authHeaders,
           body: {
-            amount: Math.round((totalAmount + totalAmount * 0.18 + 50) * 100),
+            amount,
             currency: "INR",
           },
         });
 
         if (!razorpayOrderResponse.success) {
-          throw new Error(razorpayOrderResponse.message || t("Razorpay order failed"));
+          throw new Error(razorpayOrderResponse.message || t("Razorpay order creation failed"));
         }
 
-        const { razorpayOrderId, amount, currency } = razorpayOrderResponse.data;
+        const { razorpayOrderId, amount: razorpayAmount, currency } = razorpayOrderResponse.data;
+        //   const razorpayKeyId = "rzp_test_RLoyIDyWkucq2a";
         const razorpayKeyId = process.env.REACT_APP_RAZORPAY_KEY_ID;
 
         if (!razorpayKeyId) {
-          setErrors(prev => ({ ...prev, api: t("Razorpay key missing") }));
+          setErrors((prev) => ({ ...prev, api: t("Razorpay configuration missing. Please contact support.") }));
           setIsSubmitting(false);
           return;
         }
 
         const options = {
           key: razorpayKeyId,
-          amount,
+          amount: razorpayAmount,
           currency,
-          name: "Your Company Name",
-          description: "Order Payment",
+          name: "Shopzeo",
+          description: `Order #${createdOrders[0].orderNumber}`,
           order_id: razorpayOrderId,
           handler: async (response) => {
             try {
@@ -240,7 +250,7 @@ const CheckoutPage = () => {
                 throw new Error(verifyResponse.message || t("Payment verification failed"));
               }
             } catch (err) {
-              setErrors(prev => ({ ...prev, api: `Payment verification failed: ${err.message}` }));
+              setErrors((prev) => ({ ...prev, api: `Payment verification failed: ${err.message}` }));
             } finally {
               setIsSubmitting(false);
             }
@@ -251,11 +261,17 @@ const CheckoutPage = () => {
             contact: shippingForm.phone,
           },
           theme: { color: "#3399cc" },
+          notes: {
+            order_id: primaryOrderId,
+          },
         };
 
         const rzp = new window.Razorpay(options);
         rzp.on("payment.failed", (response) => {
-          setErrors(prev => ({ ...prev, api: `Payment failed: ${response.error.description}` }));
+          setErrors((prev) => ({
+            ...prev,
+            api: `Payment failed: ${response.error.description || "Unknown error"}`,
+          }));
           setIsSubmitting(false);
         });
         rzp.open();
@@ -265,7 +281,7 @@ const CheckoutPage = () => {
       }
     } catch (err) {
       console.error("Order creation error:", err);
-      setErrors(prev => ({ ...prev, api: `Order creation failed: ${err.message}` }));
+      setErrors((prev) => ({ ...prev, api: `Order creation failed: ${err.message}` }));
       setIsSubmitting(false);
     }
   };
@@ -335,7 +351,7 @@ const CheckoutPage = () => {
                 key={`shipping-${shippingLocation.lat}-${shippingLocation.lng}`}
                 initialCenter={shippingLocation}
                 onLocationChange={setShippingLocation}
-                onAddressSelect={(address) => setShippingForm(prev => ({ ...prev, street: address.address }))}
+                onAddressSelect={(address) => setShippingForm((prev) => ({ ...prev, street: address.address }))}
                 onGeocodingStart={() => setIsShippingGeocoding(true)}
                 onGeocodingEnd={() => setIsShippingGeocoding(false)}
                 className="w-full h-full"
@@ -416,7 +432,7 @@ const CheckoutPage = () => {
                     key={`billing-${billingLocation.lat}-${billingLocation.lng}`}
                     initialCenter={billingLocation}
                     onLocationChange={setBillingLocation}
-                    onAddressSelect={(address) => setBillingForm(prev => ({ ...prev, street: address.address }))}
+                    onAddressSelect={(address) => setBillingForm((prev) => ({ ...prev, street: address.address }))}
                     onGeocodingStart={() => setIsBillingGeocoding(true)}
                     onGeocodingEnd={() => setIsBillingGeocoding(false)}
                     className="w-full h-full"
@@ -456,16 +472,23 @@ const CheckoutPage = () => {
                   <span className="animate-pulse">⏳</span> {t("Razorpay SDK is loading...")}
                 </p>
               )}
+              {razorpayError && paymentMethod === "razorpay" && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-2">
+                  <span>⚠️</span> {t("Razorpay SDK failed to load. Please try again or use COD.")}
+                </p>
+              )}
             </div>
           </div>
 
-          {errors.api && <p className="text-red-500 text-sm mt-4 bg-red-50 p-2 rounded-md">{errors.api}</p>}
+          {errors.api && (
+            <p className="text-red-500 text-sm mt-4 bg-red-50 p-2 rounded-md">{errors.api}</p>
+          )}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || (paymentMethod === "razorpay" && !razorpayLoaded)}
             onClick={handlePlaceOrder}
             className={`w-full mt-6 py-3 rounded-lg text-white font-semibold transition-all duration-200 ${
-              isSubmitting
+              isSubmitting || (paymentMethod === "razorpay" && !razorpayLoaded)
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 shadow-md"
             }`}
@@ -475,7 +498,9 @@ const CheckoutPage = () => {
                 <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
                 {t("Placing Order...")}
               </span>
-            ) : t("Place order")}
+            ) : (
+              t("Place order")
+            )}
           </button>
         </div>
 
@@ -508,7 +533,7 @@ const CheckoutPage = () => {
             <div className="flex justify-between items-center mt-6 border-t pt-4">
               <span className="text-xl font-bold text-gray-800">{t("Total")}</span>
               <span className="text-xl font-bold text-blue-600">
-                ₹{(totalAmount + (totalAmount * 0.18) + 50.0).toFixed(2)}
+                ₹{(totalAmount + totalAmount * 0.18 + 50.0).toFixed(2)}
               </span>
             </div>
           </div>
