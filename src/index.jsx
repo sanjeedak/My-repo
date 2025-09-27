@@ -5,7 +5,7 @@ import App from './App';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
-import { MapProvider } from './context/MapProvider'; // MapProvider ko import karein
+import { MapProvider } from './context/MapProvider';
 import './i18n';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -14,7 +14,7 @@ root.render(
     <AuthProvider>
       <CartProvider>
         <WishlistProvider>
-          <MapProvider> {/* --- Yahaan Badlav Kiya Gaya Hai --- */}
+          <MapProvider> 
             <App />
           </MapProvider>
         </WishlistProvider>

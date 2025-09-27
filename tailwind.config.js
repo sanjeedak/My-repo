@@ -1,6 +1,8 @@
-const defaultTheme = require('tailwindcss/defaultTheme');
+/** @type {import('tailwindcss').Config} */
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
 
-module.exports = {
+export default {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
@@ -10,16 +12,8 @@ module.exports = {
         'brand-blue': '#0071DC',
       },
       fontFamily: {
-        // Yahan 'Poppins' ko 'Inter' se badla gaya hai
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
-    },
-  },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
-  theme: {
-    extend: {
       keyframes: {
         'fade-in-out': {
           '0%, 100%': { opacity: '0', transform: 'translateY(20px)' },
@@ -31,5 +25,7 @@ module.exports = {
       }
     },
   },
-  plugins: [],
-}
+  plugins: [
+    forms,
+  ],
+};

@@ -1,5 +1,4 @@
 import React from 'react';
-// Assuming InputField is exported from the main sign-up page
 import { InputField } from '../pages/VendorSignUpPage';
 
 const VendorInfoStep = ({ formData, handleChange, errors }) => {

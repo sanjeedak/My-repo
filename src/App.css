@@ -27,16 +27,13 @@
 .App-link {
   color: #61dafb;
 }
-/* src/index.css (ya aapki main CSS file) */
 
-/* ... (aapka baaki ka CSS code) ... */
-
-/* Smooth scrolling ke liye */
+/* Smooth scrolling */
 .smooth-scroll {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar jo behtar dikhega */
+/* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }

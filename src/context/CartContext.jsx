@@ -52,15 +52,11 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     setCartItems([]);
   };
-
-  // ============== YAHAN BADLAV KIYA GAYA HAI ==============
   const totalAmount = cartItems.reduce((total, item) => {
-    // Sunishchit karein ki price aur quantity valid numbers hain
     const price = parseFloat(item.selling_price || item.price || 0);
     const quantity = parseInt(item.quantity || 1, 10);
     return total + (price * quantity);
   }, 0);
-  // ==========================================================
 
   const value = {
     cartItems,

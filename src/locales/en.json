@@ -5,8 +5,6 @@
   "login": "Login",
   "continueShopping": "Continue Shopping",
   "viewOrders": "View Your Orders",
-
-  
   "yourOrders": "Your Orders",
   "orderNumber": "Order Number",
   "status": "Status",
@@ -16,8 +14,6 @@
   "orderNotFound": "Order not found.",
   "noOrderNumberProvided": "No order number provided.",
   "couldNotFindOrderDetails": "Could not find order details.",
-
-
   "trackYourOrder": "Track Your Order",
   "loadingOrderDetails": "Loading order details...",
   "cancelOrder": "Cancel Order",
@@ -25,20 +21,14 @@
   "pleaseLoginToCancel": "Please log in to cancel the order.",
   "orderCannotBeCancelled": "Order cannot be cancelled at this stage.",
   "failedToCancelOrder": "Failed to cancel order.",
-
-
   "orderCancelled": "Order Cancelled",
   "orderCancelledSuccess": "Your order has been successfully cancelled.",
   "forOrder": "for order",
-
-
   "downloadInvoice": "Download Invoice",
   "generatingInvoice": "Generating Invoice...",
   "failedToLoadJspdf": "Failed to load jsPDF library.",
   "failedToLoadAutotable": "Failed to load jsPDF autoTable plugin.",
   "errorGeneratingInvoice": "Error generating invoice",
-
-
   "checkPaymentStatus": "Check Payment Status",
   "enterOrderNumber": "Enter Order Number",
   "paymentStatusDetails": "Payment Status Details",
@@ -61,7 +51,6 @@
   "paymentVerificationFailed": "Payment verification failed. Please try again.",
   "paymentCancelled": "Payment was cancelled. Please try again.",
   "paymentFailed": "Payment failed. Please try again.",
-
   "fullNameRequired": "Full name is required.",
   "addressRequired": "Address is required.",
   "cityRequired": "City is required.",
