@@ -42,7 +42,7 @@ const ProductsPage = () => {
     // --- DERIVED STATE & MEMOIZED VALUES ---
     const pageTitle = useMemo(() => {
         const searchQuery = searchParams.get('q');
-        if (searchQuery) return `${t('search_results_for')} "${searchQuery}"`;
+        if (searchQuery) return `${t('Search results for')} "${searchQuery}"`;
 
         const section = searchParams.get('section');
         if (section === 'featured') return t('featured_products');
@@ -50,9 +50,9 @@ const ProductsPage = () => {
         if (section === 'top_sellers') return t('top_sellers');
 
         const categorySlug = categorySlugFromPath || searchParams.get('category');
-        if (categorySlug) return `${t('products_in')} ${categorySlug.replace(/-/g, ' ')}`;
+        if (categorySlug) return `${t('Products in')} ${categorySlug.replace(/-/g, ' ')}`;
         const brandSlug = searchParams.get('brand');
-        if (brandSlug) return `${t('products_from')} ${brandSlug.replace(/-/g, ' ')}`;
+        if (brandSlug) return `${t('Products from')} ${brandSlug.replace(/-/g, ' ')}`;
         return t('All Products');
     }, [searchParams, categorySlugFromPath, t]);
 
@@ -113,7 +113,7 @@ const ProductsPage = () => {
             });
 
             if (transformed.length === 0) {
-                setError(t('no_products_found'));
+                setError(t('No products found'));
             }
         } catch (err) {
             console.error("ProductsPage API error:", err);
@@ -184,7 +184,7 @@ const ProductsPage = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder={t('search_placeholder')}
+                                placeholder={t('Search placeholder')}
                                 className="border-gray-300 rounded-md py-2 pl-10 pr-4 text-sm w-full sm:w-48 focus:ring-brand-blue focus:border-brand-blue"
                             />
                             <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400">
@@ -200,10 +200,10 @@ const ProductsPage = () => {
                             className="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-blue focus:border-brand-blue"
                         >
                             <option value="created_at-desc">{t('sort_by_default')}</option>
-                            <option value="name-asc">{t('sort_name_asc')}</option>
-                            <option value="name-desc">{t('sort_name_desc')}</option>
-                            <option value="price-asc">{t('sort_price_asc')}</option>
-                            <option value="price-desc">{t('sort_price_desc')}</option>
+                            <option value="name-asc">{t('Sort name asc')}</option>
+                            <option value="name-desc">{t('Sort name desc')}</option>
+                            <option value="price-asc">{t('Sort price asc')}</option>
+                            <option value="price-desc">{t('Sort price desc')}</option>
                         </select>
                     </div>
                 </div>
@@ -235,8 +235,8 @@ const ProductsPage = () => {
                             </div>
                         ) : (
                             <div className="col-span-full text-center py-16">
-                                <h2 className="text-xl font-semibold text-gray-700">{error || t('no_products_found')}</h2>
-                                <p className="text-gray-500 mt-2">{t('adjust_filters_prompt')}</p>
+                                <h2 className="text-xl font-semibold text-gray-700">{error || t('No products found')}</h2>
+                                <p className="text-gray-500 mt-2">{t('Adjust filters prompt')}</p>
                             </div>
                         )}
                         <Pagination

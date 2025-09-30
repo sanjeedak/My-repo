@@ -22,7 +22,7 @@ const TrackOrderPage = () => {
     const fetchOrderDetails = async () => {
       if (!orderNumber) {
         setLoading(false);
-        setError(t('noOrderNumberProvided'));
+        setError(t('No Order Number Provided'));
         return;
       }
       try {
@@ -33,11 +33,11 @@ const TrackOrderPage = () => {
         if (response.success && response.data) {
           setOrder(response.data);
         } else {
-          throw new Error(response.message || t('couldNotFindOrderDetails'));
+          throw new Error(response.message || t('Could Not Find Order Details'));
         }
       } catch (err) {
         console.error('Fetch order error:', err);
-        setError(err.message || t('couldNotFindOrderDetails'));
+        setError(err.message || t('Could Not Find Order Details'));
       } finally {
         setLoading(false);
       }
@@ -82,11 +82,11 @@ const TrackOrderPage = () => {
   const handleCancelOrder = async () => {
     if (!order || cancelLoading) return;
     if (!token) {
-      setError(t('pleaseLoginToCancel'));
+      setError(t('Please Login To Cancel'));
       return;
     }
     if (!['pending', 'confirmed'].includes(order.status)) {
-      setError(t('orderCannotBeCancelled'));
+      setError(t('Order Can not Be Cancelled'));
       return;
     }
     setCancelLoading(true);
@@ -102,14 +102,14 @@ const TrackOrderPage = () => {
       console.log('Cancel order response:', response);
       if (response.success) {
         navigate('/order-cancelled', {
-          state: { orderNumber, message: t('orderCancelledSuccess') },
+          state: { orderNumber, message: t('Order Cancelled Success') },
         });
       } else {
-        throw new Error(response.message || t('failedToCancelOrder'));
+        throw new Error(response.message || t('Failed To Cancel Order'));
       }
     } catch (err) {
       console.error('Cancel order error:', err);
-      setError(err.message || t('failedToCancelOrder'));
+      setError(err.message || t('Failed To Cancel Order'));
     } finally {
       setCancelLoading(false);
     }
@@ -252,16 +252,16 @@ const TrackOrderPage = () => {
             document.body.removeChild(autoTableScript);
             document.body.removeChild(script);
           };
-          autoTableScript.onerror = () => setError(t('failedToLoadAutotable'));
+          autoTableScript.onerror = () => setError(t('Failed To Load Autotable'));
         } catch (err) {
           console.error('Invoice generation error (autoTable):', err);
-          setError(t('errorGeneratingInvoice') + ': ' + err.message);
+          setError(t('Error Generating Invoice') + ': ' + err.message);
         }
       };
       script.onerror = () => setError(t('failedToLoadJspdf'));
     } catch (err) {
       console.error('Invoice generation error (jsPDF):', err);
-      setError(t('errorGeneratingInvoice') + ': ' + err.message);
+      setError(t('Error Generating Invoice') + ': ' + err.message);
     } finally {
       setInvoiceLoading(false);
     }
@@ -271,7 +271,7 @@ const TrackOrderPage = () => {
     <div className="bg-gray-100 min-h-screen py-10">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          {t('trackYourOrder')}
+          {t('Track Your Order')}
         </h1>
 
         {loading && <p className="text-center text-lg">{t('loadingOrderDetails')}</p>}
@@ -411,7 +411,7 @@ const TrackOrderPage = () => {
                     cancelLoading ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 >
-                  {cancelLoading ? t('cancelling') : t('cancelOrder')}
+                  {cancelLoading ? t('cancelling') : t('Cancel Order')}
                 </button>
               )}
               <button
@@ -421,7 +421,7 @@ const TrackOrderPage = () => {
                   invoiceLoading ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
               >
-                {invoiceLoading ? t('generatingInvoice') : t('downloadInvoice')}
+                {invoiceLoading ? t('Generating Invoice') : t('Download Invoice')}
               </button>
             </div>
           </div>
@@ -432,7 +432,7 @@ const TrackOrderPage = () => {
             to="/products"
             className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105"
           >
-            {t('continueShopping')}
+            {t('Continue Shopping')}
           </Link>
         </div>
       </div>

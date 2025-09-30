@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         try {
@@ -19,6 +20,8 @@ export const AuthProvider = ({ children }) => {
             console.error("Failed to load auth data from localStorage", error);
             localStorage.removeItem('user');
             localStorage.removeItem('token');
+        } finally {
+            setLoading(false); // Set loading to false after checking
         }
     }, []);
 
@@ -44,6 +47,7 @@ export const AuthProvider = ({ children }) => {
     const value = {
         user,
         token,
+        loading, // Expose loading state
         login,
         logout,
         isAuthenticated: !!token,

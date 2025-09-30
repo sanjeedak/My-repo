@@ -4,12 +4,14 @@ import { API_BASE_URL } from "../../api/config";
 import { Eye as EyeIcon, Heart, Star, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 import { toast } from 'react-hot-toast';
 
 const ProductCard = ({ product, onQuickView }) => {
   const navigate = useNavigate();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const handleNavigateDetails = () => {
     if (product?.id) {
@@ -24,29 +26,55 @@ const ProductCard = ({ product, onQuickView }) => {
     }
   };
 
-  const handleAddToWishlist = (e) => {
+  const handleWishlistToggle = (e) => {
     e.stopPropagation();
-    if (product && product.id) {
-        addToWishlist(product);
+    if (!isAuthenticated) {
+      toast.error("Please log in to manage your wishlist.");
+      navigate('/signin');
+      return;
+    }
+
+    if (!product || !product.id) {
+      toast.error("Could not modify wishlist, invalid product data.");
+      return;
+    }
+
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
     } else {
-        toast.error("Could not add to wishlist, invalid product data.");
+      addToWishlist(product);
     }
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    if (product && product.id && product.name) {
-     const productWithStoreId = {
-      ...product,
-      store_id: product.store?.id 
-    };
-    // **FIX:** Yahan 'productWithStoreId' ko pass karein
-    addToCart(productWithStoreId); 
-      toast.success(`${product.name} added to cart!`);
-    } else {
-      console.error("Invalid product data:", product);
-      toast.error("Sorry, this item cannot be added to the cart right now.");
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart.");
+      navigate('/signin');
+      return;
     }
+
+    const storeId = product?.store?.id || product?.store_id;
+
+    if (!product || !product.id || !product.name || !storeId) {
+      console.error("Invalid product data (missing store_id):", product);
+      toast.error("Cannot add this item: missing store information.");
+      return;
+    }
+
+    const promise = addToCart({
+      ...product,
+      store_id: storeId
+    });
+
+    toast.promise(
+      promise,
+      {
+        loading: 'Adding to cart...',
+        success: `${product.name} added to cart!`,
+        error: (err) => `Error: ${err.message || 'Could not add to cart.'}`,
+      }
+    );
   };
 
   const getImageUrl = (img) => {
@@ -82,7 +110,7 @@ const ProductCard = ({ product, onQuickView }) => {
             >
               <EyeIcon className="h-4 w-4" />
             </button>
-            <button onClick={handleAddToWishlist} className="rounded-full bg-white p-1.5 shadow-md hover:bg-red-100">
+            <button onClick={handleWishlistToggle} className="rounded-full bg-white p-1.5 shadow-md hover:bg-red-100">
               <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current text-red-500' : 'text-gray-500'}`} />
             </button>
         </div>

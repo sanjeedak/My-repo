@@ -3,10 +3,13 @@ import { X, ShoppingCart, Zap } from "lucide-react";
 import { API_BASE_URL } from "../../api/config";
 import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from 'react-hot-toast';
 
 const ProductModal = ({ product, onClose }) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   if (!product) return null;
 
@@ -17,27 +20,59 @@ const ProductModal = ({ product, onClose }) => {
 
   const handleBuyNow = (e) => {
     e.stopPropagation();
-    const productWithStoreId = {
-      ...product,
-      store_id: product.store?.id 
-    };
-    // **FIX:** Yahan 'productWithStoreId' ko pass karein
-    addToCart(productWithStoreId); 
-    // addToCart(product);
-    onClose();
-    navigate("/checkout");
+    if (!isAuthenticated) {
+      toast.error("Please log in to continue.");
+      navigate('/signin');
+      return;
+    }
+
+    const storeId = product?.store?.id || product?.store_id;
+
+    if (!product || !product.id || !product.name || !storeId) {
+        console.error("Invalid product data (missing store_id):", product);
+        toast.error("Cannot buy this item: missing store information.");
+        return;
+    }
+    
+    const promise = addToCart({ ...product, store_id: storeId });
+
+    toast.promise(promise, {
+        loading: 'Preparing for checkout...',
+        success: () => {
+            onClose();
+            navigate("/checkout");
+            return 'Redirecting to checkout...';
+        },
+        error: (err) => `Error: ${err.message || 'Could not prepare for checkout.'}`
+    });
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    const productWithStoreId = {
-      ...product,
-      store_id: product.store?.id 
-    };
-    // **FIX:** Yahan 'productWithStoreId' ko pass karein
-    addToCart(productWithStoreId); 
-    // addToCart(product);
-    onClose();
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart.");
+      navigate('/signin');
+      return;
+    }
+    
+    const storeId = product?.store?.id || product?.store_id;
+
+    if (!product || !product.id || !product.name || !storeId) {
+        console.error("Invalid product data (missing store_id):", product);
+        toast.error("Cannot add this item: missing store information.");
+        return;
+    }
+    
+    const promise = addToCart({ ...product, store_id: storeId });
+
+    toast.promise(promise, {
+        loading: 'Adding to cart...',
+        success: (result) => {
+            if(result.success) onClose();
+            return `${product.name} added to cart!`;
+        },
+        error: (err) => `Error: ${err.message || 'Could not add to cart.'}`
+    });
   };
 
   return (
@@ -79,14 +114,14 @@ const ProductModal = ({ product, onClose }) => {
             <p className="text-2xl font-extrabold text-blue-600">
               ₹{product.price}
             </p>
-            {product.oldPrice && (
+            {product.originalPrice && (
               <p className="text-sm text-gray-500 line-through">
-                ₹{product.oldPrice}
+                ₹{product.originalPrice}
               </p>
             )}
-            {product.stock && (
+            {product.quantity && (
               <p className="text-xs mt-1 text-green-600">
-                {product.stock} items in stock
+                {product.quantity} items in stock
               </p>
             )}
           </div>

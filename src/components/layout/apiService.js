@@ -40,11 +40,19 @@ export const apiService = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, config);
 
-    // Handle non-OK responses
+    // If response is NOT OK, provide more details
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({
-        message: `Request failed with status: ${response.status}`,
-      }));
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        // If the error response is not JSON, get it as text.
+        const errorText = await response.text();
+        console.error("Non-JSON API Error Response:", errorText);
+        throw new Error(`Request failed with status: ${response.status}. Server response: ${errorText}`);
+      }
+      // Log the detailed error from the server
+      console.error("API Error Data:", errorData);
       throw new Error(errorData.message || 'An unknown API error occurred');
     }
 

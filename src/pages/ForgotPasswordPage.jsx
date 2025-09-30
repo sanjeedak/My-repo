@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
-import InputField from '../components/forms/InputField';
+import { Input } from '../components/forms/InputField'; // Corrected import
 import { endpoints } from '../api/endpoints';
 
 const ForgotPasswordPage = () => {
@@ -67,7 +67,7 @@ const ForgotPasswordPage = () => {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <InputField
+            <Input
               id="email"
               label="Email"
               type="email"
@@ -105,4 +105,3 @@ const ForgotPasswordPage = () => {
 };
 
 export default ForgotPasswordPage;
-

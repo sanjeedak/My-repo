@@ -19,12 +19,22 @@ export const endpoints = {
   // Categories
   categories: '/api/categories',
  
+  // Cart
+  getCart: '/api/cart',
+  addToCart: '/api/cart',
+  updateCartItem: (id) => `/api/cart/${id}`,
+  removeFromCart: (id) => `/api/cart/${id}`,
+  clearCart: '/api/cart',
+
+  // Wishlist
+  getWishlist: '/api/wishlist',
+  addToWishlist: '/api/wishlist/add', 
+  removeFromWishlist: (id) => `/api/wishlist/remove/${id}`, 
 
   // Orders
   orders: '/api/orders',
-
   getOrderByNumber: (orderNumber) => `/api/track/${orderNumber}`,
-   cancelOrder: (orderId) => `/api/orders/${orderId}/cancel`,
+  cancelOrder: (orderId) => `/api/orders/${orderId}/cancel`,
 
   // User Authentication
   userLogin: '/api/user-auth/login',
@@ -43,6 +53,4 @@ export const endpoints = {
   // Payment
   createRazorpayOrder: '/api/payments/create-order',
   verifyRazorpayPayment: '/api/payments/verify-payment',
-    // checkPaymentStatus: '/api/payments/status',
-    
 };

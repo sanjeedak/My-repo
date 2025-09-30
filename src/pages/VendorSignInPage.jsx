@@ -66,17 +66,17 @@ const VendorSignInPage = () => {
             <AuthFormLayout>
                 <div className="text-center mb-6">
                     <h2 className="text-3xl font-extrabold text-gray-900">
-                        {t('vendor_login')}
+                        {t('Vendor login')}
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        {t('vendor_signin_welcome')}
+                        {t('Vendor signin welcome')}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <InputField
                         id="email"
-                        label={t('your_email')}
+                        label={t('Your email')}
                         type="email"
                         autoComplete="email"
                         value={formData.email}
@@ -85,7 +85,7 @@ const VendorSignInPage = () => {
                     />
                     <InputField
                         id="password"
-                        label={t('password')}
+                        label={t('Password')}
                         type="password"
                         autoComplete="current-password"
                         value={formData.password}
@@ -96,11 +96,11 @@ const VendorSignInPage = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">{t('remember_me')}</label>
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">{t('Remember me')}</label>
                         </div>
                         <div className="text-sm">
                             <Link to="/vendor/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                                {t('forgot_password')}?
+                                {t('forgot password')}?
                             </Link>
                         </div>
                     </div>
@@ -110,16 +110,16 @@ const VendorSignInPage = () => {
                             disabled={isLoading}
                             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
                         >
-                            {isLoading ? t('sending') : t('sign_in')}
+                            {isLoading ? t('Sending') : t('Signin')}
                         </button>
                     </div>
                 </form>
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
-                        {t('dont_have_vendor_account')}{' '}
+                        {t('Dont have vendor account')}{' '}
                         <Link to="/vendor/signup" className="font-semibold text-blue-600 hover:underline">
-                            {t('signup_now')}
+                            {t('Signup now')}
                         </Link>
                     </p>
                 </div>

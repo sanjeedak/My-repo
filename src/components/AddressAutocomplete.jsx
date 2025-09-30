@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useMap } from '../context/MapProvider';
-import InputField from './forms/InputField';
-
+import { Input } from './forms/InputField'; 
 const AddressAutocomplete = ({ label, value, onChange, onPlaceSelect, error, placeholder }) => {
   const { isLoaded } = useMap();
   const inputRef = useRef(null);
@@ -40,7 +39,7 @@ const AddressAutocomplete = ({ label, value, onChange, onPlaceSelect, error, pla
   }, [isLoaded, onPlaceSelect, onChange]);
 
   return (
-    <InputField
+    <Input
       id="address-autocomplete"
       name="street"
       label={label}

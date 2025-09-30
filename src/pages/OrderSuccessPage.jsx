@@ -12,7 +12,7 @@ const OrderSuccessPage = () => {
       <div className="bg-white p-10 rounded-lg shadow-lg max-w-2xl mx-auto">
         <div className="text-6xl mb-4">🎉</div>
         <h1 className="text-3xl font-bold text-green-600 mb-4">{t('Order placed successfully')}</h1>
-        <p className="text-gray-700 mb-2">{t('thank_you_for_shopping')}</p>
+        <p className="text-gray-700 mb-2">{t('Thank you for shopping')}</p>
 
         {orderNumbers && orderNumbers.length > 0 && (
           <div className="text-left my-8 p-6 border rounded-lg bg-gray-50">
@@ -27,7 +27,7 @@ const OrderSuccessPage = () => {
         )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {/* Yeh badlav kiya gaya hai */}
+        
           <Link
             to="/profile#orders"
             className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition-colors"

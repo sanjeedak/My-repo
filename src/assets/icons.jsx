@@ -124,5 +124,3 @@ export const UKFlagIcon = ({ className = "w-5 h-5 rounded-sm" }) => (
         </g>
     </svg>
 );
-
-// ... existing icons ...

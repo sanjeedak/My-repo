@@ -10,15 +10,15 @@ const WishlistPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  if (wishlistItems.length === 0) {
+  if (!wishlistItems || wishlistItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10 text-center">
-        <h2 className="text-2xl font-bold mb-4">{t('wishlist_empty')}</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('wishlist_empty', 'Your Wishlist is Empty')}</h2>
         <button
           onClick={() => navigate('/')}
           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
         >
-          {t('continue_shopping')}
+          {t('continue_shopping', 'Continue Shopping')}
         </button>
       </div>
     );
@@ -26,14 +26,17 @@ const WishlistPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <h2 className="text-3xl font-bold mb-6">{t('your_wishlist')}</h2>
+      <h2 className="text-3xl font-bold mb-6">{t('your_wishlist', 'Your Wishlist')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {wishlistItems.map((item) => (
           <div key={item.id} className="relative">
-            <ProductCard product={item} />
+            {/* The 'item' object has a nested 'product' object which ProductCard needs */}
+            <ProductCard product={item.product} />
             <button
+              // We pass the wishlist item's own 'id' to be removed
               onClick={() => removeFromWishlist(item.id)}
-              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 z-10"
+              aria-label="Remove from wishlist"
             >
               <X className="w-4 h-4" />
             </button>

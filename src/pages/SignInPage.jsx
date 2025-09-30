@@ -3,8 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { apiService } from "../components/layout/apiService";
 import { sanitizeInput, validateEmailPhone } from "../utils/sanatize";
 import { useAuth } from "../context/AuthContext";
-import InputField from "../components/forms/InputField";
-import RadioButton from "../components/forms/RadioButton";
+import { Input } from "../components/forms/InputField"; // Corrected import
+import { RadioGroup, RadioGroupItem } from "../components/forms/RadioButton"; // Corrected import
 import { endpoints } from "../api/endpoints";
 
 const SignInPage = () => {
@@ -31,8 +31,6 @@ const SignInPage = () => {
   };
 
   const handleRadioChange = (isEmail) => {
-    // Corrected to use a custom modal or an inline message instead of window.confirm
-    // For this example, we'll just clear the form directly, as a modal is not a simple fix.
     setUseEmail(isEmail);
     setShowOTP(false);
     setOtp("");
@@ -142,24 +140,18 @@ const SignInPage = () => {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="flex justify-center space-x-6 mb-4">
-              <RadioButton
-                id="email"
-                label="Email"
-                checked={useEmail}
-                onChange={() => handleRadioChange(true)}
-                value="Email"
-              />
-              <RadioButton
-                id="phone"
-                label="Phone"
-                checked={!useEmail}
-                onChange={() => handleRadioChange(false)}
-                value="Phone"
-              />
-            </div>
+            <RadioGroup defaultValue="email" onValueChange={(value) => handleRadioChange(value === 'email')} className="flex justify-center space-x-6 mb-4">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="email" id="r-email" />
+                <label htmlFor="r-email">Email</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="phone" id="r-phone" />
+                <label htmlFor="r-phone">Phone</label>
+              </div>
+            </RadioGroup>
 
-            <InputField
+            <Input
               id="emailPhone"
               name="emailPhone"
               label={useEmail ? "Email" : "Phone Number"}
@@ -175,7 +167,7 @@ const SignInPage = () => {
             />
 
             {useEmail ? (
-              <InputField
+              <Input
                 id="password"
                 name="password"
                 label="Password"
@@ -186,7 +178,7 @@ const SignInPage = () => {
                 placeholder="Enter your password here"
               />
             ) : showOTP ? (
-              <InputField
+              <Input
                 id="otp"
                 name="otp"
                 label="OTP"

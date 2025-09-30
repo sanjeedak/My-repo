@@ -5,14 +5,16 @@ import { apiService } from "../components/layout/apiService";
 import { transformProductData } from "../utils/transformProductData";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext"; // Import useAuth
+import { toast } from 'react-hot-toast'; // Import toast
 import { API_BASE_URL } from "../api/config";
 import { endpoints } from "../api/endpoints";
 import ProductImageGallery from "../components/products/ProductImageGallery";
 import SellerInfo from "../components/products/SellerInfo";
 import ProductTabs from "../components/products/ProductTab";
 import { 
-    Plus, Minus, ShoppingCart, ChevronRight, CheckCircle, 
-    ShieldCheck, Heart, ListChecks, Truck, RefreshCw, XCircle
+    Plus, Minus, ShoppingCart, ChevronRight, 
+    ShieldCheck, Heart, ListChecks, Truck, RefreshCw
 } from 'lucide-react';
 
 const ProductDetailsPage = () => {
@@ -21,12 +23,12 @@ const ProductDetailsPage = () => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { addToWishlist } = useWishlist();
+    const { isAuthenticated } = useAuth(); // Get auth status
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [quantity, setQuantity] = useState(1);
-    const [toast, setToast] = useState({ show: false, message: '', success: false });
 
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -59,65 +61,71 @@ const ProductDetailsPage = () => {
     };
     
     const handleAddToCart = () => {
-        if (product && product.quantity > 0) {
-            const productWithStoreId = {
-                ...product,
-                quantity,
-                store_id: product.store?.id 
-            };
-            try {
-                addToCart(productWithStoreId);
-                setToast({ 
-                    show: true, 
-                    message: t('Added to cart'), 
-                    success: true 
-                });
-            } catch (err) {
-                console.error("Error adding to cart:", err);
-                setToast({ 
-                    show: true, 
-                    message: t('Cart add error'), 
-                    success: false 
-                });
-            }
-        } else {
-            setToast({ 
-                show: true, 
-                message: t('Out of stock'), 
-                success: false 
-            });
+        if (!isAuthenticated) {
+            toast.error("Please log in to add items to your cart.");
+            navigate('/signin');
+            return;
         }
-        setTimeout(() => setToast({ show: false, message: '', success: false }), 3000);
+
+        const storeId = product?.store?.id || product?.store_id;
+
+        if (!product || !product.id || !product.name || !storeId) {
+            console.error("Invalid product data (missing store_id):", product);
+            toast.error("Cannot add this item: missing store information.");
+            return;
+        }
+
+        if (product.quantity > 0) {
+            const promise = addToCart({ ...product, store_id: storeId }, quantity);
+            toast.promise(promise, {
+                loading: 'Adding to cart...',
+                success: `${product.name} added to cart!`,
+                error: (err) => `Error: ${err.message || 'Could not add to cart.'}`
+            });
+        } else {
+            toast.error(t('Out of stock'));
+        }
     };
     
     const handleAddToWishlist = () => {
+        if (!isAuthenticated) {
+            toast.error("Please log in to add items to your wishlist.");
+            navigate('/signin');
+            return;
+        }
         if (product) {
             addToWishlist(product);
-            setToast({ 
-                show: true, 
-                message: t('Added to wishlist'), 
-                success: true 
-            });
-            setTimeout(() => setToast({ show: false, message: '', success: false }), 3000);
+            toast.success(t('Added to wishlist'));
         }
     };
 
     const handleBuyNow = () => {
-        if (product && product.quantity > 0) {
-            const productWithStoreId = {
-                ...product,
-                quantity,
-                store_id: product.store?.id 
-            };
-            addToCart(productWithStoreId);
-            navigate("/checkout");
-        } else {
-            setToast({ 
-                show: true, 
-                message: t('Out of stock'), 
-                success: false 
+        if (!isAuthenticated) {
+            toast.error("Please log in to continue.");
+            navigate('/signin');
+            return;
+        }
+        
+        const storeId = product?.store?.id || product?.store_id;
+
+        if (!product || !product.id || !product.name || !storeId) {
+             console.error("Invalid product data (missing store_id):", product);
+             toast.error("Cannot buy this item: missing store information.");
+             return;
+        }
+
+        if (product.quantity > 0) {
+            const promise = addToCart({ ...product, store_id: storeId }, quantity);
+            toast.promise(promise, {
+                loading: 'Preparing for checkout...',
+                success: () => {
+                    navigate("/checkout");
+                    return 'Redirecting to checkout...';
+                },
+                error: (err) => `Error: ${err.message || 'Could not prepare for checkout.'}`
             });
-            setTimeout(() => setToast({ show: false, message: '', success: false }), 3000);
+        } else {
+            toast.error(t('Out of stock'));
         }
     };
 
@@ -186,7 +194,7 @@ const ProductDetailsPage = () => {
                                     disabled={product.quantity === 0}
                                     className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold transition hover:bg-blue-700 disabled:bg-gray-400"
                                 >
-                                    <ShoppingCart size={18} /> {t('Add to cart')}
+                                    <ShoppingCart size={18} /> {t('add_to_cart')}
                                 </button>
                                 <button
                                     onClick={handleBuyNow}
@@ -212,13 +220,6 @@ const ProductDetailsPage = () => {
                     <ProductTabs description={product.description} specifications={product.specifications} reviews={[]} />
                 </div>
             </div>
-
-            {toast.show && (
-                <div className={`fixed bottom-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg ${toast.success ? 'bg-green-600' : 'bg-red-600'}`}>
-                    {toast.success ? <CheckCircle size={18} /> : <XCircle size={18} />}
-                    <p className="text-sm font-medium">{toast.message}</p>
-                </div>
-            )}
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast'; // Import Toaster
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -106,6 +107,7 @@ const ScrollToTop = () => {
 
 const MainLayout = () => (
   <div className="bg-slate-50 min-h-screen font-sans flex flex-col">
+    <Toaster position="top-center" reverseOrder={false} />
     <Header />
     <Navbar />
     <main className="flex-grow">

@@ -15,11 +15,11 @@ const OrderCancelledPage = () => {
             {t('orderCancelled')}
           </h1>
           <p className="text-lg text-gray-600 mb-6">
-            {message || t('orderCancelledSuccess')}
+            {message || t('Order Cancelled Success')}
             {orderNumber && (
               <span>
                 {' '}
-                {t('forOrder')} #{orderNumber}
+                {t('For Order')} #{orderNumber}
               </span>
             )}
           </p>
@@ -28,13 +28,13 @@ const OrderCancelledPage = () => {
               to="/products"
               className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105"
             >
-              {t('continueShopping')}
+              {t('Continue Shopping')}
             </Link>
             <Link
               to="/profile"
               className="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-transform transform hover:scale-105"
             >
-              {t('viewOrders')}
+              {t('View Orders')}
             </Link>
           </div>
         </div>

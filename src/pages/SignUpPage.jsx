@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../components/layout/apiService';
 import { sanitizeInput, validateEmailPhone } from '../utils/sanatize';
 import { useAuth } from '../context/AuthContext';
-import InputField from '../components/forms/InputField';
-import RadioButton from '../components/forms/RadioButton';
+import { Input } from '../components/forms/InputField'; // Corrected import
+import { RadioGroup, RadioGroupItem } from '../components/forms/RadioButton'; // Corrected import
 import { endpoints } from '../api/endpoints';
 
 const SignUpPage = () => {
@@ -168,7 +168,7 @@ const SignUpPage = () => {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField
+              <Input
                 id="firstName"
                 name="firstName"
                 label="First Name"
@@ -178,7 +178,7 @@ const SignUpPage = () => {
                 onChange={handleChange}
                 error={errors.firstName}
               />
-              <InputField
+              <Input
                 id="lastName"
                 name="lastName"
                 label="Last Name"
@@ -190,12 +190,18 @@ const SignUpPage = () => {
               />
             </div>
 
-            <div className="flex justify-center space-x-8 pt-2">
-                <RadioButton id="email" label="Use Email" checked={useEmail} onChange={() => handleRadioChange(true)} value="Email" />
-                <RadioButton id="phone" label="Use Phone" checked={!useEmail} onChange={() => handleRadioChange(false)} value="Phone" />
-            </div>
+            <RadioGroup defaultValue="email" onValueChange={(value) => handleRadioChange(value === 'email')} className="flex justify-center space-x-8 pt-2">
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="email" id="r-email" />
+                    <label htmlFor="r-email">Use Email</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="phone" id="r-phone" />
+                    <label htmlFor="r-phone">Use Phone</label>
+                </div>
+            </RadioGroup>
 
-            <InputField
+            <Input
               id="emailPhone"
               name="emailPhone"
               label={useEmail ? 'Email' : 'Phone Number'}
@@ -218,7 +224,7 @@ const SignUpPage = () => {
             )}
 
             {showOTP && (
-              <InputField
+              <Input
                 id="otp"
                 name="otp"
                 label="Enter OTP"
@@ -232,7 +238,7 @@ const SignUpPage = () => {
 
             {useEmail && (
               <>
-                <InputField
+                <Input
                   id="password"
                   name="password"
                   label="Password"
@@ -242,7 +248,7 @@ const SignUpPage = () => {
                   onChange={handleChange}
                   error={errors.password}
                 />
-                <InputField
+                <Input
                   id="confirmPassword"
                   name="confirmPassword"
                   label="Confirm Password"

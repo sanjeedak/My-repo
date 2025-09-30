@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import InputField from '../components/forms/InputField';
+import { Input } from '../components/forms/InputField'; // Corrected import
 import { apiService } from '../components/layout/apiService';
 import { endpoints } from '../api/endpoints';
 
@@ -99,7 +99,7 @@ const ResetPasswordPage = () => {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <InputField 
+                        <Input 
                             id="currentPassword" 
                             name="currentPassword"
                             label="Current Password" 
@@ -108,7 +108,7 @@ const ResetPasswordPage = () => {
                             onChange={handleChange} 
                             error={errors.currentPassword} 
                         />
-                        <InputField 
+                        <Input 
                             id="newPassword" 
                             name="newPassword"
                             label="New Password" 
@@ -117,7 +117,7 @@ const ResetPasswordPage = () => {
                             onChange={handleChange} 
                             error={errors.newPassword} 
                         />
-                        <InputField 
+                        <Input 
                             id="confirmPassword" 
                             name="confirmPassword"
                             label="Confirm New Password" 

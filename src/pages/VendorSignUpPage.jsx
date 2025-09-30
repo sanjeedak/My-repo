@@ -152,7 +152,7 @@ const VendorSignUpPage = () => {
             <AuthFormLayout
                 footerText={t('already_have_account')}
                 footerLink="/vendor/signin"
-                footerActionText={t('sign_in')}
+                footerActionText={t('Signin')}
             >
                 <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">{t('create_vendor_account')}</h2>
                 
@@ -185,7 +185,7 @@ const VendorSignUpPage = () => {
                                 <div className="flex gap-4">
                                     <button type="button" onClick={handleBack} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300">{t('back')}</button>
                                     <button type="submit" disabled={isLoading} className="w-full flex justify-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400">
-                                        {isLoading ? t('submitting') : t('submit_application')}
+                                        {isLoading ? t('submitting') : t('Submit application')}
                                     </button>
                                 </div>
                             </div>

@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { apiService } from "../components/layout/apiService";
 import { endpoints } from "../api/endpoints";
 import MapSection from "../components/MapSection";
-import InputField from "../components/forms/InputField";
+import { Input } from "../components/forms/InputField"; 
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import { validateEmailPhone } from "../utils/sanatize";
 import { useMap } from "../context/MapProvider";
@@ -215,7 +215,7 @@ const CheckoutPage = () => {
                 }
 
                 const { razorpayOrderId, amount: razorpayAmount, currency } = razorpayOrderResponse.data;
-                const razorpayKeyId = process.env.REACT_APP_RAZORPAY_KEY_ID;
+                const razorpayKeyId = import.meta.env.VITE_APP_RAZORPAY_KEY_ID;
 
                 if (!razorpayKeyId) {
                     setErrors((prev) => ({ ...prev, api: t("Razorpay configuration missing. Please contact support.") }));
@@ -290,9 +290,9 @@ const CheckoutPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Checkout Form */}
                 <div className="bg-white p-6 rounded-lg shadow-lg space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">{t("shipping_address")}</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">{t("Shipping address")}</h2>
                     <div className="space-y-5">
-                        <InputField
+                        <Input
                             id="shipping-name"
                             name="name"
                             placeholder={t("Full name")}
@@ -301,11 +301,11 @@ const CheckoutPage = () => {
                             error={errors.shipping_name}
                             className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <InputField
+                        <Input
                             id="shipping-phone"
                             name="phone"
                             label={t("Phone Number")}
-                            placeholder={t("phone_number")}
+                            placeholder={t("Phone number")}
                             type="tel"
                             value={shippingForm.phone}
                             onChange={handleShippingChange}
@@ -321,7 +321,7 @@ const CheckoutPage = () => {
                             className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                            <InputField
+                            <Input
                                 id="shipping-city"
                                 name="city"
                                 label={t("City")}
@@ -331,7 +331,7 @@ const CheckoutPage = () => {
                                 error={errors.shipping_city}
                                 className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
-                            <InputField
+                            <Input
                                 id="shipping-pincode"
                                 name="pincode"
                                 label={t("Postal code")}
@@ -374,7 +374,7 @@ const CheckoutPage = () => {
                         </div>
                         {!sameAsShipping && (
                             <div className="space-y-5">
-                                <InputField
+                                <Input
                                     id="billing-name"
                                     name="name"
                                     placeholder={t("Full name")}
@@ -383,7 +383,7 @@ const CheckoutPage = () => {
                                     error={errors.billing_name}
                                     className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
-                                <InputField
+                                <Input
                                     id="billing-phone"
                                     name="phone"
                                     placeholder={t("Phone number")}
@@ -402,7 +402,7 @@ const CheckoutPage = () => {
                                     className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                                    <InputField
+                                    <Input
                                         id="billing-city"
                                         name="city"
                                         label={t("City")}
@@ -412,7 +412,7 @@ const CheckoutPage = () => {
                                         error={errors.billing_city}
                                         className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
-                                    <InputField
+                                    <Input
                                         id="billing-pincode"
                                         name="pincode"
                                         label={t("Postal code")}

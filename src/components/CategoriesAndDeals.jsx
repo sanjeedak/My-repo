@@ -7,17 +7,15 @@ import { endpoints } from '../api/endpoints';
 import { transformProductData } from '../utils/transformProductData';
 import ProductCard from './products/ProductCard';
 
-// Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation } from 'swiper/modules';
 
-// Eye icon (lucide or heroicons)
-import { Eye } from 'lucide-react';
-import Pagination from './Pagination'; // Import Pagination component
 
-// Helper function to get the correct image URL for categories
+import { Eye } from 'lucide-react';
+import Pagination from './Pagination'; 
+
 const getCategoryImageUrl = (imagePath, categoryName) => {
   if (imagePath && imagePath.startsWith('http')) {
     return imagePath;
@@ -30,7 +28,6 @@ const getCategoryImageUrl = (imagePath, categoryName) => {
 };
 
 
-// --- Categories Section ---
 export const CategoriesSection = () => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);

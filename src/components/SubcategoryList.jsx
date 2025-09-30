@@ -24,7 +24,7 @@ const SubcategoryList = ({ categorySlug, categoryName, subcategories }) => {
           <div key={sub.id} className="border-r border-gray-100 pr-6 last:border-r-0 last:pr-0">
             {/* Subcategory Title */}
             <Link
-              to={`/category/${sub.slug}`} // <-- Yahaan Badlav Kiya Gaya Hai
+              to={`/category/${sub.slug}`} 
               className="font-semibold text-sm text-gray-700 hover:text-blue-600 hover:underline mb-2 block"
             >
               {sub.name}
@@ -36,7 +36,7 @@ const SubcategoryList = ({ categorySlug, categoryName, subcategories }) => {
                 {sub.subcategories.map((subSub) => (
                   <li key={subSub.id}>
                     <Link
-                      to={`/category/${subSub.slug}`} // <-- Yahaan Badlav Kiya Gaya Hai
+                      to={`/category/${subSub.slug}`} 
                       className="flex items-center text-xs text-gray-500 hover:text-blue-600"
                     >
                        <ChevronRight className="w-3 h-3 mr-1.5 flex-shrink-0" />
