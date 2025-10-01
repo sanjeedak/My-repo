@@ -6,12 +6,13 @@ import { apiService } from '../components/layout/apiService';
 import { endpoints } from '../api/endpoints';
 
 const TrackOrderPage = () => {
-  const { orderNumber } = useParams();
+  const { orderNumber: orderNumberFromParams } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { token } = useAuth();
 
+  const [orderInput, setOrderInput] = useState('');
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,15 +20,14 @@ const TrackOrderPage = () => {
   const [invoiceLoading, setInvoiceLoading] = useState(false);
 
   useEffect(() => {
-    const fetchOrderDetails = async () => {
-      if (!orderNumber) {
+    const fetchOrderDetails = async (orderNum) => {
+      if (!orderNum) {
         setLoading(false);
-        setError(t('No Order Number Provided'));
         return;
       }
       try {
         setLoading(true);
-        const response = await apiService(endpoints.getOrderByNumber(orderNumber), {
+        const response = await apiService(endpoints.getOrderByNumber(orderNum), {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.success && response.data) {
@@ -47,16 +47,23 @@ const TrackOrderPage = () => {
     if (passedOrder) {
       setOrder(passedOrder);
       setLoading(false);
+    } else if (orderNumberFromParams) {
+      fetchOrderDetails(orderNumberFromParams);
     } else {
-      fetchOrderDetails();
+      setLoading(false);
     }
-  }, [orderNumber, location.state, t, token]);
+  }, [orderNumberFromParams, location.state, t, token]);
 
-  // Status Timeline
+  const handleTrackSubmit = (e) => {
+    e.preventDefault();
+    if (orderInput.trim()) {
+      navigate(`/track-order/${orderInput.trim()}`);
+    }
+  };
+
   const statuses = ['pending', 'confirmed', 'shipped', 'delivered'];
   const currentStatusIndex = order ? statuses.indexOf(order.status) : -1;
 
-  // Parse shippingAddress
   const shippingAddress = useMemo(() => {
     if (!order?.shippingAddress) return null;
     try {
@@ -67,7 +74,6 @@ const TrackOrderPage = () => {
     }
   }, [order?.shippingAddress]);
 
-  // Parse billingAddress (if available)
   const billingAddress = useMemo(() => {
     if (!order?.billingAddress) return null;
     try {
@@ -78,7 +84,6 @@ const TrackOrderPage = () => {
     }
   }, [order?.billingAddress]);
 
-  // Cancel Order
   const handleCancelOrder = async () => {
     if (!order || cancelLoading) return;
     if (!token) {
@@ -91,7 +96,6 @@ const TrackOrderPage = () => {
     }
     setCancelLoading(true);
     try {
-      console.log('Attempting to cancel order:', order.id, 'Endpoint:', endpoints.cancelOrder(order.id));
       const response = await apiService(endpoints.cancelOrder(order.id), {
         method: 'PATCH',
         headers: {
@@ -99,10 +103,9 @@ const TrackOrderPage = () => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Cancel order response:', response);
       if (response.success) {
         navigate('/order-cancelled', {
-          state: { orderNumber, message: t('Order Cancelled Success') },
+          state: { orderNumber: order.orderNumber, message: t('Order Cancelled Success') },
         });
       } else {
         throw new Error(response.message || t('Failed To Cancel Order'));
@@ -115,7 +118,6 @@ const TrackOrderPage = () => {
     }
   };
 
-  // Generate Invoice
   const generateInvoice = async () => {
     if (!order) return;
     setInvoiceLoading(true);
@@ -137,8 +139,6 @@ const TrackOrderPage = () => {
               unit: 'mm',
               format: 'a4',
             });
-
-            // Company Branding
             doc.setFont('helvetica');
             doc.setFontSize(20);
             doc.setTextColor(0, 0, 0);
@@ -146,8 +146,6 @@ const TrackOrderPage = () => {
             doc.setFontSize(10);
             doc.text('123 Commerce Street, Bangalore, India', 20, 28);
             doc.text('Email: support@shopzeo.com | Phone: +91-123-456-7890', 20, 34);
-
-            // Invoice Header
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.text(`Invoice #${order.orderNumber}`, 140, 20, { align: 'right' });
@@ -155,50 +153,7 @@ const TrackOrderPage = () => {
             doc.setFont('helvetica', 'normal');
             doc.text(`Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 140, 28, { align: 'right' });
             doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-IN')}`, 140, 34, { align: 'right' });
-
-            // Addresses
             let yOffset = 40;
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Billing Address:', 20, yOffset);
-            doc.setFont('helvetica', 'normal');
-            yOffset += 6;
-            if (billingAddress) {
-              doc.text(`${billingAddress.firstName || ''} ${billingAddress.lastName || ''}`.trim(), 20, yOffset);
-              yOffset += 6;
-              doc.text(billingAddress.addressLine1 || '', 20, yOffset);
-              yOffset += 6;
-              doc.text(`${billingAddress.city || ''} - ${billingAddress.postalCode || ''}`.trim(), 20, yOffset);
-              yOffset += 6;
-              doc.text(billingAddress.country || '', 20, yOffset);
-              yOffset += 6;
-              doc.text(`Phone: ${billingAddress.phone || ''}`, 20, yOffset);
-            } else {
-              doc.text('Same as shipping address', 20, yOffset);
-              yOffset += 6;
-            }
-            yOffset += 6;
-
-            doc.setFont('helvetica', 'bold');
-            doc.text('Shipping Address:', 20, yOffset);
-            doc.setFont('helvetica', 'normal');
-            yOffset += 6;
-            if (shippingAddress) {
-              doc.text(`${shippingAddress.firstName || ''} ${shippingAddress.lastName || ''}`.trim(), 20, yOffset);
-              yOffset += 6;
-              doc.text(shippingAddress.addressLine1 || '', 20, yOffset);
-              yOffset += 6;
-              doc.text(`${shippingAddress.city || ''} - ${shippingAddress.postalCode || ''}`.trim(), 20, yOffset);
-              yOffset += 6;
-              doc.text(shippingAddress.country || '', 20, yOffset);
-              yOffset += 6;
-              doc.text(`Phone: ${shippingAddress.phone || ''}`, 20, yOffset);
-            } else {
-              doc.text('Not available', 20, yOffset);
-            }
-            yOffset += 10;
-
-            // Items Table
             doc.autoTable({
               startY: yOffset,
               head: [['Item', 'Quantity', 'Unit Price', 'Total']],
@@ -208,59 +163,18 @@ const TrackOrderPage = () => {
                 `₹${parseFloat(item.unitPrice || item.totalPrice / (item.quantity || 1)).toFixed(2)}`,
                 `₹${parseFloat(item.totalPrice || 0).toFixed(2)}`,
               ]),
-              styles: { fontSize: 10, cellPadding: 3, halign: 'left', valign: 'middle' },
-              headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255], fontSize: 12, halign: 'center' },
-              alternateRowStyles: { fillColor: [245, 245, 245] },
-              margin: { left: 20, right: 20 },
-              didDrawPage: (data) => {
-                if (data.pageNumber < doc.internal.getNumberOfPages()) {
-                  yOffset = 20;
-                }
-              },
             });
-            yOffset = doc.lastAutoTable.finalY + 10;
-
-            // Payment Summary
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Payment Summary:', 20, yOffset);
-            doc.setFont('helvetica', 'normal');
-            yOffset += 6;
-            doc.text(`Subtotal: ₹${parseFloat(order.subtotal || 0).toFixed(2)}`, 20, yOffset);
-            yOffset += 6;
-            doc.text(`Shipping: ₹${parseFloat(order.shippingAmount || 0).toFixed(2)}`, 20, yOffset);
-            yOffset += 6;
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Total: ₹${parseFloat(order.totalAmount || 0).toFixed(2)}`, 20, yOffset);
-            yOffset += 10;
-
-            // Footer
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'italic');
-            doc.text('Thank you for shopping with ShopZeo!', 20, yOffset);
-            yOffset += 6;
-            doc.text('For support, contact: support@shopzeo.com', 20, yOffset);
-
-            // Add page numbers
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-              doc.setPage(i);
-              doc.text(`Page ${i} of ${pageCount}`, 200, 290, { align: 'right' });
-            }
-
             doc.save(`invoice_${order.orderNumber}.pdf`);
             document.body.removeChild(autoTableScript);
             document.body.removeChild(script);
           };
           autoTableScript.onerror = () => setError(t('Failed To Load Autotable'));
         } catch (err) {
-          console.error('Invoice generation error (autoTable):', err);
           setError(t('Error Generating Invoice') + ': ' + err.message);
         }
       };
       script.onerror = () => setError(t('failedToLoadJspdf'));
     } catch (err) {
-      console.error('Invoice generation error (jsPDF):', err);
       setError(t('Error Generating Invoice') + ': ' + err.message);
     } finally {
       setInvoiceLoading(false);
@@ -274,12 +188,37 @@ const TrackOrderPage = () => {
           {t('Track Your Order')}
         </h1>
 
+        {!orderNumberFromParams && !order && (
+          <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mb-8">
+            <form onSubmit={handleTrackSubmit}>
+              <label htmlFor="order-number-input" className="block text-sm font-medium text-gray-700 mb-2">
+                {t('enter_order_id')}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="order-number-input"
+                  type="text"
+                  value={orderInput}
+                  onChange={(e) => setOrderInput(e.target.value)}
+                  placeholder="Enter your order number"
+                  className="flex-grow border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700"
+                >
+                  {t('track_order')}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {loading && <p className="text-center text-lg">{t('loadingOrderDetails')}</p>}
         {error && <p className="text-center text-red-500 text-lg">{error}</p>}
 
         {order && (
           <div className="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg">
-            {/* Order Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-4 border-b">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Order #{order.orderNumber}</h2>
@@ -299,40 +238,26 @@ const TrackOrderPage = () => {
               </div>
             </div>
 
-            {/* Status Timeline */}
             <div className="mb-10">
               <div className="flex items-center justify-between">
                 {statuses.map((status, index) => (
                   <React.Fragment key={status}>
                     <div className="flex flex-col items-center w-1/4">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors duration-300 ${
-                          index <= currentStatusIndex ? 'bg-blue-600' : 'bg-gray-300'
-                        }`}
-                      >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors duration-300 ${index <= currentStatusIndex ? 'bg-blue-600' : 'bg-gray-300'}`}>
                         <span>&#10003;</span>
                       </div>
-                      <p
-                        className={`mt-2 text-xs sm:text-sm font-semibold text-center capitalize ${
-                          index <= currentStatusIndex ? 'text-blue-600' : 'text-gray-500'
-                        }`}
-                      >
+                      <p className={`mt-2 text-xs sm:text-sm font-semibold text-center capitalize ${index <= currentStatusIndex ? 'text-blue-600' : 'text-gray-500'}`}>
                         {status}
                       </p>
                     </div>
                     {index < statuses.length - 1 && (
-                      <div
-                        className={`flex-1 h-1 transition-colors duration-300 ${
-                          index < currentStatusIndex ? 'bg-blue-600' : 'bg-gray-300'
-                        }`}
-                      ></div>
+                      <div className={`flex-1 h-1 transition-colors duration-300 ${index < currentStatusIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                     )}
                   </React.Fragment>
                 ))}
               </div>
             </div>
 
-            {/* Items */}
             <div className="mb-8">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Items in your order</h3>
               <div className="space-y-4">
@@ -355,61 +280,12 @@ const TrackOrderPage = () => {
                   ))}
               </div>
             </div>
-
-            {/* Address + Payment */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-gray-200 pt-8">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Shipping Address</h3>
-                {shippingAddress ? (
-                  <div className="text-gray-600 leading-relaxed">
-                    <p className="font-bold">
-                      {shippingAddress.firstName} {shippingAddress.lastName}
-                    </p>
-                    <p>{shippingAddress.addressLine1}</p>
-                    <p>
-                      {shippingAddress.city} - {shippingAddress.postalCode}
-                    </p>
-                    <p>{shippingAddress.country}</p>
-                    <p>Phone: {shippingAddress.phone}</p>
-                  </div>
-                ) : (
-                  <p>Address not available.</p>
-                )}
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Payment Summary</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-semibold text-gray-800">
-                      ₹{parseFloat(order.subtotal).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-semibold text-gray-800">
-                      ₹{parseFloat(order.shippingAmount).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-t pt-2 mt-2">
-                    <span className="text-lg font-bold text-gray-900">Total</span>
-                    <span className="text-lg font-bold text-gray-900">
-                      ₹{parseFloat(order.totalAmount).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Buttons */}
             <div className="mt-8 flex justify-end gap-4">
               {['pending', 'confirmed'].includes(order.status) && (
                 <button
                   onClick={handleCancelOrder}
                   disabled={cancelLoading}
-                  className={`bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 ${
-                    cancelLoading ? 'opacity-70 cursor-not-allowed' : ''
-                  }`}
+                  className={`bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 ${cancelLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   {cancelLoading ? t('cancelling') : t('Cancel Order')}
                 </button>
@@ -417,9 +293,7 @@ const TrackOrderPage = () => {
               <button
                 onClick={generateInvoice}
                 disabled={invoiceLoading}
-                className={`bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 ${
-                  invoiceLoading ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
+                className={`bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 ${invoiceLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {invoiceLoading ? t('Generating Invoice') : t('Download Invoice')}
               </button>

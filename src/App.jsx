@@ -175,7 +175,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="track-order/:orderNumber"
+                        path="track-order/:orderNumber?"
                         element={
                           <ProtectedRoute>
                             <TrackOrderPage />
