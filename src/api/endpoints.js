@@ -4,7 +4,7 @@ export const endpoints = {
   products: '/api/products',
   productDetails: (id) => `/api/products/${id}`,
   productsByStore: (storeId) => `/api/products/store/${storeId}`,
-  productSearch: '/api/products/search',
+  productSearch: '/api/products/search', 
   topSellers: '/api/products/top-sellers',
 
   // Brands

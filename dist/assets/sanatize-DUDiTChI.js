@@ -1,1 +1,0 @@
-const r=e=>e.trim().replace(/[<>&;]/g,"").slice(0,100),n=(e,t)=>{if(!e.trim())return"This field is required";if(t){if(!/^\S+@\S+\.\S+$/.test(e))return"Invalid email format"}else{const i=e.replace(/\s/g,"");if(!/^(?:\+91)?\d{10}$/.test(i))return"Please enter a valid 10-digit phone number, with an optional country code."}return""};export{r as s,n as v};

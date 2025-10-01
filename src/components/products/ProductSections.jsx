@@ -27,7 +27,7 @@ const SectionHeader = ({ title, linkTo }) => {
         to={linkTo}
         className="text-xs font-medium text-blue-600 hover:bg-blue-100 px-2 py-1 rounded transition-all flex items-center gap-1"
       >
-        {t("view_all")}
+        {t("View all")}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-3 w-3"
@@ -132,7 +132,7 @@ export const FlashDeal = () => {
   return (
     <div className="my-8">
       <SectionHeader
-        title={t("flash_deals")}
+        title={t("Flash deals")}
         linkTo="/products?section=flash_deal"
       />
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
@@ -252,7 +252,7 @@ export const LatestProducts = () => {
   const { t } = useTranslation();
   return (
     <ProductSectionLayout
-      title={t("latest_products")}
+      title={t("Latest products")}
       linkTo="/products?sortBy=created_at"
       endpoint={`${endpoints.products}?sortBy=created_at&order=desc&limit=12`}
     />
@@ -264,7 +264,7 @@ export const TopRatedProducts = () => {
     const { t } = useTranslation();
     return (
         <ProductSectionLayout
-            title={t('top_rated_product')}
+            title={t('Top rated product')}
             linkTo="/products?top_rated=true"
             endpoint={`${endpoints.products}?top_rated=true&limit=6`}
         />

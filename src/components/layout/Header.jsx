@@ -48,7 +48,7 @@ const Header = () => {
   const [selectedLang, setSelectedLang] = useState(languages.find(l => l.code === i18n.language) || languages[0]);
   
   useEffect(() => {
-    apiService(`${endpoints.categories}?parent_id=null`)
+    apiService(endpoints.categories)
       .then(res => {
         if (res?.success && Array.isArray(res?.data?.categories)) {
           setCategories(res.data.categories);
@@ -66,7 +66,7 @@ const Header = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        navigate(`/search?search=${encodeURIComponent(searchQuery.trim())}`);
         setIsMobileSearchOpen(false);
     }
   }

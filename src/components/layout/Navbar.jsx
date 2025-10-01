@@ -89,7 +89,7 @@ const Navbar = () => {
     const fetchData = async () => {
       try {
         const [catResponse, brandResponse] = await Promise.all([
-          apiService(`${endpoints.categories}?parent_id=null`),
+          apiService(endpoints.categories),
           apiService(`${endpoints.brands}?limit=8`),
         ]);
 

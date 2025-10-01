@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/products/ProductCard';
@@ -17,18 +17,19 @@ const ProductsPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
-    // const { slug: categorySlugFromPath } = useParams();
     const { slug: categorySlugFromPath, storeId } = useParams();
     const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const mainContentRef = useRef(null); // Ref for scrolling to the top of the content
 
     // --- COMPONENT STATE ---
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [availableBrands, setAvailableBrands] = useState([]);
+    const [allCategories, setAllCategories] = useState([]);
     const [paginationInfo, setPaginationInfo] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [filters, setFilters] = useState({
         maxPrice: appConfigs.maxPrice,
         brands: [],
@@ -37,18 +38,12 @@ const ProductsPage = () => {
         order: 'desc',
     });
 
-    const itemsPerPage = 100;
+    const itemsPerPage = 12;
 
     // --- DERIVED STATE & MEMOIZED VALUES ---
     const pageTitle = useMemo(() => {
-        const searchQuery = searchParams.get('q');
+        const searchQuery = searchParams.get('search');
         if (searchQuery) return `${t('Search results for')} "${searchQuery}"`;
-
-        const section = searchParams.get('section');
-        if (section === 'featured') return t('featured_products');
-        if (section === 'flash_deal') return t('flash_deals');
-        if (section === 'top_sellers') return t('top_sellers');
-
         const categorySlug = categorySlugFromPath || searchParams.get('category');
         if (categorySlug) return `${t('Products in')} ${categorySlug.replace(/-/g, ' ')}`;
         const brandSlug = searchParams.get('brand');
@@ -58,48 +53,43 @@ const ProductsPage = () => {
 
     // --- DATA FETCHING ---
     useEffect(() => {
-        apiService(endpoints.brands)
-            .then(brandData => {
-                if (brandData.success && Array.isArray(brandData.data?.brands)) {
-                    setAvailableBrands(brandData.data.brands);
-                }
-            })
-            .catch(err => console.error("Failed to fetch brands:", err));
+        apiService(endpoints.brands).then(res => res.success && Array.isArray(res.data?.brands) && setAvailableBrands(res.data.brands));
+        apiService(`${endpoints.categories}?limit=1000`).then(res => res.success && Array.isArray(res.data?.categories) && setAllCategories(res.data.categories));
     }, []);
+
+    useEffect(() => {
+        const searchQuery = searchParams.get('search');
+        if (searchQuery && allCategories.length > 0 && !categorySlugFromPath && !storeId) {
+            const lowerCaseSearch = searchQuery.toLowerCase().trim();
+            const matchedCategory = allCategories.find(cat => cat.name.toLowerCase() === lowerCaseSearch);
+            if (matchedCategory) {
+                navigate(`/category/${matchedCategory.slug}`, { replace: true });
+            }
+        }
+    }, [searchParams, allCategories, navigate, categorySlugFromPath, storeId]);
 
     const fetchProducts = useCallback(async (pageToFetch) => {
         setLoading(true);
         setError('');
         try {
-            let endpointUrl;
             const queryParams = new URLSearchParams({
                 page: pageToFetch,
                 limit: itemsPerPage,
                 sortBy: filters.sortBy,
                 order: filters.order,
-                maxPrice: 10000,
+                maxPrice: filters.maxPrice,
                 minRating: filters.minRating,
             });
-            if (storeId) {
-                endpointUrl = endpoints.productsByStore(storeId);
-            } else {
-                endpointUrl = endpoints.products;
-            }
-            if (filters.brands.length > 0) {
-                queryParams.set('brands', filters.brands.join(','));
-            }
 
+            let endpointUrl = storeId ? endpoints.productsByStore(storeId) : endpoints.products;
+
+            if (filters.brands.length > 0) queryParams.set('brands', filters.brands.join(','));
             const categorySlug = categorySlugFromPath || searchParams.get('category');
             if (categorySlug) queryParams.set('category', categorySlug);
-
             const brandSlug = searchParams.get('brand');
             if (brandSlug) queryParams.set('brand', brandSlug);
-
-            const section = searchParams.get('section');
-            if (section) queryParams.set('section', section);
-
-            const searchQuery = searchParams.get('q');
-            if (searchQuery) queryParams.set('q', searchQuery);
+            const searchQuery = searchParams.get('search');
+            if (searchQuery) queryParams.set('search', searchQuery);
 
             const data = await apiService(`${endpointUrl}?${queryParams.toString()}`);
             const productList = data?.products || data?.data?.products || [];
@@ -107,72 +97,51 @@ const ProductsPage = () => {
 
             setProducts(transformed);
             setPaginationInfo({
-                currentPage: data?.pagination?.currentPage || 1,
-                totalPages: data?.pagination?.totalPages || 1,
+                currentPage: data?.pagination?.page || 1,
+                totalPages: data?.pagination?.pages || 1,
                 totalItems: data?.pagination?.total || 0,
             });
-
-            if (transformed.length === 0) {
-                setError(t('No products found'));
-            }
+            if (transformed.length === 0) setError(t('No products found'));
         } catch (err) {
-            console.error("ProductsPage API error:", err);
             setError('Could not fetch products. Please try again later.');
             setProducts([]);
         } finally {
             setLoading(false);
         }
-    }, [filters, itemsPerPage, categorySlugFromPath, searchParams, t,storeId]);
-
-    const brandSlug = searchParams.get('brand');
-    const categorySlug = categorySlugFromPath || searchParams.get('category');
-
-    useEffect(() => {
-        setFilters({
-            maxPrice: appConfigs.maxPrice,
-            brands: [],
-            minRating: 0,
-            sortBy: 'created_at',
-            order: 'desc',
-        });
-        setSearchTerm(searchParams.get('q') || '');
-    }, [brandSlug, categorySlug, searchParams]);
+    }, [filters, categorySlugFromPath, searchParams, storeId, t]);
 
     useEffect(() => {
         const currentPage = parseInt(searchParams.get('page') || '1', 10);
         fetchProducts(currentPage);
-    }, [fetchProducts, searchParams]);
+    }, [location.search, fetchProducts]);
+    
+    // --- SCROLL TO TOP ON PAGE CHANGE ---
+    useEffect(() => {
+        if (mainContentRef.current) {
+            mainContentRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [products, loading]); // Trigger scroll on product load
 
     // --- EVENT HANDLERS ---
     const handlePageChange = (page) => {
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set('page', page);
-        navigate(`${location.pathname}?${newSearchParams.toString()}`);
+        newSearchParams.set('page', String(page));
+        navigate({ search: newSearchParams.toString() });
     };
 
     const handleSearch = (e) => {
         e.preventDefault();
-        const newSearchParams = new URLSearchParams(searchParams);
+        const newSearchParams = new URLSearchParams();
         if (searchTerm.trim()) {
-            newSearchParams.set('q', searchTerm.trim());
-        } else {
-            newSearchParams.delete('q');
+            newSearchParams.set('search', searchTerm.trim());
         }
         newSearchParams.set('page', '1');
         navigate(`/products?${newSearchParams.toString()}`);
     };
 
-    useEffect(() => {
-        const newSearchParams = new URLSearchParams(location.search);
-        if (newSearchParams.get('page') !== '1') {
-            newSearchParams.set('page', '1');
-            navigate(`${location.pathname}?${newSearchParams.toString()}`);
-        }
-    }, [filters, location.pathname, location.search, navigate]);
-
     return (
         <>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" ref={mainContentRef}>
                 <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 capitalize">{pageTitle}</h2>
