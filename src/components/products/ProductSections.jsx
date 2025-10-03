@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -113,12 +113,30 @@ const ProductCardSkeleton = () => (
     </div>
 );
 
+// --- Custom Arrow Component ---
+const CustomSwiperButton = ({ direction, swiperRef }) => (
+  <button
+    onClick={() => {
+        if (swiperRef.current) {
+            if (direction === 'prev') swiperRef.current.swiper.slidePrev();
+            else swiperRef.current.swiper.slideNext();
+        }
+    }}
+    className={`absolute top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition-all ${
+      direction === 'prev' ? 'left-0' : 'right-0'
+    }`}
+  >
+    {direction === 'prev' ? '‹' : '›'}
+  </button>
+);
+
 
 // --- FLASH DEAL ---
 export const FlashDeal = () => {
   const { t } = useTranslation();
   const [flashProducts, setFlashProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     apiService(`${endpoints.products}?on_sale=true&limit=10`)
@@ -152,8 +170,9 @@ export const FlashDeal = () => {
 
         <div className="relative lg:col-span-4">
           <Swiper
+            ref={swiperRef}
             modules={[Navigation]}
-            navigation={{ nextEl: ".flash-next", prevEl: ".flash-prev" }}
+            navigation={false}
             spaceBetween={24}
             slidesPerView={2}
             breakpoints={{
@@ -176,12 +195,8 @@ export const FlashDeal = () => {
                   </SwiperSlide>
                 ))}
           </Swiper>
-          <button className="flash-prev absolute -left-3 top-1/2 -translate-y-1/2 bg-white text-gray-600 p-2 rounded-full shadow hover:bg-gray-100 z-10">
-            ‹
-          </button>
-          <button className="flash-next absolute -right-3 top-1/2 -translate-y-1/2 bg-white text-gray-600 p-2 rounded-full shadow hover:bg-gray-100 z-10">
-            ›
-          </button>
+           <CustomSwiperButton direction="prev" swiperRef={swiperRef} />
+           <CustomSwiperButton direction="next" swiperRef={swiperRef} />
         </div>
       </div>
     </div>
@@ -274,16 +289,13 @@ export const TopRatedProducts = () => {
 // --- TOP SELLERS ---
 export const SellerCard = ({ seller: store }) => {
   const navigate = useNavigate();
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
 
-  // const handleSellerClick = () => {
-  //   navigate(`/products?brand=${store.slug}`);
-  // };
    const handleSellerClick = () => {
     navigate(`/store/${store.id}`);
   };
 
-  // const productCount = store.total_products || 0;
+  const productCount = store.total_products || 0;
 
   return (
     <div
@@ -304,7 +316,7 @@ export const SellerCard = ({ seller: store }) => {
           }}
         />
       </div>
-      <div className="p-4 text-center flex-grow flex flex-col justify-between">
+      <div className="p-4 text-center flex-grow flex flex-col justify-center">
         <div>
           <h3 className="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600">
             {store.name}
@@ -316,11 +328,10 @@ export const SellerCard = ({ seller: store }) => {
             </span>
           </div>
         </div>
-        <div className="mt-4 text-xs text-gray-400">
-          {/* Updated to display the product count */}
-          {/* <span>
+        <div className="mt-3 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full px-2 py-1 self-center">
+          <span>
             {productCount} {t("products")}
-          </span> */}
+          </span>
         </div>
       </div>
     </div>
@@ -331,6 +342,7 @@ export const TopSellers = () => {
   const { t } = useTranslation();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     apiService(`${endpoints.stores}?top=true&limit=10`)
@@ -346,29 +358,34 @@ export const TopSellers = () => {
   return (
     <div className="my-12">
       <SectionHeader title={t("top_sellers")} linkTo="/vendors" />
-      <Swiper
-        modules={[Navigation]}
-        navigation
-        spaceBetween={16}
-        slidesPerView={2}
-        breakpoints={{
-          640: { slidesPerView: 3 },
-          1024: { slidesPerView: 4 },
-          1280: { slidesPerView: 5 },
-        }}
-      >
-        {loading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <SwiperSlide key={i}>
-                <div className="w-full h-48 bg-gray-200 rounded-lg animate-pulse"></div>
-              </SwiperSlide>
-            ))
-          : stores.map((store) => (
-              <SwiperSlide key={store.id} className="h-full">
-                <SellerCard seller={store} />
-              </SwiperSlide>
-            ))}
-      </Swiper>
+      <div className="relative">
+          <Swiper
+            ref={swiperRef}
+            modules={[Navigation]}
+            navigation={false}
+            spaceBetween={16}
+            slidesPerView={2}
+            breakpoints={{
+              640: { slidesPerView: 3 },
+              1024: { slidesPerView: 4 },
+              1280: { slidesPerView: 5 },
+            }}
+          >
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <SwiperSlide key={i}>
+                    <div className="w-full h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+                  </SwiperSlide>
+                ))
+              : stores.map((store) => (
+                  <SwiperSlide key={store.id} className="h-full">
+                    <SellerCard seller={store} />
+                  </SwiperSlide>
+                ))}
+          </Swiper>
+          <CustomSwiperButton direction="prev" swiperRef={swiperRef} />
+          <CustomSwiperButton direction="next" swiperRef={swiperRef} />
+      </div>
     </div>
   );
 };

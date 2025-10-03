@@ -59,3 +59,30 @@
     transform: rotate(360deg);
   }
 }
+/* Swiper navigation arrows custom style */
+.swiper-button-prev,
+.swiper-button-next {
+  width: 28px;          /* smaller size */
+  height: 28px;
+  background: #f1f5f9;  /* light gray background */
+  border-radius: 50%;   /* round buttons */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  color: #2563eb;       /* blue arrow color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 14px !important; /* shrink arrow icon */
+  font-weight: bold;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  background: #2563eb; /* blue background on hover */
+  color: white;        /* white arrow on hover */
+  transition: all 0.3s ease;
+}
+
